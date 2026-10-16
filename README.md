@@ -6,7 +6,7 @@
 
 ## 当前状态
 
-文档更新：2026-10-16。当前为独立 Electron 桌面工程，Phase 1 已移除官方账号和会员限制，预测直接使用用户视觉模型。服务端、控制台和官网已迁至私有仓库 `yuyeyuyy/Snipvia-server`。[Phase 1 实施报告](docs/opensource/PHASE1_REPORT.md) 记录验证、数据兼容与剩余发布门槛。
+文档更新：2026-10-16。当前为独立 Electron 桌面工程，Phase 1 已移除官方账号和会员限制，预测直接使用用户视觉模型。服务端、控制台和官网已迁至私有仓库 `yuyeyuyy/Snipvia-server`。[Phase 1 实施报告](docs/opensource/PHASE1_REPORT.md) 记录验证、数据兼容与剩余发布门槛。旧混合历史保留在私有归档 `Snipvia-legacy`；当前同名 `Snipvia` 是独立客户端历史的新私有仓库，见[仓库历史隔离报告](docs/opensource/REPOSITORY_ISOLATION_REPORT.md)。许可证和素材授权待确认，尚未公开或发布新的免费安装包。
 
 Mac 桌面应用 **v0.2.3** 的变更见 [发布说明](docs/RELEASE_NOTES_0_2_3.md)，签名、公证与验证见[发布报告](docs/MACOS_RELEASE_0_2_3.md)，安装包从独立公开的 [GitHub Release](https://github.com/yuyeyuyy/Snipvia-releases/releases/tag/v0.2.3) 下载。v0.2.2 可直接通过应用内下载并确认重启更新；v0.2.1 或更早版本需先手动安装新版 DMG。Windows 沿用 v0.2.1 预览版。源码仓库保持私有，分发机制见[迁移说明](docs/RELEASE_DISTRIBUTION.md)。下表描述本版源码与已知边界。私有系统已独立保存，见[分离报告](docs/opensource/SEPARATION_REPORT.md)。
 

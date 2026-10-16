@@ -1,5 +1,7 @@
 # Snipvia Phase 1 实施报告
 
+> 后续状态：维护者已确认保留旧库为私有归档并新建同名私有仓库。现已执行，当前 `Snipvia/main` 使用独立客户端历史；旧 main、标签、PR 和 Release 留在 `Snipvia-legacy`。详见[仓库历史隔离报告](REPOSITORY_ISOLATION_REPORT.md)。下文保留 Phase 1 刚完成时的历史风险和验证记录，旧库改名已不再是待选方案。公开、正式发布、Phase 2 和停服尚未执行。
+
 日期：2026-10-16。范围：维护者指定私有远程、将新更新源改为当前 Snipvia 仓库，并执行 [REFACTOR_PLAN](REFACTOR_PLAN.md) 的 Phase 1。原分离结果见 [SEPARATION_REPORT](SEPARATION_REPORT.md)；该报告描述 Phase 1 之前的账号兼容状态。
 
 ## 交付结论

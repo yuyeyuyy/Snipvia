@@ -2,11 +2,11 @@ import { expect, test } from '@playwright/test';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 
 test('客户端厂商配置、接口密钥隔离及 DeepSeek 图片 Agent 对话', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-provider-settings-'));
-  const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  const app = await launchDesktop({ args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow();
     await app.evaluate(({ safeStorage }) => {

@@ -5,26 +5,19 @@ import { PredictionError } from '../../src/main/analysis/PredictionError';
 import { defaultApplicableContent, defaultPredictionBranches, needsSemanticPrediction, predictionApplicableContent, predictionBranchSchema } from '../../src/shared/screenshot-understanding';
 
 describe('screenshot analyzer', () => {
-  it('uses the configured server even for confident local OCR and does not invoke another prediction model', async () => {
-    const classifyWithVision = vi.fn(), classifyWithServer = vi.fn().mockResolvedValue({ contentType: 'code', confidence: 0.96, recommendedAction: 'explain-code', matchedBranchId: 'explain-code', signals: { hasSchedule: false } });
-    const analyzer = new ScreenshotAnalyzer({ recognizeText: async () => ({ text: 'TypeError: value is undefined\nError: request failed', confidence: 0.99, lineCount: 2 }), classifyWithVision, classifyWithServer });
-    const result = await analyzer.analyze({ image: 'synthetic-crop', width: 900, height: 600, predictionBranches: defaultPredictionBranches }, new AbortController().signal);
-    expect(result.layer).toBe('decision'); expect(result.analysis.matchedBranchId).toBe('explain-code');
-    expect(classifyWithServer).toHaveBeenCalledOnce(); expect(classifyWithVision).not.toHaveBeenCalled();
+  it('always asks the user model, including confident local OCR', async () => {
+    const classifyWithVision = vi.fn().mockResolvedValue({ contentType: 'code', confidence: 0.96, matchedBranchId: 'explain-code', signals: { hasSchedule: false } });
+    const analyzer = new ScreenshotAnalyzer({ recognizeText: async () => ({ text: 'Error: meeting tomorrow 10:00', confidence: 0.99, lineCount: 1 }), classifyWithVision });
+    const result = await analyzer.analyze({ image: 'selected-crop', width: 900, height: 600, predictionBranches: defaultPredictionBranches }, new AbortController().signal);
+    expect(result.layer).toBe('vision'); expect(result.analysis.matchedBranchId).toBe('explain-code');
+    expect(result.analysis.signals?.hasSchedule).toBe(false); expect(classifyWithVision).toHaveBeenCalledOnce();
   });
-  it('a failed server prediction falls back to manual selection without bypassing applicability criteria', async () => {
-    const classifyWithVision = vi.fn(), classifyWithServer = vi.fn().mockRejectedValue(new Error('upstream unavailable'));
-    const analyzer = new ScreenshotAnalyzer({ recognizeText: async () => ({ text: 'TypeError: value is undefined\nError: request failed', confidence: 0.99, lineCount: 2 }), classifyWithVision, classifyWithServer });
-    const result = await analyzer.analyze({ image: 'synthetic-crop', width: 900, height: 600, predictionBranches: defaultPredictionBranches }, new AbortController().signal);
-    expect(result.layer).toBe('fallback'); expect(result.analysis.matchedBranchId).toBeNull();
-    expect(result.predictionError).toContain('服务端预测未完成');
-    expect(autoActionRouter.getAutoAction(result.analysis).id).toBe('ask-ai'); expect(classifyWithVision).not.toHaveBeenCalled();
-  });
-  it('保留已脱敏的阶段提示，未知异常不向界面泄露内容', async () => {
-    for (const error of [new PredictionError({ stage: 'vision', reason: 'auth', upstreamStatus: 401 }), new Error('PRIVATE_SECRET_AND_IMAGE')]) {
-      const analyzer = new ScreenshotAnalyzer({ recognizeText: async () => null, classifyWithServer: async () => { throw error; }, classifyWithVision: vi.fn() });
-      const result = await analyzer.analyze({ image: 'synthetic', width: 500, height: 500, predictionBranches: defaultPredictionBranches }, new AbortController().signal);
+  it('keeps safe errors visible and never falls back to OCR actions', async () => {
+    for (const error of [new PredictionError({ stage: 'vision', reason: 'auth', upstreamStatus: 401 }), new Error('PRIVATE_KEY_AND_IMAGE')]) {
+      const result = await new ScreenshotAnalyzer({ recognizeText: async () => ({ text: 'TypeError: undefined', confidence: 1, lineCount: 1 }), classifyWithVision: async () => { throw error; } })
+        .analyze({ image: 'crop', width: 100, height: 100, predictionBranches: defaultPredictionBranches }, new AbortController().signal);
       expect(result.predictionError).toBeDefined(); expect(result.predictionError).not.toContain('PRIVATE');
+      expect(autoActionRouter.getAutoAction(result.analysis).id).toBe('ask-ai');
       if (error instanceof PredictionError) expect(result.predictionError).toContain('HTTP 401');
     }
   });
@@ -41,7 +34,7 @@ describe('screenshot analyzer', () => {
   });
 
   it('uses the vision layer only when local and OCR confidence are insufficient', async () => {
-    const classifyWithVision = vi.fn().mockResolvedValue({ contentType: 'ui', confidence: 0.93, signals: { hasUI: true } });
+    const classifyWithVision = vi.fn().mockResolvedValue({ contentType: 'ui', confidence: 0.93, matchedBranchId: null, signals: { hasUI: true } });
     const analyzer = new ScreenshotAnalyzer({
       recognizeText: vi.fn().mockResolvedValue({ text: '', confidence: 0, lineCount: 0 }),
       classifyWithVision
@@ -160,14 +153,14 @@ describe('screenshot analyzer', () => {
     expect(autoActionRouter.getAutoAction({ ...analysis, matchedBranchId: 'create-schedule', signals: {} }, branches).id).toBe('ask-ai');
     expect(autoActionRouter.getAutoAction({ ...analysis, matchedBranchId: 'create-schedule' }, branches).id).toBe('create-schedule');
   });
-  it('keeps unchanged defaults on the OCR fast path and skips classification when all branches are disabled', async () => {
+  it('uses the user model for defaults and skips classification when all branches are disabled', async () => {
     const recognizeText = vi.fn().mockResolvedValue({ text: 'TypeError: value is undefined\nError: request failed', confidence: 0.99, lineCount: 2 });
-    const classifyWithVision = vi.fn(); const analyzer = new ScreenshotAnalyzer({ recognizeText, classifyWithVision });
+    const classifyWithVision = vi.fn().mockResolvedValue({ contentType: 'error', confidence: 0.99, matchedBranchId: 'explain-error' }); const analyzer = new ScreenshotAnalyzer({ recognizeText, classifyWithVision });
     const context = { image: 'fixture', width: 900, height: 600, predictionBranches: defaultPredictionBranches };
     const result = await analyzer.analyze(context, new AbortController().signal);
     expect(autoActionRouter.getAutoAction(result.analysis).id).toBe('explain-error');
     const disabled = await analyzer.analyze({ ...context, predictionBranches: defaultPredictionBranches.map((branch) => ({ ...branch, enabled: false })) }, new AbortController().signal);
     expect(disabled.analysis.matchedBranchId).toBeNull();
-    expect(recognizeText).toHaveBeenCalledOnce(); expect(classifyWithVision).not.toHaveBeenCalled();
+    expect(recognizeText).toHaveBeenCalledOnce(); expect(classifyWithVision).toHaveBeenCalledOnce();
   });
 });

@@ -36,5 +36,6 @@
     "Regex cannot detect all secret formats or establish validity.",
     "Binary assets were not OCR scanned or exhaustively reviewed for personal content.",
     "No Apple keychain or external production system inspection."
-  ]
+  ],
+  "snapshot": "Phase 0 separation snapshot; its history/remote counts predate Phase 1. See PHASE1_REPORT.md for current delivery."
 }

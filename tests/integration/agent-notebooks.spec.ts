@@ -1,4 +1,4 @@
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { expect, test } from '@playwright/test';
 import { createServer } from 'node:http';
 import { mkdtemp, mkdir, readdir, readFile, rename, rm } from 'node:fs/promises';
@@ -19,7 +19,7 @@ test('notebook selection, first-use creation, branch binding and optional automa
   });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const address = server.address(); if (!address || typeof address === 'string') throw new Error('mock server unavailable');
-  const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${join(directory, 'app')}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  const app = await launchDesktop({ args: ['.', `--user-data-dir=${join(directory, 'app')}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow(); const errors: string[] = []; page.on('pageerror', (error) => errors.push(error.message));
     await expect(page.getByRole('button', { name: 'AI 笔记', exact: true })).toHaveAttribute('aria-current', 'page');

@@ -3,7 +3,7 @@ import { createServer, type ServerResponse } from 'node:http';
 import { mkdtemp, mkdir, readFile, readdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import type { WorkspaceService } from '../../src/main/agent/WorkspaceService';
 
 test('AI confirms each note change before writing and replying, folds directory work into status, and opens actual changes', async () => {
@@ -46,7 +46,7 @@ test('AI confirms each note change before writing and replying, folds directory 
   });
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
   const address = server.address(); if (!address || typeof address === 'string') throw new Error('mock server missing');
-  const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${join(directory, 'client')}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  const app = await launchDesktop({ args: ['.', `--user-data-dir=${join(directory, 'client')}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow();
     await app.evaluate(({ dialog }, path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, root);
@@ -112,7 +112,7 @@ test('AI confirms each note change before writing and replying, folds directory 
     await expect(quick.locator('.agent-run-status')).toHaveText('正在读取文件 基础.md');
     await expect(quick.locator('.agent-part')).toHaveCount(2); await expect(quick.locator('.agent-part').nth(1)).toContainText('搜索文件二分');
     await app.evaluate(() => (globalThis as typeof globalThis & { releaseRead(): void }).releaseRead());
-    await expect(quick.locator('.agent-run-status')).toHaveText('正在编辑 二分查找.md');
+    await expect(quick.locator('.agent-run-status')).toContainText('等待你确认：编辑笔记');
     expect(finalReplies).toBe(0); await expect(quick.getByLabel('已编辑笔记')).toHaveCount(0);
     await quick.screenshot({ path: 'docs/ui/agent-note-writing.png' });
     const confirmNote = async () => {

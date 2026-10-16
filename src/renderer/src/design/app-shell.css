@@ -13,7 +13,6 @@
 .titlebar-button:hover { background: var(--bg-hover); color: var(--text-primary); }
 .titlebar-button:active { background: var(--bg-active); }
 .titlebar-button.active { background: var(--bg-selected); color: var(--text-selected); }
-.titlebar-login { width: auto; min-width: 48px; padding: 0 10px; font-size: var(--font-control); font-weight: 500; }
 .sidebar { grid-column: 1; grid-row: 2; width: 100%; min-height: 0; padding: var(--space-3) var(--space-2); overflow-y: auto; overflow-x: hidden; border-right: 1px solid var(--border-subtle); background: var(--bg-nav); }
 .sidebar nav { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-1); min-width: 0; }
 .sidebar .nav { position: relative; display: flex; align-items: center; gap: var(--space-2); width: 100%; min-width: 0; height: 34px; padding: 0 9px; overflow: hidden; border-radius: var(--radius-control); color: var(--text-secondary); background: transparent; font-size: var(--font-control); font-weight: 500; text-align: left; }

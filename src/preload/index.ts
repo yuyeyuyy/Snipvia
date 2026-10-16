@@ -67,17 +67,6 @@ const api: SnipviaAPI = {
     },
     onChanged: (callback) => { themeListeners.add(callback); return () => { themeListeners.delete(callback); }; }
   },
-  account: {
-    get: () => ipcRenderer.invoke('account:get'),
-    sendCode: (value) => ipcRenderer.invoke('account:send-code', value),
-    signIn: (value) => ipcRenderer.invoke('account:sign-in', value),
-    signOut: () => ipcRenderer.invoke('account:sign-out'),
-    onChanged: (callback) => {
-      const listener = (_event: Electron.IpcRendererEvent, state: import('../shared/account').AccountState) => callback(state);
-      ipcRenderer.on('account:changed', listener);
-      return () => { ipcRenderer.removeListener('account:changed', listener); };
-    }
-  },
   notes: {
     copyCode: (content) => ipcRenderer.invoke('notes:copy-code', content),
     onOpenRequested: (callback) => { const listener = (_event: Electron.IpcRendererEvent, value: import('../shared/notes').NoteOpenRequest) => callback(value);

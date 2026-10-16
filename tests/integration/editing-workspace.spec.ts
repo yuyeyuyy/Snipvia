@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { tokenColor } from '../helpers/appearance';
 import { visionTestImage } from '../../src/main/ai/models/vision-test';
 
@@ -31,7 +31,7 @@ test('selected notes and prediction rules become proposals, save only after revi
     });
   });
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve)); const address = server.address(); if (!address || typeof address === 'string') throw new Error('mock server unavailable');
-  const storage = join(directory, 'app'); const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${storage}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  const storage = join(directory, 'app'); const app = await launchDesktop({ args: ['.', `--user-data-dir=${storage}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow(); const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
     await app.evaluate(({ dialog }, root) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [root] }); }, root);

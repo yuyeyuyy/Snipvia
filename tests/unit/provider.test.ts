@@ -25,8 +25,8 @@ describe('vision provider', () => {
     const fetch = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: '{"contentType":"unknown","confidence":0.5,"matchedBranchId":null}' } }] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: '{"events":[]}' } }] })));
     vi.stubGlobal('fetch', fetch);
-    await classifyScreenshot(settings, '', 'fixture', new AbortController().signal);
-    await expect(extractScheduleEvents(settings, '', 'fixture', '2026-10-06T00:00:00Z', 'Asia/Shanghai', new AbortController().signal)).rejects.toThrow('日程字段');
+    await classifyScreenshot(settings, 'synthetic-model-key', 'fixture', new AbortController().signal);
+    await expect(extractScheduleEvents(settings, 'synthetic-model-key', 'fixture', '2026-10-06T00:00:00Z', 'Asia/Shanghai', new AbortController().signal)).rejects.toThrow('日程字段');
     for (const [, init] of fetch.mock.calls) expect(JSON.parse(init.body)).toMatchObject({ thinking: { type: 'disabled' }, temperature: 0.6 });
   });
   it.each(['qwen3.8-max', 'qwen3.8-flash', 'qwen3.8-max-0902', 'qwen3.8-max-2026-09-02'])(
@@ -53,7 +53,7 @@ describe('vision provider', () => {
   ])('keeps vendor-specific parameters out of $provider / $model requests', async (setting) => {
     const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ choices: [{ message: { content: '回答' } }] })));
     vi.stubGlobal('fetch', fetch);
-    await askModel({ ...defaults, ...setting }, '', 'fixture', [], '问题', new AbortController().signal);
+    await askModel({ ...defaults, ...setting }, 'synthetic-model-key', 'fixture', [], '问题', new AbortController().signal);
     const body = JSON.parse(fetch.mock.calls[0][1].body);
     expect(body).not.toHaveProperty('enable_thinking');
     expect(body).not.toHaveProperty('preserve_thinking');
@@ -83,11 +83,11 @@ describe('vision provider', () => {
   });
   it('does not expose provider response bodies in errors', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('private upstream details', { status: 401 })));
-    await expect(askModel(defaults, '', 'fixture', [], '问题', new AbortController().signal)).rejects.toThrow('HTTP 401');
+    await expect(askModel(defaults, 'synthetic-model-key', 'fixture', [], '问题', new AbortController().signal)).rejects.toThrow('HTTP 401');
   });
   it('rejects unsupported or empty responses', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ choices: [] }))));
-    await expect(askModel(defaults, '', 'fixture', [], '问题', new AbortController().signal)).rejects.toThrow('空回答');
+    await expect(askModel(defaults, 'synthetic-model-key', 'fixture', [], '问题', new AbortController().signal)).rejects.toThrow('空回答');
   });
   it('rejects a non-ASCII credential before constructing the authorization header', async () => {
     const fetch = vi.fn();
@@ -101,16 +101,16 @@ describe('vision provider', () => {
     vi.stubGlobal('fetch', vi.fn((_url: string, options: RequestInit) => new Promise((_resolve, reject) => {
       options.signal?.addEventListener('abort', () => reject(new Error('cancelled')));
     })));
-    const pending = askModel(defaults, '', 'fixture', [], '问题', controller.signal);
+    const pending = askModel(defaults, 'synthetic-model-key', 'fixture', [], '问题', controller.signal);
     controller.abort();
     await expect(pending).rejects.toThrow('cancelled');
   });
   it('parses only supported structured screenshot classifications', () => {
-    expect(parseScreenshotClassification('```json\n{"contentType":"ui","confidence":0.91,"signals":{"hasUI":true}}\n```'))
-      .toEqual({ contentType: 'ui', confidence: 0.91, signals: { hasUI: true } });
-    expect(parseScreenshotClassification('{"contentType":"text","confidence":0.88,"signals":{"hasSchedule":true}}'))
-      .toEqual({ contentType: 'text', confidence: 0.88, signals: { hasSchedule: true } });
-    expect(() => parseScreenshotClassification('{"contentType":"invoice","confidence":0.9}')).toThrow('不支持');
+    expect(parseScreenshotClassification('```json\n{"contentType":"ui","confidence":0.91,"matchedBranchId":null,"signals":{"hasUI":true}}\n```'))
+      .toEqual({ contentType: 'ui', confidence: 0.91, matchedBranchId: null, signals: { hasUI: true } });
+    expect(parseScreenshotClassification('{"contentType":"text","confidence":0.88,"matchedBranchId":null,"signals":{"hasSchedule":true}}'))
+      .toEqual({ contentType: 'text', confidence: 0.88, matchedBranchId: null, signals: { hasSchedule: true } });
+    expect(() => parseScreenshotClassification('{"contentType":"invoice","confidence":0.9,"matchedBranchId":null}')).toThrow('不支持');
     expect(() => parseScreenshotClassification('This is code')).toThrow('有效 JSON');
   });
   it('classifies using enabled applicability rules, without leaking execution instructions or notebook bindings', async () => {
@@ -149,7 +149,7 @@ describe('vision provider', () => {
     });
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(body, { headers: { 'Content-Type': 'text/event-stream' } })));
     const deltas: string[] = [];
-    expect(await streamModel(defaults, '', 'fixture', [], '解释', new AbortController().signal, (delta) => deltas.push(delta))).toBe('第一段');
+    expect(await streamModel(defaults, 'synthetic-model-key', 'fixture', [], '解释', new AbortController().signal, (delta) => deltas.push(delta))).toBe('第一段');
     expect(deltas).toEqual(['第一', '段']);
   });
   it('accepts a complete JSON response from compatible services that ignore stream mode', async () => {
@@ -157,7 +157,7 @@ describe('vision provider', () => {
       headers: { 'Content-Type': 'application/json' }
     })));
     const deltas: string[] = [];
-    expect(await streamModel(defaults, '', 'fixture', [], '解释', new AbortController().signal, (delta) => deltas.push(delta))).toBe('完整回答');
+    expect(await streamModel(defaults, 'synthetic-model-key', 'fixture', [], '解释', new AbortController().signal, (delta) => deltas.push(delta))).toBe('完整回答');
     expect(deltas).toEqual(['完整回答']);
   });
   it('parses fenced and unfenced structured schedule output', () => {

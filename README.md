@@ -2,11 +2,11 @@
 
 **Snip. Ask. Act.**
 
-面向 macOS 和 Windows 的截图 AI 助手：快捷键框选屏幕，在截图旁提问、解释代码和错误，或把图片中的安排整理成待确认日程。项目同时包含本地 Markdown 笔记、Agent 工具调用，以及独立的账号与预测服务控制台。
+面向 macOS 和 Windows 的截图 AI 助手：快捷键框选屏幕，在截图旁提问、解释代码和错误，或把图片中的安排整理成待确认日程。桌面核心完全免费、本地优先、无需登录；用户自行配置模型与 API Key。项目保留本地 Markdown 笔记和 Agent 工具调用。
 
 ## 当前状态
 
-文档更新：2026-10-12。仓库采用 **pnpm workspace**，包含 Electron 桌面应用、React 网页控制台、Fastify 服务端和共享 API 契约。
+文档更新：2026-10-16。当前为独立 Electron 桌面工程，Phase 1 已移除官方账号和会员限制，预测直接使用用户视觉模型。服务端、控制台和官网已迁至私有仓库 `yuyeyuyy/Snipvia-server`。[Phase 1 实施报告](docs/opensource/PHASE1_REPORT.md) 记录验证、数据兼容与剩余发布门槛。
 
 Mac 桌面应用 **v0.2.3** 的变更见 [发布说明](docs/RELEASE_NOTES_0_2_3.md)，签名、公证与验证见[发布报告](docs/MACOS_RELEASE_0_2_3.md)，安装包从独立公开的 [GitHub Release](https://github.com/yuyeyuyy/Snipvia-releases/releases/tag/v0.2.3) 下载。v0.2.2 可直接通过应用内下载并确认重启更新；v0.2.1 或更早版本需先手动安装新版 DMG。Windows 沿用 v0.2.1 预览版。源码仓库保持私有，分发机制见[迁移说明](docs/RELEASE_DISTRIBUTION.md)。下表描述本版源码与已知边界。私有系统已独立保存，见[分离报告](docs/opensource/SEPARATION_REPORT.md)。
 
@@ -14,16 +14,13 @@ Mac 桌面应用 **v0.2.3** 的变更见 [发布说明](docs/RELEASE_NOTES_0_2_3
 | --- | --- | --- |
 | 截图与对话 | 快捷键框选、置顶图片、截图旁流式对话、续拍追问、本地历史 | 只上传选中区域；普通截图支持标注，长截图未实现 |
 | 截图预测 | 四个内置分支：解释错误、解释代码、回答问题、创建日程草稿；名称、适用内容、执行指令和笔记本绑定可编辑 | 空输入按 Enter 才触发；低置信度、无命中或调用失败时等待手动操作 |
-| 服务端预测 | GPT / Qwen-VL / Gemini 视觉理解 → TypeSafe Jev；控制台配置模型、密钥、超时及五项限额 | 模型在厂商侧运行；真实素材准确率及目标服务器并发能力需单独验收 |
 | AI 笔记 | 本地 Markdown、三种编辑模式、代码高亮与复制、GFM 表格、标题大纲、双向链接、附件、ZIP 导出、文件拖拽、侧栏连续收起 | 移除笔记本只取消链接；Agent 可提出新建、追加与局部编辑建议，每次查看差异并确认后保存；实际修改可撤销，之后被改过的笔记不覆盖；附件自动写入未实现 |
 | AI 对话工作区 | 居中欢迎页、分组会话侧栏、重命名与模型恢复；流式输出、停止、重新生成；授权笔记 / 预测规则与确认编辑；本地图片选择、⌘V 粘贴、拖放、已有截图、消息图片预览与历史恢复 | 模型只能提出结构化修改，没有直接写文件或命令权限；图片能力不足会明确提示；详见 [Phase 3](docs/AI_CHAT_WORKSPACE_PHASE3.md)与 [Phase 4](docs/AI_CHAT_WORKSPACE_PHASE4.md)；最新源码界面见 [UI 重构](docs/AI_CHAT_UI_REDESIGN.md) |
 | Agent | 图像问答、联网搜索、网页分块阅读、授权工作区检索、自动整理笔记、沙箱命令与 JavaScript / Python / Shell 脚本、计划清单、步骤时间线、来源展示、停止任务；会话跨重启保留，长对话自动摘要压缩 | 脚本及非只读命令需确认；命令限当前笔记本，macOS 已验证，Windows 暂不开放；通用文件修改和外部 MCP 执行未开放 |
-| 账号与控制台 | 邮箱验证码登录注册、会话恢复、管理员 TOTP、用户管理及每人预测用量、批量资格与模板、预览和幂等期限调整、多活动与兑换码、未激活名额回收、限时或永久资格、套餐及订单查询 | 用量仅累计请求与成功次数；用户在网页兑换后刷新客户端资格；在线支付、续费退款尚未接入 |
-| 部署与运维 | Linux amd64 Docker 镜像、Caddy HTTPS、ACR 分发、发行文件更新、SQLite 一致性备份 | 需要配置域名、SMTP 和独立生产密钥；本机备份还需保存异机副本 |
 
 macOS 是优先验证平台，提供 macOS 14+ Apple 芯片与 Intel 的独立安装包；Intel 真机兼容性仍需完整验收。Windows 使用 Electron 截图适配，Windows 11 x64 的安装、自启、混合 DPI 和完整流程仍需真机验收。
 
-桌面历史、日程和笔记使用本地文件；**服务端已使用 SQLite**，无需另部署 MySQL、PostgreSQL 或 Java 服务。客户端已接入启动后台版本检查和「设置 → 关于 → 检查更新」，显示 GitHub Release 版本号与 Markdown 更新说明。启用更新的正式签名 Mac 版支持用户点击下载、保存笔记后「重启并更新」；开发版、旧安装包及当前未签名 Windows 版通过发布页手动更新。详见[版本检查与更新](docs/UPDATE_CHECK.md)。应用内定时提醒、ICS、双向日历同步和笔记云同步尚未实现。Mac 日历及提醒事项写入需要用户核对并确认。
+桌面历史、日程和笔记使用本地文件，开发和运行不需要后台或数据库服务。客户端已接入启动后台版本检查和「设置 → 关于 → 检查更新」，显示 GitHub Release 版本号与 Markdown 更新说明。启用更新的正式签名 Mac 版支持用户点击下载、保存笔记后「重启并更新」；开发版、旧安装包及当前未签名 Windows 版通过发布页手动更新。详见[版本检查与更新](docs/UPDATE_CHECK.md)。应用内定时提醒、ICS、双向日历同步和笔记云同步尚未实现。Mac 日历及提醒事项写入需要用户核对并确认。
 
 2026-10-12 Mac 更新实机测试：独立签名测试包从 0.2.1 自行升级并重启到 0.2.2，笔记与签名检查通过；迁移前的私有仓库匿名更新源返回 404，当时尚未完成线上分发验收，详见[测试报告](docs/MACOS_UPDATE_TEST.md)。
 
@@ -38,7 +35,6 @@ UI 2.0 阶段 2 已在源码实现：Light / Dark / System（默认跟随系统�
 - Node.js **24.15.x**（见 [.node-version](.node-version)）。
 - pnpm **11.1.3**；依赖版本以 `pnpm-lock.yaml` 为准。
 - Electron 窗口测试需要桌面会话；构建 macOS 原生截图辅助程序及安装包需要完整 Xcode。
-- 服务端 SQLite 使用原生模块，部署 Linux 时通过 Docker 构建，不复制 macOS 的 `node_modules`。
 
 在项目根目录执行：
 
@@ -59,25 +55,13 @@ pnpm dev
 
 首次录屏授权可从「模型与设置 → 录屏权限」打开系统设置和 Finder，把选中的开发应用拖入录屏列表并启用，再重新运行 `pnpm dev`。普通源码修改不会替换该应用；Electron 版本变化时启动器会停止并提示处理。打包版拥有独立的应用身份，需要单独授权。详情见 [macOS 开发与验收](docs/DEVELOPMENT.md)。
 
-### 私有系统已分离
+### 免费、本地优先与模型配置
 
-服务端、管理控制台、官网、部署工具与后台契约已迁出桌面工作区；本仓库仅安装和构建客户端。迁移边界、验证与回滚见[私有服务分离报告](docs/opensource/SEPARATION_REPORT.md)。当前客户端仍保留原有登录、资格检查和服务端预测行为，无需登录的产品重构尚未实施。
+客户端无需注册、登录、资格或官方 Cookie。首次启动可直接截图编辑、保存、使用笔记与历史；AI 功能需要在「模型与设置」选择支持图片的模型并配置自己的 Key。自定义本地服务可不使用 Key。模型厂商可能收取 API 费用。
 
-### 桌面应用连接哪个账号服务
+空输入 Enter 显式触发分支预测，直接把选中裁剪图和已启用分支的适用条件发给用户模型；没有匹配或预测失败时等待手动操作。可选 Jev 属于后续 Phase 2，本阶段不调用 Jev 或旧预测代理。
 
-当前开发版和新打包客户端默认连接 `https://console.umbraticus.cn`。需要连接维护者独立运行的测试服务时，在另一个终端运行：
-
-```sh
-SNIPVIA_CONSOLE_ORIGIN=http://127.0.0.1:3100 pnpm dev
-```
-
-生产客户端更换服务来源时，通过构建变量指定完整 HTTPS 来源：
-
-```sh
-MAIN_VITE_CONSOLE_ORIGIN=https://accounts.example.com pnpm package
-```
-
-地址不包含 `/api`、查询参数或凭据。会话绑定服务来源，切换后需要重新登录；本机账号数据不会自动迁移到云端。服务端密钥与部署配置保存在私有工程；桌面账号协议见[账号边界](docs/DESKTOP_ACCOUNT_AND_EMAIL.md)。
+旧 `account/session.json` 保留原位但不读取、不解密；旧账号环境变量无效。私有系统迁移见[分离报告](docs/opensource/SEPARATION_REPORT.md)。
 
 ## 主要命令
 
@@ -98,7 +82,7 @@ MAIN_VITE_CONSOLE_ORIGIN=https://accounts.example.com pnpm package
 | `pnpm package` | 生成当前系统和架构的应用目录 |
 | `pnpm dist` | 生成桌面安装包 |
 
-桌面自动测试使用本机合成账号 HTTP 夹具、模拟模型和合成截图；不需要服务端源码、生产账号或真实模型 Key。后端认证、限额、邮件和数据库测试保存在私有工程。真实录屏权限、混合 DPI 和跨平台验收仍需真机验证。
+桌面自动测试使用纯桌面 helper、模拟模型和合成截图；不需要服务端源码、生产账号或真实模型 Key。后端认证、限额、邮件和数据库测试保存在私有工程。真实录屏权限、混合 DPI 和跨平台验收仍需真机验证。
 
 ## 使用流程
 
@@ -106,10 +90,10 @@ MAIN_VITE_CONSOLE_ORIGIN=https://accounts.example.com pnpm package
 
 客户端预设支持 OpenAI、Anthropic Claude、Gemini、xAI Grok、百炼 Qwen、DeepSeek、智谱 GLM、Kimi、火山方舟 Doubao与自定义服务。刷新按钮位于模型下拉框左侧，动态查询 / 官方清单回退直接更新下拉选项，只展示已确认支持图片理解的模型；保留 24 小时缓存及手动 ID。OpenAI 预设更新为 GPT-6.1 Sol / GPT-6 系列，旧配置保持原模型；百度、腾讯、硅基流动和 OpenRouter 的入口已移除，已有配置以自定义服务展示并保留原凭据；详见[模型目录与能力识别](docs/MODEL_DISCOVERY.md)。千问、Kimi 和智谱可选择接口来源，凭据按来源独立保存；DeepSeek 预设使用支持图片的 `deepseek-flash`。配置、模型限制及验证范围见 [客户端模型厂商](docs/DESKTOP_MODEL_PROVIDERS.md)。
 
-1. 在标题栏打开「模型与设置」，选择支持图片的对话模型并配置自己的 Key。桌面对话使用 Chat Completions 兼容协议，Agent 还需要 Tool Calling。服务端视觉模型和 Jev 由管理员在网页控制台配置，属于独立链路。
+1. 在标题栏打开「模型与设置」，选择支持图片的对话模型并配置自己的 Key。桌面对话使用 Chat Completions 兼容协议，Agent 还需要 Tool Calling。分支预测也使用这一用户模型；不需要官方服务或 Jev Key。
 2. 使用默认 `⌘⇧Space`（Windows：`Ctrl+Shift+Space`）框选；没有录屏权限时可通过主窗口导入图片。置顶截图可拖动，关闭图片会结束当前流程。
 3. 截图后等待输入。空输入按 Enter 会预测分支；输入提示词后按 Enter 直接对话。默认 `⌘⇧Enter` 续拍并沿用最近对话上下文，跳过预测。
-4. 有效体验、订阅或永久资格可使用截图对话；无资格使用 AI 截图时进入普通截图并提示联系管理员。已登录且后台启用图片预测时，所选截图经过服务端视觉理解与 Jev。后台未提供服务时保留本机 / OCR / 用户模型路径；服务端调用失败或无命中时等待手动提问。
+4. 无需账号即可使用截图对话、主窗口对话和 Agent。分支条件、置信度和日程信号仍须通过校验；失败显示模型设置提示，可明确重试。
 5. Agent 可以搜索网页、读取相关段落和检索已授权工作区，回答下方提供来源入口。当前默认搜索为 Exa，配置 Brave Key 时优先使用 Brave，也可显式选择 DuckDuckGo；配置与实现见[联网研究说明](docs/AGENT_WEB_RESEARCH.md)。
 6. 运行中可停止，悬浮对话可返回主窗口继续；历史保存在本机。识别出的日程先成为草稿，核对后才能保存为正式事项或添加到 Mac 日历、提醒事项。
 
@@ -123,7 +107,7 @@ MAIN_VITE_CONSOLE_ORIGIN=https://accounts.example.com pnpm package
 
 选定笔记本后，Agent 还可以通过 `run_command` 创建目录和移动文件，或通过 `run_script` 验证算法、批量整理笔记。命令在本机 OS 沙箱中运行，默认不联网、不继承应用密钥，单次最多 10 秒；执行完成后再回复，Markdown 变更列表来自真实文件核对。详见 [Agent 命令与脚本](docs/AGENT_COMMANDS.md)。
 
-服务端预测的累计请求不代表模型调用成功。失败时客户端显示视觉理解 / Jev 阶段和已脱敏 HTTP 状态，允许空输入按 Enter 明确重试；不自动重试或切换其他预测厂商。服务端仅保留累计次数，失败详情只随响应传递。预测代理实现与管理文档已迁至私有工程。
+预测失败只显示脱敏错误和 HTTP 状态，不回显上游内容、Key 或图片；不会自动改用另一家模型。
 
 ## 项目目录结构
 
@@ -132,7 +116,6 @@ Snipvia/
 ├── src/                         桌面应用
 │   ├── main/                    Electron 主进程：系统能力、网络、文件与凭据
 │   │   ├── index.ts             应用生命周期、服务组装与 IPC 注册
-│   │   ├── account/             云端账号和截图预测客户端
 │   │   ├── agent/               Agent 循环、工具、权限、MCP 与网页检索
 │   │   ├── ai/                  普通对话、视觉请求与 Agent 模型适配
 │   │   ├── analysis/            截图内容分析和分支路由
@@ -141,11 +124,11 @@ Snipvia/
 │   │   ├── notes/               本地笔记目录、编辑保存、附件与导出
 │   │   ├── performance/         截图性能事件与测量
 │   │   ├── platform/            平台权限和开机自启适配
-│   │   ├── storage/             设置、账号会话、历史和日程存储
+│   │   ├── storage/             设置、历史和日程存储
 │   │   └── windows/             框选与置顶窗口、对话定位
 │   ├── preload/                 向页面暴露有限的 IPC 桥接
 │   ├── renderer/                桌面 React 页面、样式和资源
-│   │   └── src/                 account、agent、capture、chat、notes 等界面
+│   │   └── src/                 agent、capture、chat、notes 等界面
 │   └── shared/                  桌面跨进程类型、Zod 校验及纯计算函数
 ├── native/
 │   └── screen-capture-kit-helper/  macOS Swift 截图辅助程序
@@ -177,14 +160,12 @@ Snipvia/
 | 数据 | 存放位置与行为 |
 | --- | --- |
 | 桌面模型 Key | Electron `userData/settings.json` 中的密文；使用 `safeStorage`，macOS 由钥匙串保护、Windows 使用 DPAPI |
-| 桌面账号会话 | `userData/account/session.json` 加密保存并绑定服务来源；安全存储不可用时只保留内存会话 |
 | 对话和日程 | `userData/history/`、`userData/schedule/` 中的本地 JSON 与裁剪截图，当前不加密 |
 | 笔记本 | 用户选择的目录内保存 Markdown 与附件；`userData/notebooks.json` 保存链接登记 |
 | Agent 会话与笔记检查点 | `userData/agent-sessions/` 保存每个对话的完整 Agent 记录（含工具结果）；`userData/agent-checkpoints/` 保存每轮笔记修改前后的内容，供撤销，最多 100 份 / 64 MiB。均为本地 JSON、不加密，删除对话或清空历史时一并删除 |
-| 服务端业务 | SQLite 保存账号、资格、限额、累计预测次数和管理操作日志 |
-| 预测内容 | 服务端不保留预测图片、描述或请求正文；所选视觉厂商接收图片，Jev 接收文字与适用条件 |
+| 预测内容 | 用户视觉模型接收选中裁剪图与适用条件；不发送执行 prompt、笔记本路径或账号 Cookie |
 
-不将 `.env`、生产密钥、数据库、个人截图或用户数据提交到仓库。预测执行指令、笔记本路径和历史对话不进入服务端预测请求；客户端之后的对话和已授权检索是另一条模型调用链路。服务端不保存预测内容，不代表上游厂商不保存，数据政策需按实际服务确认。
+不将 `.env`、生产密钥、数据库、个人截图或用户数据提交到仓库。分类、问答、网页检索的接收方取决于用户配置；模型厂商的数据保留政策应由用户确认。本地优先不表示模型默认在本机运行。
 
 Renderer 不直接读取文件或凭据；IPC 和模型输出均做校验。笔记只访问系统选择器授权的目录，拒绝路径穿越和符号链接。日程草稿的识别记录可以保存，但正式事项及外部日历写入必须经用户确认。
 
@@ -205,15 +186,15 @@ Renderer 不直接读取文件或凭据；IPC 和模型输出均做校验。笔�
 - [网页工具](docs/AGENT_WEB_TOOLS.md)、[联网研究与来源](docs/AGENT_WEB_RESEARCH.md)。
 - [Agent 整理与确认写入笔记](docs/AGENT_NOTE_WRITING_PLAN.md)、[本地日程模型备选方案](docs/LOCAL_SCHEDULE_MODEL_PLAN.md)：逐次确认、写入保护与本地模型备选规划。
 
-### 控制台与部署
+### 数据迁移
 
-- [客户端账号与 SMTP](docs/DESKTOP_ACCOUNT_AND_EMAIL.md)。
-- [算法学习与笔记用例](docs/ALGORITHM_NOTE_SCENARIOS.md)：8 组截图材料、会员边界及自动写入验收。
+- [旧账号数据保留说明](docs/DESKTOP_ACCOUNT_AND_EMAIL.md)。
+- [算法学习与笔记用例](docs/ALGORITHM_NOTE_SCENARIOS.md)：截图材料及确认写入验收。
 - [日程截图测试包](docs/schedule-test-pack/README.md)：日期、时区、截止事项和歧义素材。
 
 ## 桌面分发
 
-当前安装产物可从 [公开 GitHub Releases](https://github.com/yuyeyuyy/Snipvia-releases/releases) 获取：
+历史安装产物可从 [旧公开 GitHub Releases](https://github.com/yuyeyuyy/Snipvia-releases/releases) 获取：
 
 | 平台 | 安装包 | 说明 |
 | --- | --- | --- |
@@ -223,10 +204,12 @@ Renderer 不直接读取文件或凭据；IPC 和模型输出均做校验。笔�
 
 `pnpm dist:friend` 生成 Apple 芯片体验 ZIP；`pnpm dist:windows-friend` 生成 Windows 免安装包；`pnpm dist:release` 生成 DMG、EXE、说明及 SHA-256。版本取自根目录 `package.json`，发布前运行本机检查和 [Windows 发布验证模板](docs/ci/windows-release.yml)。
 
-正式 Mac 签名 / 公证使用独立[发布流程](docs/MACOS_RELEASE.md)；`pnpm release:publish --directory <verified目录> --notes <说明.md>` 默认校验公开发布计划，加 `--execute` 才上传并发布到 `Snipvia-releases`。新验收报告必须记录当前公开更新源，不覆盖已发布版本。迁移的旧 v0.2.1 不包含后来加入的自动更新功能。
+正式 Mac 签名 / 公证使用独立[发布流程](docs/MACOS_RELEASE.md)；`pnpm release:publish --directory <verified目录> --notes <说明.md>` 默认校验公开发布计划，加 `--execute` 才上传并发布到当前 `Snipvia` 的 Releases（本阶段未发布）。新验收报告必须记录当前公开更新源，不覆盖已发布版本。迁移的旧 v0.2.1 不包含后来加入的自动更新功能。
 
 正式 Mac 安装与更新步骤见[公开安装指南](https://github.com/yuyeyuyy/Snipvia-releases/blob/main/docs/INSTALL.md)，体验包的详细步骤见 [Mac 说明](docs/FRIEND_INSTALL_GUIDE.md)、[Windows 说明](docs/WINDOWS_FRIEND_INSTALL_GUIDE.md)。本次 Mac 发行已完成签名与公证；不将个人 Key 或本机数据放入安装包。
 
 ## 许可
 
 项目当前未授予开源许可，`package.json` 标记为 `UNLICENSED`。
+
+当前源码的新版本检查、下载和发布计划统一使用 [Snipvia Releases](https://github.com/yuyeyuyy/Snipvia/releases)。旧安装包仍读取旧渠道；新免费版发布前不能删除旧 Release 或停用旧客户端所需服务。本阶段未签名、打包、迁移 Release 或停服。

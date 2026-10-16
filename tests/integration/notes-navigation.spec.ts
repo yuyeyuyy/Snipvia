@@ -1,4 +1,4 @@
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { expect, test, type Locator } from '@playwright/test';
 import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -28,7 +28,7 @@ test('notes panes animate independently, keep the editor, and unlinking preserve
   const content = '# 工作计划\n\n## 待办事项\n\n保留编辑内容与目录状态。';
   await writeFile(join(book, '首页.md'), content); await writeFile(join(book, '项目', '计划.md'), '# 项目');
   await writeFile(join(book, 'assets', 'attachment.txt'), '保留附件');
-  const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${storage}`], env: { ...process.env, SNIPVIA_CONSOLE_ORIGIN: 'http://127.0.0.1:1', SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  const app = await launchDesktop({ args: ['.', `--user-data-dir=${storage}`], env: { ...process.env, SNIPVIA_CONSOLE_ORIGIN: 'http://127.0.0.1:1', SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow(); const errors: string[] = []; page.on('pageerror', (error) => errors.push(error.message));
     await app.evaluate(({ dialog }, path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, book);

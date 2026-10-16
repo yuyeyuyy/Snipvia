@@ -9,6 +9,12 @@ const settings = { provider: 'custom' as const, endpoint: 'http://127.0.0.1:5555
 const request = (): AgentChatRequest => ({ system: 'System', messages: [{ role: 'user', content: 'Task' }], tools: [], signal: new AbortController().signal, maxOutputTokens: 2048 });
 function sse(events: unknown[], done = true) { return new Response(events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join('') + (done ? 'data: [DONE]\n\n' : ''), { headers: { 'Content-Type': 'text/event-stream' } }); }
 describe('configured Agent model adapter', () => {
+  it('does not send an unauthenticated request when a hosted model has no configured key', async () => {
+    const fetcher = vi.fn<typeof fetch>();
+    const provider = new ChatCompletionsAgentProvider({ provider: 'openai', endpoint: 'https://api.openai.com/v1', model: 'synthetic-model' }, '', undefined, fetcher);
+    await expect(provider.chat(request())).rejects.toThrow('模型与设置');
+    expect(fetcher).not.toHaveBeenCalled();
+  });
   it('maps multiple current and historical pictures to their own turns, excludes summaries and releases buffers', async () => {
     const fetcher = vi.fn<typeof fetch>(async () => Response.json({ choices: [{ message: { content: 'done' }, finish_reason: 'stop' }] }));
     const provider = new ChatCompletionsAgentProvider(settings, 'test-key', undefined, fetcher, { current: ['data:image/png;base64,CURRENT_A', 'data:image/png;base64,CURRENT_B'], history: new Map([['old-id', 'data:image/png;base64,OLD']]) });

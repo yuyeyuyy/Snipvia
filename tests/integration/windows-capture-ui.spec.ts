@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 
 test('Windows renderer uses Enter for the entire display and reuses the overlay after cancellation', async () => {
   test.setTimeout(60_000);
@@ -47,7 +47,7 @@ test('Windows renderer uses Enter for the entire display and reuses the overlay 
     };
     require(${JSON.stringify(main)});
   `);
-  const instance = await launchMemberDesktop({ args: [bootstrap, `--user-data-dir=${join(directory, 'data')}`],
+  const instance = await launchDesktop({ args: [bootstrap, `--user-data-dir=${join(directory, 'data')}`],
     env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await instance.firstWindow();

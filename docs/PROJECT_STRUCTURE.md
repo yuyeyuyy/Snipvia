@@ -1,18 +1,17 @@
 # 项目结构详解
 
-更新：2026-10-06。入口：[README](../README.md)。本文件介绍当前源码中的目录职责、关键文件、调用关系和修改位置；各功能的验证范围见对应功能文档。
+更新：2026-10-16。入口：[README](../README.md)。本文件介绍当前源码中的目录职责、关键文件、调用关系和修改位置；各功能的验证范围见对应功能文档。
 
 ## 工作区组成
 
-根目录是独立 Electron 桌面工作区；服务端、控制台、官网与后台契约已迁入本地私有候选。当前客户端仍保留账号与预测的原 HTTP 行为。详见[分离报告](opensource/SEPARATION_REPORT.md)。
+根目录是独立 Electron 桌面工作区；服务端、控制台、官网与后台契约已迁入本地私有候选。当前客户端无账号服务依赖，分支预测直连用户配置的视觉模型。详见[分离报告](opensource/SEPARATION_REPORT.md)。
 
 ## 桌面主进程：src/main/
 
-`index.ts` 组装服务、创建窗口、注册快捷键和 IPC，并协调截图、对话、历史与账号状态。系统权限、网络请求、凭据和文件操作由 Main 执行，Renderer 通过 Preload 访问有限接口。
+`index.ts` 组装服务、创建窗口、注册快捷键和 IPC，并协调截图、对话与历史。系统权限、网络请求、凭据和文件操作由 Main 执行，Renderer 通过 Preload 访问有限接口。
 
 | 目录 / 文件 | 主要职责与关键入口 |
 | --- | --- |
-| `account/AccountService.ts` | 固定账号来源的验证码、登录、会话校验、资格验证和图片预测 HTTP 客户端；`requireScreenshotChatAccess` 在开始 AI 流程前刷新资格 |
 | `capture/capture-engine.ts` | 选择主后端与回退后端，处理初始化、截图失败和取消 |
 | `capture/screen-capture-kit-backend.ts` | 调用 macOS Swift 辅助程序，处理截图帧、OCR 和状态 |
 | `capture/electron-capture-backend.ts` | Electron desktopCapturer 路径与等待策略 |
@@ -20,7 +19,7 @@
 | `windows/capture-overlay-window.ts` | 复用全屏框选窗口，传递帧就绪、AI / 普通截图模式及资格提示 |
 | `windows/screenshot-to-all-window.ts` | 复用置顶截图窗口，处理新截图、首轮显示和结束；后续帧统计不阻塞对话显示 |
 | `windows/quick-chat-placement.ts` | 按显示器可用区域计算对话窗位置和边界 |
-| `analysis/screenshot-analyzer.ts` | 本机信号、OCR、服务端预测和用户视觉模型的分析协调；远端失败时等待手动操作 |
+| `analysis/screenshot-analyzer.ts` | 本机 OCR 与用户视觉模型的分析协调；远端失败时等待手动操作 |
 | `analysis/auto-action-router.ts` | 校验启用分支、置信度及日程信号，决定执行或等待提问 |
 | `ai/provider.ts` | 普通问答、流式对话、截图分类、日程提取和输出校验 |
 | `ai/chat-completion-options.ts` | 普通问答和 Agent 共用的厂商参数：非思考模式与固定采样限制 |
@@ -31,10 +30,10 @@
 | `calendar/mac-calendar.ts` | Mac 日历与提醒事项的列举和用户确认后的写入；不提供双向同步 |
 | `platform/index.ts` | macOS 录屏权限、帮助信息，以及 Windows 基础适配 |
 | `platform/login-item.ts` | 打包应用的开机自启状态与设置 |
-| `storage/` | 模型配置、加密账号会话、对话历史、日程识别记录与正式事项 |
+| `storage/` | 模型配置、对话历史、日程识别记录与正式事项 |
 | `performance/screenshot-performance.ts` | 按截图会话收集事件、时间与资源信息，生成性能报告 |
 
-截图对话资格检查覆盖快捷键、系统菜单、普通截图转 AI、导入对话、续拍、聊天发送和 Agent 启动。普通截图输出和本地笔记操作不依赖会员资格。
+所有本地入口均无需账号；AI 需要用户模型配置。系统权限、文件授权、IPC sender 和修改确认继续有效。
 
 ### Agent 子系统：src/main/agent/
 
@@ -68,13 +67,13 @@ agent/
 
 `commands/registerCommandTools.ts` 声明 `run_command` / `run_script`；`CommandRunner.ts` 检查能力、资格和编辑器保存后执行；`ProcessSandbox.ts` 接入 sandbox-runtime、干净环境与进程组取消；`CommandFiles.ts` 核对 Markdown 的实际编辑、移动、删除。命令只作用于笔记本与私有临时目录，无额外 Renderer shell IPC。实现及平台边界见 [命令与脚本](AGENT_COMMANDS.md)。
 
-网页检索默认提供商在 `web/defaultSearchProvider.ts` 中选择：配置 Brave Key 时优先使用 Brave；显式选择 DuckDuckGo 时使用该适配器；其余使用 Exa。网页和 MCP 返回内容属于不可信输入，不能授予文件或账号权限。
+网页检索默认提供商在 `web/defaultSearchProvider.ts` 中选择：配置 Brave Key 时优先使用 Brave；显式选择 DuckDuckGo 时使用该适配器；其余使用 Exa。网页和 MCP 返回内容属于不可信输入，不能授予文件权限。
 
 ## 桥接与界面
 
 ### src/preload/
 
-`index.ts` 使用 contextBridge 暴露 `window.snipvia`。账号、笔记、Agent、截图、历史、日程等 API 都对应固定 IPC 通道；页面不能传入任意通道或获取 ipcRenderer 对象。
+`index.ts` 使用 contextBridge 暴露 `window.snipvia`。笔记、Agent、截图、历史、日程等 API 都对应固定 IPC 通道；页面不能传入任意通道或获取 ipcRenderer 对象。
 
 增加 IPC 功能时，需要同时修改共享契约、Main 的窗口与输入验证、Preload 的窄接口，再接入页面。类型声明不能替代主进程运行时验证。
 
@@ -94,7 +93,6 @@ agent/
 | --- | --- |
 | `App.tsx` | 主窗口导航、全局状态与内部会话继续视图；主导航暂时保留截图日程、AI 笔记、历史对话 |
 | `components/` | 标题栏、共享 WorkspaceHeader、图标 |
-| `account/` | 验证码登录、退出、资格与连接状态 |
 | `agent/` | 流式回答、运行状态、来源、授权与笔记本选择 |
 | `capture/` | 框选、置顶图、浮窗样式；`editor/` 提供标注模型、绘制与编辑器 |
 | `chat/` | QuickChat 和安全 Markdown 渲染 |
@@ -117,8 +115,6 @@ agent/
 | 文件 / 目录 | 内容 |
 | --- | --- |
 | `contracts.ts` | 设置、截图、聊天、日程和 window.snipvia 的公共类型与 Schema |
-| `account.ts` | 邮箱输入和公开账号状态；不包含私有 Cookie |
-| `screenshot-chat-access.ts` | 桌面会话、连接、账号与会员资格判断 |
 | `screenshot-understanding.ts` | 默认四个分支、可编辑条件、分析结果和自动任务状态 |
 | `notes.ts` / `note-markdown.ts` | 笔记 IPC、路径输入、Markdown 标题和链接逻辑 |
 | `agent/` / `agent-file-change.ts` | 运行、消息、审批、来源和差异等跨进程类型；`agent/note-writing.ts` 定义实际笔记修改元数据与 Markdown 路径限制 |
@@ -129,13 +125,9 @@ agent/
 | `models.ts` | 统一 ModelInfo、ModelCapabilities 八项三态、来源与验证时间、模型目录 IPC Schema |
 | `performance.ts` | 性能事件和报告契约 |
 
-## 客户端 HTTP 契约
+## 本地预测契约
 
-- `src/shared/account-protocol.ts`：资格状态及资格判断，行为与原共享包相同。
-- `src/shared/prediction-protocol.ts`：客户端服务发现、截图预测请求与响应校验。
-- `src/shared/prediction-failure.ts`：预测失败元数据与安全消息。
-- `tests/helpers/account-fixture.ts`：仅供测试的内存 HTTP 夹具，无生产认证、邮件或数据库实现。
-
+`analysis/PredictionService.ts` 默认使用用户视觉模型；`ai/json-request.ts` 提供有界、可取消 JSON 传输；`shared/prediction-failure.ts` 提供脱敏模型错误。没有后台契约或 Cookie。
 
 ## 原生程序、脚本与测试
 
@@ -145,9 +137,9 @@ agent/
 
 测试分为：
 
-- `tests/unit/`：Vitest；纯计算、IPC / 输出校验、存储、权限、模型异常和客户端会员边界。
+- `tests/unit/`：Vitest；纯计算、IPC / 输出校验、存储、权限、模型异常和本地数据边界。
 - `tests/integration/`：Playwright；Electron 窗口与真实文件工作流。
-- `tests/helpers/`：合成 HTTP 账号与有效资格等公共夹具；不会用开发者云端账号代替测试用户。
+- `tests/helpers/`：临时桌面启动与模型模拟夹具；不创建账号或后台服务。
 - `tests/fixtures/`：合成数据与本地 MCP 测试服务；不用个人截图作为测试输入。
 
 默认 `playwright.config.ts` 测桌面；真实服务端与浏览器测试已迁至私有工程。需要真实屏幕、权限和混合 DPI 的实验另有条件，不把跳过项记为通过。
@@ -177,11 +169,9 @@ agent/
 | 要修改的功能 | 优先阅读 / 修改 |
 | --- | --- |
 | 截图后窗口未显示、位置异常 | `main/index.ts`、`main/windows/`、`renderer/src/capture/`、`chat/QuickChat.tsx` |
-| 会员资格与免费截图边界 | `shared/screenshot-chat-access.ts`、`main/account/`、`main/index.ts`、服务端 `decisions.ts` |
 | 新增或修改预测分支 | `shared/screenshot-understanding.ts`、`main/analysis/`、`renderer/src/settings/` |
 | 笔记树、拖拽、保存或附件 | `renderer/src/notes/`、`main/notes/`、`shared/notes.ts` / `note-markdown.ts` |
 | Agent 工具或授权 | `main/agent/`、`shared/agent/`、`renderer/src/agent/` |
-| 登录、SMTP、管理员验证 | `main/account/`、网页 `App.tsx`、服务端 `auth.ts` / `app.ts` / `config.ts` |
 | 界面框架与导航 | `renderer/src/App.tsx`、`components/AppTitleBar.tsx`、`refined.css` |
 | 打包、域名、镜像更新 | `scripts/package-*.sh`、`scripts/macos-release/`、`electron-builder.yml` |
 

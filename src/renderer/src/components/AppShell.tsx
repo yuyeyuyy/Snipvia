@@ -4,14 +4,14 @@ import { Icon, type IconName } from './Icon';
 import { Dialog } from './ui/Dialog';
 import { IconButton, Input } from './ui/Button';
 
-export type AppPage = 'chat' | 'history' | 'schedule' | 'settings' | 'notes' | 'account';
+export type AppPage = 'chat' | 'history' | 'schedule' | 'settings' | 'notes';
 const destinations: { page: AppPage; title: string; icon: IconName }[] = [
   { page: 'chat', title: 'AI 对话', icon: 'chat' },
   { page: 'notes', title: 'AI 笔记', icon: 'notebook' },
   { page: 'schedule', title: '截图日程', icon: 'calendar' },
   { page: 'history', title: '历史对话', icon: 'history' }
 ];
-const commands = [...destinations, { page: 'settings' as const, title: '设置', icon: 'settings' as const }, { page: 'account' as const, title: '账号与登录', icon: 'user' as const }];
+const commands = [...destinations, { page: 'settings' as const, title: '设置', icon: 'settings' as const }];
 
 function CommandPalette({ onNavigate, onClose }: { onNavigate: (page: AppPage) => void; onClose: () => void }) {
   const [query, setQuery] = useState('');
@@ -34,9 +34,9 @@ function CommandPalette({ onNavigate, onClose }: { onNavigate: (page: AppPage) =
   </Dialog>;
 }
 
-export function AppShell({ children, sidebarContent, page, signedIn, sidebarCollapsed, unreadScheduleCount, onToggleSidebar, onNavigate }: {
+export function AppShell({ children, sidebarContent, page, sidebarCollapsed, unreadScheduleCount, onToggleSidebar, onNavigate }: {
   sidebarContent?: ReactNode;
-  children: ReactNode; page: AppPage; signedIn: boolean; sidebarCollapsed: boolean; unreadScheduleCount: number;
+  children: ReactNode; page: AppPage; sidebarCollapsed: boolean; unreadScheduleCount: number;
   onToggleSidebar: () => void; onNavigate: (page: AppPage) => void;
 }) {
   const [commandsOpen, setCommandsOpen] = useState(false);
@@ -65,7 +65,7 @@ export function AppShell({ children, sidebarContent, page, signedIn, sidebarColl
     else { onToggleSidebar(); if (compact) setCompactExpanded(true); }
   }
   return <div className={`app-shell${page === 'chat' ? ' chat-active' : ''}${collapsed ? ' sidebar-collapsed' : ''}`}>
-    <AppTitleBar signedIn={signedIn} accountActive={page === 'account'} settingsActive={page === 'settings'} sidebarCollapsed={collapsed} onAccount={() => onNavigate('account')} onSettings={() => onNavigate('settings')} onToggleSidebar={toggle} onSearch={() => setCommandsOpen(true)} />
+    <AppTitleBar settingsActive={page === 'settings'} sidebarCollapsed={collapsed} onSettings={() => onNavigate('settings')} onToggleSidebar={toggle} onSearch={() => setCommandsOpen(true)} />
     <aside className="sidebar" id="app-sidebar" aria-label="菜单栏"><nav aria-label="主导航">{destinations.map((item) => <button type="button" key={item.page} className={page === item.page ? 'nav active' : 'nav'} aria-label={item.title} title={item.page === 'schedule' && unreadScheduleCount > 0 ? `${item.title} · ${unreadScheduleCount} 条未查看日程` : item.title} aria-current={page === item.page ? 'page' : undefined} onClick={() => onNavigate(item.page)}><Icon name={item.icon} /><span>{item.title}</span>{item.page === 'schedule' && unreadScheduleCount > 0 && <b aria-label={`${unreadScheduleCount} 条未查看日程`}>{unreadScheduleCount > 99 ? '99+' : unreadScheduleCount}</b>}</button>)}</nav>{page === 'chat' && sidebarContent}</aside>
     <main>{children}</main>
     {commandsOpen && <CommandPalette onClose={() => setCommandsOpen(false)} onNavigate={onNavigate} />}

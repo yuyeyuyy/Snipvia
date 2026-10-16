@@ -58,7 +58,7 @@ describe.skipIf(process.platform !== 'darwin')('Mac 原生更新适配（全部�
     const hooks = { beforeInstall: vi.fn(), onInstallError: vi.fn() }, installer = new ElectronUpdateInstaller(hooks);
     await installer.download('0.3.0', 'v0.3.0', vi.fn());
     expect(runtime.signingArguments).toContain('-R=anchor apple generic and certificate leaf[subject.OU] = "F76JCDMA4Y" and certificate leaf[field.1.2.840.113635.100.6.1.13] exists');
-    expect(runtime.options).toEqual({ provider: 'generic', url: 'https://github.com/yuyeyuyy/Snipvia-releases/releases/download/v0.3.0/' });
+    expect(runtime.options).toEqual({ provider: 'generic', url: 'https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.0/' });
     expect(runtime.updater).toMatchObject({ autoDownload: false, autoInstallOnAppQuit: false, autoRunAppAfterInstall: true, allowDowngrade: false, allowPrerelease: false,
       disableDifferentialDownload: true, disableWebInstaller: true, logger: null });
     expect(runtime.install).not.toHaveBeenCalled(); installer.install();

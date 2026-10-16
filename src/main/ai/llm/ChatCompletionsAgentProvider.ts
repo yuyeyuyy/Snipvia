@@ -1,6 +1,6 @@
 import type { Settings } from '../../../shared/contracts';
 import type { AgentChatResponse, AgentProviderEvent, AgentToolCall } from '../../../shared/agent/message';
-import { assertApiKeyFormat } from '../../../shared/api-key';
+import { requireModelConfiguration } from '../model-configuration';
 import { AgentError, checkAgentAbort } from '../../agent/AgentError';
 import { conservativeTokens } from '../../agent/ContextManager';
 import type { AgentChatContext, AgentChatRequest, LLMProvider } from './LLMProvider';
@@ -55,7 +55,7 @@ export class ChatCompletionsAgentProvider implements LLMProvider {
     throw new AgentError('LLM_INCOMPLETE_STREAM', '模型流未完成');
   }
   async *stream(request: AgentChatRequest): AsyncIterable<AgentProviderEvent> {
-    assertApiKeyFormat(this.key); checkAgentAbort(request.signal);
+    requireModelConfiguration(this.settings, this.key); checkAgentAbort(request.signal);
     let lastUser = -1;
     request.messages.forEach((message, index) => { if (message.role === 'user') lastUser = index; });
     const messages = request.messages.map((message, index) => {

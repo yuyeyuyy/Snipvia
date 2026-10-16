@@ -14,7 +14,7 @@ test('后台检查与关于页共享状态，手动刷新、失败恢复、亮�
       body: ${JSON.stringify('## 改进\n\n- 启动后在后台检查新版本。\n- 在设置页直接查看版本与更新说明。\n\n## 修复\n\n- 优化截图窗口布局。\n- 改善笔记保存状态提示。')} };
     const realFetch = globalThis.fetch;
     globalThis.fetch = async (url, init) => {
-      if (String(url) !== 'https://api.github.com/repos/yuyeyuyy/Snipvia-releases/releases/latest') return realFetch(url, init);
+      if (String(url) !== 'https://api.github.com/repos/yuyeyuyy/Snipvia/releases/latest') return realFetch(url, init);
       const probe = globalThis.updateProbe; probe.calls++;
       if (probe.blocked) await new Promise(resolve => { probe.release = resolve; });
       if (probe.status !== 200) return new Response('PRIVATE_UPSTREAM_BODY', { status: probe.status });
@@ -72,7 +72,7 @@ globalThis.enableUpdateDownloadFixture = () => {
     expect(await instance.evaluate(() => (globalThis as typeof globalThis & { updateProbe: Probe }).updateProbe.calls)).toBe(1);
     await row.getByRole('button', { name: '查看新版本' }).click();
     expect(await instance.evaluate(() => (globalThis as typeof globalThis & { updateProbe: Probe }).updateProbe.opened))
-      .toEqual(['https://github.com/yuyeyuyy/Snipvia-releases/releases/tag/v9.0.0']);
+      .toEqual(['https://github.com/yuyeyuyy/Snipvia/releases/tag/v9.0.0']);
 
     await mkdir('docs/ui', { recursive: true });
     const about = page.locator('section[aria-labelledby="about-settings-title"]');

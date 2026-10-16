@@ -30,12 +30,12 @@ function fixture() {
 }
 it('公开发布白名单只含最终二进制与哈希清单，复用固定公开更新源', () => {
   const f = fixture(), plan = planPublication(f.directory, f.notes);
-  expect(plan.repository).toBe('yuyeyuyy/Snipvia-releases'); expect(plan.tag).toBe('v0.3.0');
+  expect(plan.repository).toBe('yuyeyuyy/Snipvia'); expect(plan.tag).toBe('v0.3.0');
   expect(plan.assets).toHaveLength(6); expect(plan.assets.map(item => item.name)).not.toContain('verification.json');
   expect(JSON.parse(plan.assets.find(item => item.name === 'latest-mac.yml')!.content!).files).toHaveLength(4);
 });
 it('拒绝旧更新源、未启用更新和公证未通过的验收报告', () => {
-  const f = fixture(); f.report.updateRepository = 'yuyeyuyy/Snipvia'; f.saveReport();
+  const f = fixture(); f.report.updateRepository = 'yuyeyuyy/Snipvia-releases'; f.saveReport();
   expect(() => planPublication(f.directory, f.notes)).toThrow('公开更新源');
   f.report.updateRepository = releaseSource.repository; f.report.autoUpdateEnabled = false; f.saveReport();
   expect(() => planPublication(f.directory, f.notes)).toThrow('公开更新源');
@@ -64,7 +64,7 @@ it('通过 CLI 找到未发布草稿后按 ID 读取，网络错误不能当作 
   expect(releaseOrNull('v0.3.0', args => {
     calls.push(args); return JSON.stringify(args[0] === 'release' ? { databaseId: 123 } : { draft: true, assets: [] });
   })).toMatchObject({ draft: true });
-  expect(calls[1]).toEqual(['api', 'repos/yuyeyuyy/Snipvia-releases/releases/123']);
+  expect(calls[1]).toEqual(['api', 'repos/yuyeyuyy/Snipvia/releases/123']);
   expect(releaseOrNull('v0.3.0', () => { throw Object.assign(new Error('not found'), { stderr: 'release not found' }); })).toBeNull();
   expect(() => releaseOrNull('v0.3.0', () => { throw Object.assign(new Error('network'), { stderr: 'EOF' }); })).toThrow('网络');
 });

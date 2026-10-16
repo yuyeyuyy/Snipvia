@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import { mkdtemp, mkdir, writeFile, readFile, readdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { chatModelId } from '../../src/renderer/src/chat/model-choice';
 import { visionTestImage } from '../../src/main/ai/models/vision-test';
 
@@ -21,7 +21,7 @@ test('native file chooser, Cmd+V, dropped files, screenshot crops and image hist
   }); });
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve)); const address = server.address(); if (!address || typeof address === 'string') throw new Error('Mock unavailable');
   const options = { args: ['.', `--user-data-dir=${storage}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } };
-  let app = await launchMemberDesktop(options);
+  let app = await launchDesktop(options);
   const configure = async (page: Page, model = 'mock-image') => { const result = await page.evaluate(async ({ endpoint, model }) => { const settings = await window.snipvia.settings.get(); if (!settings.ok) throw new Error(settings.error); return window.snipvia.settings.save({ ...settings.value, provider: 'custom', model, endpoint, apiKey: 'test-key' }); }, { endpoint: `http://127.0.0.1:${address.port}/v1`, model }); if (await page.getByLabel('对话模型', { exact: true }).isVisible()) { await expect(page.getByLabel('对话模型', { exact: true })).toBeEnabled(); await page.getByLabel('对话模型', { exact: true }).selectOption(chatModelId({ provider: 'custom', endpoint: `http://127.0.0.1:${address.port}/v1`, model })); } return result; };
   try {
     let page = await app.firstWindow(); const imageAction = async (name: string) => { await page.getByRole('button', { name: '添加图片', exact: true }).click(); await page.getByRole('button', { name, exact: true }).click(); }; const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
@@ -47,7 +47,7 @@ test('native file chooser, Cmd+V, dropped files, screenshot crops and image hist
     await page.getByRole('button', { name: '重新生成', exact: true }).click(); await expect.poll(() => bodies.length).toBe(2); await expect(page.getByRole('group', { name: '消息图片' }).locator('img')).toHaveCount(3);
     expect((bodies[1].messages.at(-1)!.content as unknown[])).toHaveLength(4);
     const filesBefore = await readdir(join(storage, 'history/attachments')); expect(filesBefore).toHaveLength(3);
-    await app.close(); app = await launchMemberDesktop(options); page = await app.firstWindow();
+    await app.close(); app = await launchDesktop(options); page = await app.firstWindow();
     await page.getByRole('navigation', { name: '主导航' }).getByRole('button', { name: 'AI 对话', exact: true }).click(); await page.getByLabel('选择对话', { exact: true }).selectOption(id);
     await expect(page.getByRole('group', { name: '消息图片' }).locator('img')).toHaveCount(3);
     await page.getByRole('navigation', { name: '主导航' }).getByRole('button', { name: '历史对话', exact: true }).click();

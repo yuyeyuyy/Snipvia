@@ -3,7 +3,7 @@ import { createServer, type ServerResponse } from 'node:http';
 import { mkdtemp, mkdir, readFile, writeFile, rm, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import type { CommandRunner } from '../../src/main/agent/commands/CommandRunner';
 
 test('organize commands run directly, scripts wait for inline approval, and Stop preserves actual changes', async () => {
@@ -35,7 +35,7 @@ test('organize commands run directly, scripts wait for inline approval, and Stop
     })().catch(error => { response.statusCode = 500; response.end(JSON.stringify({ error: String(error) })); }); });
   });
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve)); const address = server.address(); if (!address || typeof address === 'string') throw new Error('missing server');
-  const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${join(directory, 'client')}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  const app = await launchDesktop({ args: ['.', `--user-data-dir=${join(directory, 'client')}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow();
     await app.evaluate(({ dialog }, path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, root);

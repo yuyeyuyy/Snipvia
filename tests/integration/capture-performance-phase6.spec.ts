@@ -1,4 +1,4 @@
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
@@ -24,7 +24,7 @@ type Launched = { app: ElectronApplication; main: Page; overlay: Page; directory
 
 async function launch(environment: Record<string, string> = {}, healthy = true): Promise<Launched> {
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-phase6-'));
-  const app = await launchMemberDesktop({
+  const app = await launchDesktop({
     args: ['.', `--user-data-dir=${directory}`],
     env: {
       ...process.env,

@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { chatModelId } from '../../src/renderer/src/chat/model-choice';
 import { visionTestImage } from '../../src/main/ai/models/vision-test';
 
@@ -26,7 +26,7 @@ test('modern chat welcome, sidebar actions, per-conversation models, responsive 
   const oldId = randomUUID(), timestamp = new Date().toISOString(); await mkdir(join(directory, 'history'));
   await writeFile(join(directory, 'history/conversations.json'), JSON.stringify([{ id: oldId, title: '旧模型会话', createdAt: timestamp, updatedAt: timestamp, profile: { provider: 'custom', model: 'removed-model', endpoint: endpoint + '/removed' }, messages: [{ role: 'user', content: '旧问题' }, { role: 'assistant', content: '旧回答' }] }, { id: randomUUID(), title: '已用过的 B 模型', createdAt: timestamp, updatedAt: timestamp, profile: { provider: 'custom', endpoint, model: 'mock-b' }, messages: [{ role: 'user', content: 'B 的历史' }, { role: 'assistant', content: 'B 的回答' }] }]));
   const options = { args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } };
-  let app = await launchMemberDesktop(options);
+  let app = await launchDesktop(options);
   try {
     let page = await app.firstWindow(); const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
     await page.evaluate(async endpoint => { const result = await window.snipvia.settings.get(); if (!result.ok) throw new Error(result.error); for (const model of ['mock-b', 'mock-a']) { const saved = await window.snipvia.settings.save({ ...result.value, provider: 'custom', endpoint, model, apiKey: 'test-key' }); if (!saved.ok) throw new Error(saved.error); } }, endpoint);
@@ -86,7 +86,7 @@ test('modern chat welcome, sidebar actions, per-conversation models, responsive 
     await expect(page.getByRole('button', { name: '发送', exact: true })).toBeInViewport(); expect(await page.locator('.workspace-composer').evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
     await page.getByRole('button', { name: '收起菜单栏', exact: true }).click(); await expect(page.locator('.chat-sidebar-list')).toBeHidden();
     await page.evaluate(() => window.snipvia.appearance.set('system')); await expect(page.locator('html')).toHaveAttribute('data-theme-mode', 'system');
-    expect(errors).toEqual([]); await app.close(); app = await launchMemberDesktop(options); page = await app.firstWindow();
+    expect(errors).toEqual([]); await app.close(); app = await launchDesktop(options); page = await app.firstWindow();
     await page.getByRole('navigation', { name: '主导航' }).getByRole('button', { name: 'AI 对话', exact: true }).click(); await page.getByLabel('选择对话', { exact: true }).selectOption(firstId);
     await expect(page.getByLabel('对话模型', { exact: true })).toHaveValue(scope('mock-a')); const restored = await page.evaluate(id => window.snipvia.history.read(id), firstId); expect(restored.ok && restored.value.title).toBe(renamed);
     await expect(page.getByRole('group', { name: '待发送图片' })).toHaveCount(0);

@@ -1,5 +1,7 @@
 # macOS 正式签名、公证与分发
 
+> 2026-10-16 Phase 1 更新：当前源码的版本检查、下载和新发布目标已统一改为 `yuyeyuyy/Snipvia`。本文中旧发行记录与旧渠道说明仅用于历史过渡；新免费版尚未发布，旧安装包不会因源码变更自动切换渠道。详见 [Phase 1 报告](opensource/PHASE1_REPORT.md)。
+
 ## 当前实施状态与阶段边界
 
 本流程面向官网直接下载的 macOS 14+ 应用，使用 Developer ID Application 签名，分别生成 arm64、x64 DMG 和 ZIP，不进行 Universal 合并，不发布到 Mac App Store。

@@ -76,13 +76,13 @@ export class CaptureOverlayWindow {
     return this.readyPromise;
   }
 
-  async present(sessionId: string, bounds: Rectangle, frameReady = true, mode: CaptureMode = 'ai', notice?: string) {
-    await this.beginSession(sessionId, bounds, frameReady, mode, notice);
+  async present(sessionId: string, bounds: Rectangle, frameReady = true, mode: CaptureMode = 'ai') {
+    await this.beginSession(sessionId, bounds, frameReady, mode);
     return this.visiblePromise ?? false;
   }
 
-  async prepare(sessionId: string, bounds: Rectangle, mode: CaptureMode = 'ai', notice?: string) {
-    await this.beginSession(sessionId, bounds, false, mode, notice);
+  async prepare(sessionId: string, bounds: Rectangle, mode: CaptureMode = 'ai') {
+    await this.beginSession(sessionId, bounds, false, mode);
   }
 
   waitUntilVisible(sessionId: string) {
@@ -90,7 +90,7 @@ export class CaptureOverlayWindow {
     return this.visiblePromise ?? Promise.resolve(false);
   }
 
-  private async beginSession(sessionId: string, bounds: Rectangle, frameReady: boolean, mode: CaptureMode, notice?: string) {
+  private async beginSession(sessionId: string, bounds: Rectangle, frameReady: boolean, mode: CaptureMode) {
     await this.ensureReady();
     const window = this.getWindow();
     this.hide();
@@ -99,7 +99,7 @@ export class CaptureOverlayWindow {
     window.setAlwaysOnTop(true, 'screen-saver');
     screenshotPerformance.mark(sessionId, 'capture_overlay_reuse_start');
     this.visiblePromise = new Promise((resolve) => { this.resolveVisible = resolve; });
-    window.webContents.send('capture:new-session', { performanceSessionId: sessionId, frameReady, mode, notice });
+    window.webContents.send('capture:new-session', { performanceSessionId: sessionId, frameReady, mode });
   }
 
   showShellSession(sessionId: string) {

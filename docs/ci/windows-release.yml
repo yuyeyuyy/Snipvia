@@ -20,11 +20,11 @@ jobs:
           npm install --global pnpm@11.1.3
           pnpm install --frozen-lockfile
       - name: Check Windows contracts and adapters
-        run: pnpm exec vitest run tests/unit/geometry.test.ts tests/unit/thumbnail-size.test.ts tests/unit/desktop-source-selection.test.ts tests/unit/login-item.test.ts tests/unit/screenshot-chat-access.test.ts tests/unit/providers.test.ts tests/unit/account.test.ts tests/unit/screenshot-editor.test.ts
+        run: pnpm exec vitest run tests/unit/geometry.test.ts tests/unit/thumbnail-size.test.ts tests/unit/desktop-source-selection.test.ts tests/unit/login-item.test.ts tests/unit/screenshot-chat-access.test.ts tests/unit/providers.test.ts tests/unit/screenshot-editor.test.ts
       - name: Build desktop
         run: pnpm build
       - name: Validate account, providers, notes and screenshot access
-        run: pnpm exec playwright test tests/integration/account.spec.ts tests/integration/provider-settings.spec.ts tests/integration/notes-markdown.spec.ts tests/integration/screenshot-membership.spec.ts tests/integration/screenshot-editor.spec.ts
+        run: pnpm exec playwright test tests/integration/local-first.spec.ts tests/integration/provider-settings.spec.ts tests/integration/notes-markdown.spec.ts tests/integration/screenshot-editor.spec.ts
       - name: Build EXE installer
         run: pnpm exec electron-builder --win nsis --x64 --publish never
       - name: Install into a temporary directory

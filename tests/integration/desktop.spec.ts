@@ -1,4 +1,4 @@
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { expect, test } from '@playwright/test';
 import { createServer } from 'node:http';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
@@ -38,7 +38,7 @@ test('desktop settings, safe IPC, image chat and cancellation', async () => {
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
   if (!address || typeof address === 'string') throw new Error('mock server unavailable');
-  const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CONSOLE_ORIGIN: 'http://127.0.0.1:1', SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  const app = await launchDesktop({ args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CONSOLE_ORIGIN: 'http://127.0.0.1:1', SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow();
     expect(await app.evaluate(({ app }) => process.platform !== 'darwin' || Boolean(app.dock?.isVisible()))).toBe(true);
@@ -62,7 +62,7 @@ test('desktop settings, safe IPC, image chat and cancellation', async () => {
       for (const offset of Object.values(layout)) expect(Math.abs(offset), JSON.stringify(layout)).toBeLessThan(1);
     };
     await expect(titlebar.locator('.brand-name')).toHaveText('截然');
-    await expect(titlebar.getByRole('button', { name: '账号与登录' })).toHaveText('');
+    await expect(titlebar.getByRole('button', { name: '账号与登录' })).toHaveCount(0);
     await expect(titlebar.getByRole('button', { name: '模型与设置' })).toHaveText('');
     await expect(titlebar).toHaveCSS('-webkit-app-region', 'drag');
     await expect(titlebar.getByRole('button', { name: '模型与设置' })).toHaveCSS('-webkit-app-region', 'no-drag');

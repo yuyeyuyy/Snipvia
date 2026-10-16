@@ -81,3 +81,7 @@ pnpm test:smoke
 ## 平台接口
 
 在 `src/main/platform/index.ts` 扩展平台差异，保持 renderer 与平台实现解耦。新增系统操作必须通过白名单 preload 和主进程 sender/schema 校验。Electron 截图 API 不保证请求尺寸就是返回尺寸，因此主进程会验证原生分辨率；参见 [DesktopCapturerSource 官方说明](https://www.electronjs.org/docs/latest/api/structures/desktop-capturer-source)。
+
+## Phase 1 本地优先开发
+
+客户端不需要后台、数据库、账号或 SMTP。运行 `pnpm dev` 后可直接使用本地功能；AI 使用自己的模型设置。旧账号环境变量不再生效，旧 Cookie 保留但不读取。测试使用 `tests/helpers/desktop.ts`，不启动账号服务。新发布源为 `yuyeyuyy/Snipvia`，本阶段没有发布新安装包。

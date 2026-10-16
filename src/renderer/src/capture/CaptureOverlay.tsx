@@ -4,7 +4,6 @@ import type { CaptureMode, Selection } from '../../../shared/contracts';
 
 export function CaptureOverlay() {
   const [mode, setMode] = useState<CaptureMode>('ai');
-  const [notice, setNotice] = useState('');
   const [editing, setEditing] = useState(false);
   const editingRef = useRef(false);
   const [frame, setFrame] = useState('');
@@ -83,7 +82,7 @@ export function CaptureOverlay() {
         setFrame(source);
       });
     };
-    const stopSession = window.snipvia.capture.onSession(({ performanceSessionId: sessionId, frameReady, mode: captureMode, notice: membershipNotice }) => {
+    const stopSession = window.snipvia.capture.onSession(({ performanceSessionId: sessionId, frameReady, mode: captureMode }) => {
       if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
       objectUrl.current = null;
       activeSessionId.current = sessionId;
@@ -91,7 +90,6 @@ export function CaptureOverlay() {
       pendingSelection.current = null; decodedSession.current = null;
       setPerformanceSessionId(sessionId);
       setMode(captureMode);
-      setNotice(membershipNotice ?? '');
       setFrame('');
       setOrigin(null);
       setRect(null);
@@ -193,7 +191,6 @@ export function CaptureOverlay() {
       });
     }} />}
     <div className="capture-shade" />
-    {notice && <div className="capture-membership-notice" role="status">{notice}</div>}
     {rect && !editing && <div className="selection" style={{ left: rect.x, top: rect.y, width: rect.width, height: rect.height, backgroundImage: frame ? `url(${frame})` : 'none', backgroundSize: `${innerWidth}px ${innerHeight}px`, backgroundPosition: `-${rect.x}px -${rect.y}px` }}><span>{Math.round(rect.width)} × {Math.round(rect.height)}</span></div>}
     {editing && rect && performanceSessionId && <ScreenshotEditor key={performanceSessionId} frame={frame} initialSelection={rect} sessionId={performanceSessionId} />}
     {!editing && <div className="capture-hint">{error || (busy ? '正在固定截图…' : frame ? mode === 'standard' ? `拖动选择截图区域 · 松开标注${window.snipvia.platform === 'win32' ? ' · Enter 全屏' : ''} · Esc 取消` : `拖动选择截图区域 · 松开完成${window.snipvia.platform === 'win32' ? ' · Enter 全屏' : ''} · Esc 取消` : '正在准备截图… · Esc 取消')}</div>}

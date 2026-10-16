@@ -4,7 +4,7 @@ import { mkdtemp, readFile, readdir, rm, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { tokenColor } from '../helpers/appearance';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 
 test('AI workspace uses real IPC with mock streams, preserves drafts, regenerates, stops and reopens text history', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-chat-workspace-'));
@@ -25,7 +25,7 @@ test('AI workspace uses real IPC with mock streams, preserves drafts, regenerate
   await new Promise<void>(done => server.listen(0, '127.0.0.1', done));
   const address = server.address(); if (!address || typeof address === 'string') throw new Error('mock unavailable');
   const options = { args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } };
-  let app = await launchMemberDesktop(options);
+  let app = await launchDesktop(options);
   try {
     let page = await app.firstWindow(); const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
     await page.getByRole('navigation', { name: '主导航' }).getByRole('button', { name: 'AI 对话', exact: true }).click();
@@ -86,7 +86,7 @@ test('AI workspace uses real IPC with mock streams, preserves drafts, regenerate
     await expect(page.getByRole('button', { name: '停止生成' })).toHaveCount(0);
     await expect(page.locator('.workspace-message.assistant').last()).toContainText('保留这段部分回答');
     expect(errors).toEqual([]);
-    await app.close(); app = await launchMemberDesktop(options); page = await app.firstWindow();
+    await app.close(); app = await launchDesktop(options); page = await app.firstWindow();
     await page.getByRole('navigation', { name: '主导航' }).getByRole('button', { name: '历史对话', exact: true }).click();
     await expect(page.locator('.history-preview-body')).toContainText('新回答');
     await page.getByRole('button', { name: '继续对话', exact: true }).click();

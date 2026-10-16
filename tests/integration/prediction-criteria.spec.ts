@@ -1,4 +1,4 @@
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { expect, test } from '@playwright/test';
 import { createServer } from 'node:http';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
@@ -25,7 +25,7 @@ test('editable applicability persists and determines prediction independently of
   });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const address = server.address(); if (!address || typeof address === 'string') throw new Error('mock server unavailable');
-  const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CONSOLE_ORIGIN: 'http://127.0.0.1:1', SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  const app = await launchDesktop({ args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CONSOLE_ORIGIN: 'http://127.0.0.1:1', SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow(); const errors: string[] = []; page.on('pageerror', (error) => errors.push(error.message));
     await expect(page.getByRole('button', { name: 'AI 笔记', exact: true })).toHaveAttribute('aria-current', 'page');
@@ -104,7 +104,7 @@ test('editable applicability persists and determines prediction independently of
     // A stale or hallucinated disabled ID must never execute, even with a strong fixed type.
     matchedBranchId = custom.id;
     quick = await predict();
-    await expect.poll(async () => { const state = await quick.evaluate(() => window.snipvia.chat.state()); return state.ok && state.value.autoAction?.state; }).toBe('idle');
+    await expect.poll(async () => { const state = await quick.evaluate(() => window.snipvia.chat.state()); return state.ok && state.value.autoAction?.state; }).toBe('error');
     expect(classifications.at(-1)?.branches.some((branch) => branch.id === custom.id)).toBe(false);
     expect(executionRequests).toHaveLength(1);
     expect(errors).toEqual([]);

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 
 for (const fallback of [false, true]) {
   test(`selection starts before pixels arrive and survives ${fallback ? 'fallback' : 'native capture'}`, async () => {
@@ -31,7 +31,7 @@ for (const fallback of [false, true]) {
       Module._extensions['.js']=(module,path)=>{if(path!==${JSON.stringify(mainPath)})return load(module,path);module._compile(require('node:fs').readFileSync(path,'utf8')+${JSON.stringify(instrument)},path);};
       require(${JSON.stringify(mainPath)});
     `);
-    const app = await launchMemberDesktop({ args: [bootstrap, `--user-data-dir=${join(directory, 'data')}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'auto', SNIPVIA_CAPTURE_WARMUP: '0' } });
+    const app = await launchDesktop({ args: [bootstrap, `--user-data-dir=${join(directory, 'data')}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'auto', SNIPVIA_CAPTURE_WARMUP: '0' } });
     try {
       const main = await app.firstWindow();
       await expect.poll(() => app.windows().some(window => window.url().endsWith('#capture'))).toBe(true);

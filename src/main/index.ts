@@ -1,6 +1,6 @@
 import { EditingProposals } from './agent/editing/EditingProposals';
 import { editingReferenceSchema, editingSelectionSchema, editingProposalSchema, editingApplySchema } from '../shared/agent/editing';
-import { app, BrowserWindow, clipboard, ClipboardItem, desktopCapturer, dialog, globalShortcut, ipcMain, Menu, nativeImage, Notification, powerMonitor, safeStorage, screen, shell, Tray, type IpcMainInvokeEvent, type NativeImage } from 'electron';
+import { app, BrowserWindow, clipboard, ClipboardItem, desktopCapturer, dialog, globalShortcut, ipcMain, Menu, nativeImage, Notification, powerMonitor, screen, shell, Tray, type IpcMainInvokeEvent, type NativeImage } from 'electron';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { stat, writeFile, open } from 'node:fs/promises';
@@ -18,7 +18,9 @@ import { loadSettings, publicSettings, readKey, saveSettings, savePredictionBran
 import { AppearanceService } from './appearance';
 import { ModelCatalog } from './ai/models/ModelCatalog';
 import { modelAddRequestSchema, modelListRequestSchema, modelTestRequestSchema } from '../shared/models';
-import { askModel, classifyScreenshot, extractScheduleEvents, streamModel } from './ai/provider';
+import { askModel, extractScheduleEvents, streamModel } from './ai/provider';
+import { PredictionService } from './analysis/PredictionService';
+import { PredictionError } from './analysis/PredictionError';
 import { platform, screenPermissionInfo } from './platform';
 import { getLoginItemState, launchedAtLogin, setLoginItem } from './platform/login-item';
 import { completeScheduleJob, createScheduleJob, deleteScheduleJob, failScheduleJob, listScheduleJobs, loadSchedule, markMacReminderSaved, markMacSaved, readScheduleJob, saveScheduleEvent } from './storage/schedule';
@@ -47,14 +49,11 @@ import { ChatCompletionsAgentProvider } from './ai/llm/ChatCompletionsAgentProvi
 import { agentWorkspaceSchema, agentWorkspaceStartSchema, agentWorkspaceStopSchema, agentNotebookSchema, agentCaptureSchema, agentDecisionSchema, agentDiffSchema, agentRunSchema, agentStartSchema, agentSourceIconSchema } from '../shared/agent/execution';
 import { NotebookService } from './notes/NotebookService';
 import { registerNotesIPC } from './notes/registerNotesIPC';
-import { AccountService, resolveAccountOrigin } from './account/AccountService';
-import { AccountSessionStore } from './storage/account';
 import { NotebookWriter } from './agent/notes/NotebookWriter';
 import { NoteCheckpointStore, checkpointDiff, undoCheckpoint, undoState } from './agent/notes/NoteCheckpoints';
 import { AgentSessionStore } from './agent/AgentSessionStore';
 import { ToolError, throwIfAborted } from './agent/ToolError';
 import { agentNoteChangeSchema } from '../shared/agent/execution';
-import { screenshotChatAccessError } from '../shared/screenshot-chat-access';
 import { UpdateCheckService } from './updates/UpdateCheckService';
 import { ElectronUpdateInstaller } from './updates/ElectronUpdateInstaller';
 import { version as sourceVersion } from '../../package.json';
@@ -70,15 +69,11 @@ let mainWindow: BrowserWindow;
 let updates: UpdateCheckService;
 let modelCatalog: ModelCatalog;
 export const appearance = new AppearanceService(() => mainWindow);
-let accounts: AccountService;
 let captureOverlayWindow: CaptureOverlayWindow | null = null;
 let screenshotToAllWindow: ScreenshotToAllWindow | null = null;
 let quickChatWindow: BrowserWindow | null = null;
 let quickChatLoading: Promise<void> | null = null;
 let quickChatReady: { windowId: number; resolve: () => void } | null = null;
-const captureAccessChecks = new Map<string, Promise<Error | null>>();
-let pendingAiPinSession: string | null = null;
-let membershipExpiryTimer: ReturnType<typeof setTimeout> | undefined;
 const noteFlushRequests = new Map<string, (success: boolean) => void>();
 let quickChatExpanded = false;
 let quickChatCompactSize = { width: 440, height: 400 };
@@ -152,7 +147,8 @@ export const notebooks = new NotebookService(join(app.getPath('userData'), 'note
 // Main owns tools, workspace capabilities and execution; Renderer only sends chat intent and approval decisions.
 const agentPermissionDirectory = join(app.getPath('userData'), 'agent-permissions');
 const agentMCPDirectory = join(app.getPath('userData'), 'mcp');
-const accountDirectory = join(app.getPath('userData'), 'account');
+// Old account data is never read or decrypted, but stays protected from Agent tools.
+const legacyAccountDirectory = join(app.getPath('userData'), 'account');
 const agentCheckpointDirectory = join(app.getPath('userData'), 'agent-checkpoints');
 export const noteCheckpoints = new NoteCheckpointStore(agentCheckpointDirectory);
 export const agentFileTools = createFileToolSystem({
@@ -161,8 +157,6 @@ export const agentFileTools = createFileToolSystem({
   notebookWriter: (workspaces) => new NotebookWriter({ workspaces,
     notebook: (id) => notebooks.authorizedNotebook(id),
     beforeWrite: async (_id, signal) => {
-      try { await accounts.requireScreenshotChatAccess(); }
-      catch (error) { throw new ToolError('PERMISSION_DENIED', error instanceof Error ? error.message : '无法验证会员资格'); }
       await flushNotesForAgent(signal);
     },
     review: async (preview, signal, options) => {
@@ -172,7 +166,7 @@ export const agentFileTools = createFileToolSystem({
     changed: (id) => notebooks.notifyChanged(id)
   }),
   store: new FilePermissionGrantStore(join(agentPermissionDirectory, 'grants.json')),
-  protectedDirectories: [agentPermissionDirectory, agentMCPDirectory, accountDirectory, agentCheckpointDirectory],
+  protectedDirectories: [agentPermissionDirectory, agentMCPDirectory, legacyAccountDirectory, agentCheckpointDirectory],
   prompt: (request, signal) => agentExecution?.permissionPrompt(request, signal) ?? createPermissionPrompt({
     webPreferences, parent: () => mainWindow, load: (window) => loadWindow(window, 'agent-permission'),
     clearRemembered: async () => { await agentFileTools.permissions.clearRemembered(); }
@@ -199,7 +193,7 @@ export const editingProposals = new EditingProposals({
   profile: () => profileFrom(publicSettings()), branches: () => publicSettings().predictionBranches,
   exists: id => { readWorkspaceConversation(id, false); },
   busy: () => agentExecution?.busy || !!controller || !!autoActionController,
-  beforeWrite: async signal => { await accounts.requireScreenshotChatAccess(); await flushNotesForAgent(signal); },
+  beforeWrite: async signal => { await flushNotesForAgent(signal); },
   saveBranches: (before, after) => {
     if (agentExecution.busy || controller || autoActionController) throw new Error('截图预测或对话正在执行，请稍后保存规则');
     const settings = savePredictionBranches(before, after);
@@ -514,7 +508,6 @@ function cleanupOverlay() {
     captureMemoryBefore.delete(performanceSessionId);
     captureBenchmarkFrames.delete(performanceSessionId);
     captureIntents.delete(performanceSessionId);
-    captureAccessChecks.delete(performanceSessionId);
   }
   captureOverlayWindow?.hide();
   capturedFrame = null;
@@ -526,13 +519,6 @@ function announceError(error: unknown) {
   const message = error instanceof Error ? error.message : '截图失败';
   cleanupOverlay();
   mainWindow.webContents.send('capture:error', message);
-}
-
-function stopMembershipTasks(message: string) {
-  controller?.abort(new Error(message));
-  abortAutoAction(message);
-  agentExecution?.cancelAll();
-  if (quickChatWindow && !quickChatWindow.isDestroyed()) quickChatWindow.webContents.send('capture:error', message);
 }
 
 async function flushNotesForAgent(signal: AbortSignal) {
@@ -611,7 +597,6 @@ function clearPinnedFlow(discardEmpty: boolean) {
   quickChatUserSize = null;
   if (chat && !chat.isDestroyed()) chat.destroy();
   if (discardEmpty) discardPinnedConversation();
-  pendingAiPinSession = null;
   pinnedCaptureId = null;
   pinnedJpeg = null;
   localPin = null;
@@ -772,9 +757,8 @@ function saveAssistantExchange(question: string, answer: string, profile: ModelP
   return assistantMessage;
 }
 
-async function executeAutoAction(actionId: ScreenshotActionId, captureId: string, active: AbortController, operationId: string) {
+async function executeAutoAction(actionId: ScreenshotActionId, captureId: string, active: AbortController, operationId: string, activeSettings: Settings) {
   if (!capture || capture.id !== captureId || autoActionController !== active) return;
-  const activeSettings = publicSettings();
   const action = autoActionRouter.getAction(actionId, activeSettings.predictionBranches);
   if (action.id === 'ask-ai') {
     setAutoAction({ ...autoActionSnapshot!, actionId, operationId, state: 'idle', content: '', error: undefined });
@@ -802,7 +786,7 @@ async function executeAutoAction(actionId: ScreenshotActionId, captureId: string
     if (action.id === 'create-schedule') {
       if (!pinnedJpeg || capture.id !== pinnedCaptureId) throw new Error('截图已结束，无法创建日程草稿');
       if (!pinnedScheduleJobId) {
-        const key = readKey();
+        const key = readKey(activeSettings);
         pinnedScheduleJobId = createScheduleJob({
           id: capture.id, width: capture.width, height: capture.height, createdAt: capture.createdAt
         }, pinnedJpeg, activeProfile);
@@ -852,9 +836,11 @@ async function beginAutoUnderstanding(captureId: string, jpeg: Buffer) {
     if (autoActionController !== active) return;
     setAutoAction({ captureId, operationId, state: 'error', actionId: 'ask-ai', content: '', error: error instanceof Error ? error.message : '无法打开截图理解窗口' });
   });
-  const branches = publicSettings().predictionBranches;
+  const predictionSettings = structuredClone(publicSettings());
+  const branches = predictionSettings.predictionBranches;
+  const predictionKey = () => { try { return readKey(predictionSettings); } catch { throw new PredictionError({ stage: 'vision', reason: 'configuration' }); } };
+  const prediction = new PredictionService();
   const analyzer = new ScreenshotAnalyzer({
-    classifyWithServer: async (_image, signal) => accounts.predictScreenshot(`data:image/jpeg;base64,${jpeg.toString('base64')}`, branches, signal),
     recognizeText: async (_image, signal) => {
       screenshotPerformance.mark(current.performanceSessionId, 'local_ocr_start');
       try { return await (screenCaptureKitBackend?.recognizeText(jpeg, signal, current.performanceSessionId) ?? null); }
@@ -862,7 +848,7 @@ async function beginAutoUnderstanding(captureId: string, jpeg: Buffer) {
     },
     classifyWithVision: async (image, signal) => {
       screenshotPerformance.mark(current.performanceSessionId, 'vision_classification_start');
-      try { return await classifyScreenshot({ ...publicSettings(), predictionBranches: branches }, readKey(), image, signal); }
+      try { return await prediction.predict(predictionSettings, predictionKey(), image, signal); }
       finally { screenshotPerformance.mark(current.performanceSessionId, 'vision_classification_end'); }
     }
   });
@@ -877,7 +863,7 @@ async function beginAutoUnderstanding(captureId: string, jpeg: Buffer) {
       setAutoAction({ captureId, operationId, state: 'error', actionId: 'ask-ai', content: '', error: result.predictionError });
       autoActionController = null; return;
     }
-    const action = autoActionRouter.getAutoAction(result.analysis, publicSettings().predictionBranches);
+    const action = autoActionRouter.getAutoAction(result.analysis, branches);
     const recommendedDelay = action.id !== 'ask-ai' && result.analysis.confidence >= 0.65 && result.analysis.confidence < 0.82;
     setAutoAction({
       captureId, operationId, state: action.id === 'ask-ai' ? 'idle' : recommendedDelay ? 'recommended' : 'executing',
@@ -887,7 +873,7 @@ async function beginAutoUnderstanding(captureId: string, jpeg: Buffer) {
       actionId: action.id, confidence: result.analysis.confidence
     });
     if (recommendedDelay) await delayWithSignal(700, active.signal);
-    await executeAutoAction(action.id, captureId, active, operationId);
+    await executeAutoAction(action.id, captureId, active, operationId, predictionSettings);
   } catch (error) {
     if (active.signal.aborted || autoActionController !== active) return;
     setAutoAction({
@@ -995,19 +981,13 @@ async function startCapture(trigger: CaptureTrigger = 'main', continuationConver
     electron: process.versions.electron,
     mode: process.env.ELECTRON_RENDERER_URL ? 'DEV' : app.isPackaged ? 'PROD' : 'PROD build preview'
   });
-  // Start timing at entry: account I/O must never precede this mark or gate the
-  // local selection window. Server validation remains mandatory in presentAiCapture.
+  // Local capture never waits for model or network configuration.
   if (trigger === 'hotkey' || trigger === 'continue-hotkey') screenshotPerformance.mark(performanceSessionId, 'hotkey_pressed');
   screenshotPerformance.mark(performanceSessionId, 'capture_start');
-  const notice = mode === 'ai' ? accounts.screenshotCaptureNotice() ?? undefined : undefined;
-  if (notice) { mode = 'standard'; continuationConversationId = undefined; }
   screenshotPerformance.updateMetadata(performanceSessionId, { captureMode: mode });
   if (preparing || captureOverlayWindow?.isActive()) {
     screenshotPerformance.mark(activeCapturePerformanceSessionId, 'capture_cancelled', 'main', { reason: 'superseded' });
     cleanupOverlay();
-  }
-  if (mode === 'ai') {
-    captureAccessChecks.set(performanceSessionId, accounts.requireScreenshotChatAccess().then(() => null, error => error instanceof Error ? error : new Error('会员验证失败')));
   }
   captureIntents.set(performanceSessionId, continuationConversationId
     ? { kind: 'continue', conversationId: continuationConversationId }
@@ -1063,7 +1043,7 @@ async function startCapture(trigger: CaptureTrigger = 'main', continuationConver
       && capturePermissionGranted;
     let immediateOverlayVisible: Promise<boolean> | null = null;
     if (canPresentImmediately) {
-      await captureOverlayWindow.prepare(performanceSessionId, display.bounds, mode, notice);
+      await captureOverlayWindow.prepare(performanceSessionId, display.bounds, mode);
       immediateOverlayVisible = captureOverlayWindow.waitUntilVisible(performanceSessionId);
     }
     const result = await captureEngine.captureDisplay({
@@ -1092,7 +1072,7 @@ async function startCapture(trigger: CaptureTrigger = 'main', continuationConver
     const visible = immediateOverlayVisible
       && captureOverlayWindow.isSessionActive(performanceSessionId)
       ? (captureOverlayWindow.frameReady(performanceSessionId), await immediateOverlayVisible)
-      : await captureOverlayWindow.present(performanceSessionId, display.bounds, true, mode, notice);
+      : await captureOverlayWindow.present(performanceSessionId, display.bounds, true, mode);
     if (session !== generation || !visible) return;
     preparing = false;
   } catch (error) {
@@ -1109,12 +1089,6 @@ async function startCapture(trigger: CaptureTrigger = 'main', continuationConver
 }
 
 async function presentAiCapture(image: NativeImage, selection: Selection, display: NonNullable<typeof captureDisplay>, sessionId: string, captureIntent: CaptureIntent) {
-  const checking = captureAccessChecks.get(sessionId)
-    ?? accounts.requireScreenshotChatAccess().then(() => null, error => error instanceof Error ? error : new Error('会员验证失败'));
-  if (accounts.screenshotCaptureNotice()) {
-    const error = await checking;
-    if (error) throw error;
-  }
   if (!captureOverlayWindow?.isSessionActive(sessionId)) throw new Error('截图会话已结束');
   if (!screenshotToAllWindow) throw new Error('ScreenshotToAll 尚未预加载');
   if (screenshotToAllWindow.isActive()) closePinnedFlow(true);
@@ -1126,24 +1100,13 @@ async function presentAiCapture(image: NativeImage, selection: Selection, displa
   localPin = { capture: pinned, png };
   pinnedCaptureId = pinned.id;
   pinnedPerformanceSessionId = sessionId;
-  pendingAiPinSession = sessionId;
   const bounds = pinnedBounds(selection, display);
   cleanupOverlay();
   const visible = await screenshotToAllWindow.present(sessionId, bounds, {
-    capture: pinned, chatActive: false, localOnly: true, checkingAccess: true, performanceSessionId: sessionId
+    capture: pinned, chatActive: false, localOnly: true, performanceSessionId: sessionId
   });
-  const current = () => pendingAiPinSession === sessionId && pinnedCaptureId === pinned.id && screenshotToAllWindow?.isSessionActive(sessionId);
+  const current = () => pinnedCaptureId === pinned.id && screenshotToAllWindow?.isSessionActive(sessionId);
   if (!visible || !current()) return;
-  const validated = await checking;
-  const currentNotice = accounts.screenshotCaptureNotice();
-  const accessError = validated ?? (currentNotice ? new Error(currentNotice) : null);
-  if (!current()) return;
-  pendingAiPinSession = null;
-  if (accessError) {
-    screenshotToAllWindow.update(sessionId, { capture: pinned, chatActive: false, localOnly: true, performanceSessionId: sessionId });
-    screenshotToAllWindow.getWindow().webContents.send('capture:error', accessError.message);
-    return;
-  }
   try {
     const accepted = acceptImage(image, false, sessionId, captureIntent.kind === 'continue' ? captureIntent.conversationId : undefined);
     localPin = null;
@@ -1355,7 +1318,7 @@ function setupAgentIPC() {
         if (request.kind === 'state') return { ok: true, value: snapshot };
         if (request.kind === 'stop') { agentExecution.stop(event.sender.id, target, request.runId); return { ok: true, value: undefined }; }
         if (request.kind === 'start') {
-          await accounts.requireScreenshotChatAccess();
+
           if (!senderAllowed(event, 'main')) throw new Error('窗口已变化');
           const lease = chatImages.begin(event.sender.id, request.conversationId, request.imageIds);
           try { return { ok: true, value: agentExecution.start(event.sender.id, target, request.question, request.question, request.regenerate, lease.images) }; }
@@ -1387,7 +1350,7 @@ function setupAgentIPC() {
           result = await agentExecution.selectNotebook(owner, captureId, book);
         } else if (operation === 'start') {
           const request = agentStartSchema.parse(value);
-          await accounts.requireScreenshotChatAccess();
+
           if (!senderAllowed(event, ['main', 'quickChat'])) throw new Error('窗口已变化');
           result = agentExecution.start(owner, captureId, request.question);
         } else if (operation === 'stop') {
@@ -1531,13 +1494,6 @@ function setupIPC() {
     if (approval.response !== 1) throw new Error('已取消图片能力测试');
     return modelCatalog.testVision(parsed);
   });
-  handle('account:get', 'main', () => accounts.get());
-  handle('account:send-code', 'main', (value) => accounts.sendCode(value));
-  handle('account:sign-in', 'main', (value) => accounts.signIn(value));
-  handle('account:sign-out', 'main', () => {
-    stopMembershipTasks('已退出登录，截图对话已停止。请联系管理员开通会员后使用。');
-    return accounts.signOut();
-  });
   handle('settings:login-item', 'main', () => getLoginItemState());
   handle('settings:set-login-item', 'main', (value) => setLoginItem(z.boolean().parse(value)));
   handle('permissions:screen', 'main', () => {
@@ -1573,6 +1529,7 @@ function setupIPC() {
     registerShortcuts(settings);
     try {
       const saved = saveSettings(settings, apiKey);
+      if (autoActionController) abortAutoAction('模型配置已改变，请重新开始分析');
       mainWindow.webContents.send('settings:changed', saved);
       if (quickChatWindow && !quickChatWindow.isDestroyed()) quickChatWindow.webContents.send('settings:changed', saved);
       return saved;
@@ -1706,7 +1663,7 @@ function setupIPC() {
     await presentAiCapture(selected, selection, display, request.sessionId, captureIntent);
   });
   handle('capture:import', 'main', async () => {
-    await accounts.requireScreenshotChatAccess();
+
     const result = await dialog.showOpenDialog(mainWindow, { properties: ['openFile'], filters: [{ name: '图片', extensions: ['png', 'jpg', 'jpeg'] }] });
     if (result.canceled) return null;
     const path = result.filePaths[0];
@@ -1736,8 +1693,7 @@ function setupIPC() {
     closePinnedFlow(true);
   });
   handle('pin:start-chat', 'pin', async () => {
-    if (pendingAiPinSession) throw new Error('正在验证会员资格，请稍候');
-    await accounts.requireScreenshotChatAccess();
+
     if (!screenshotToAllWindow?.isActive()) throw new Error('置顶截图已结束');
     if (localPin && pinnedPerformanceSessionId) {
       const accepted = acceptImage(nativeImage.createFromBuffer(localPin.png), false, pinnedPerformanceSessionId);
@@ -1794,7 +1750,7 @@ function setupIPC() {
     };
   });
   handle('chat:send', ['main', 'quickChat'], async (value) => {
-    await accounts.requireScreenshotChatAccess();
+
     if (agentExecution?.busy) throw new Error('请先停止当前 Agent 任务');
     const request = chatSchema.parse(value);
     if (!capture || request.captureId !== capture.id) throw new Error('截图已失效，请重新选择');
@@ -1835,7 +1791,7 @@ function setupIPC() {
     } finally { clearTimeout(timeout); if (controller === active) controller = null; }
   });
   handle('chat:stream', 'quickChat', async (value) => {
-    await accounts.requireScreenshotChatAccess();
+
     const request = chatStreamRequestSchema.parse(value);
     screenshotPerformance.mark(request.performanceSessionId ?? capture?.performanceSessionId, 'chat_send_main_received');
     return startManualChatStream(request);
@@ -1847,7 +1803,7 @@ function setupIPC() {
   handle('auto-action:actions', 'quickChat', () => autoActionRouter.availableActions(publicSettings().predictionBranches));
   handle('auto-action:state', 'quickChat', () => autoActionSnapshot ? { ...autoActionSnapshot } : null);
   handle('auto-action:start', ['quickChat', 'pin'], async (value) => {
-    await accounts.requireScreenshotChatAccess();
+
     const captureId = conversationIdSchema.parse(value);
     if (!capture || capture.id !== captureId || capture.id !== pinnedCaptureId || !pinnedJpeg ||
         autoActionSnapshot?.captureId !== captureId) throw new Error('截图已失效，请重新截图');
@@ -1949,29 +1905,6 @@ else {
     try { loadHistory(); } catch { startupError += `${startupError ? '\n' : ''}历史记录读取失败；为避免覆盖原文件，本次请勿创建新对话。`; }
     try { loadSchedule(); } catch { startupError += `${startupError ? '\n' : ''}日程记录读取失败；为避免覆盖原文件，本次请勿创建新日程。`; }
     writePackagedTestResult({ stage: 'storage-loaded' });
-    accounts = new AccountService({
-      origin: resolveAccountOrigin(app.isPackaged, import.meta.env.MAIN_VITE_CONSOLE_ORIGIN, process.env.SNIPVIA_CONSOLE_ORIGIN),
-      packaged: app.isPackaged,
-      store: new AccountSessionStore(join(accountDirectory, 'session.json'), {
-        available: () => safeStorage.isEncryptionAvailable() && (process.platform !== 'linux' || safeStorage.getSelectedStorageBackend() !== 'basic_text'),
-        encrypt: (value) => safeStorage.encryptString(value), decrypt: (value) => safeStorage.decryptString(value)
-      }),
-      onChanged: (state) => {
-        clearTimeout(membershipExpiryTimer);
-        if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('account:changed', state);
-        const error = screenshotChatAccessError(state);
-        if (error) { stopMembershipTasks(error); return; }
-        const expiresAt = state.user?.access.expiresAt;
-        if (expiresAt !== null && expiresAt !== undefined) {
-          const check = () => {
-            const failure = screenshotChatAccessError(state);
-            if (failure) stopMembershipTasks(failure);
-            else { membershipExpiryTimer = setTimeout(check, Math.min(expiresAt - Date.now(), 2_147_483_647)); membershipExpiryTimer.unref(); }
-          };
-          membershipExpiryTimer = setTimeout(check, Math.min(expiresAt - Date.now(), 2_147_483_647)); membershipExpiryTimer.unref();
-        }
-      }
-    });
     startupPerformanceSessionId = screenshotPerformance.startSession({
       trigger: 'startup-preload',
       platform: process.platform,

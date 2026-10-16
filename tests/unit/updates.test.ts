@@ -122,7 +122,7 @@ describe('主进程更新检查', () => {
     expect(f.service.current().status).toBe('idle');
     await expect(f.service.openRelease()).rejects.toThrow();
     const state = await f.service.check();
-    expect(state).toMatchObject({ status: 'available', currentVersion: '0.2.1', latestVersion: '0.3.0', releaseUrl: 'https://github.com/yuyeyuyy/Snipvia-releases/releases/tag/v0.3.0', checkedAt: '2026-10-12T00:00:00.000Z' });
+    expect(state).toMatchObject({ status: 'available', currentVersion: '0.2.1', latestVersion: '0.3.0', releaseUrl: 'https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.0', checkedAt: '2026-10-12T00:00:00.000Z' });
     expect(f.fetcher).toHaveBeenCalledWith(latestReleaseEndpoint, expect.objectContaining({ redirect: 'error', credentials: 'omit' }));
     const init = f.fetcher.mock.calls[0][1]!;
     expect(new Headers(init.headers).has('authorization')).toBe(false);

@@ -1,4 +1,4 @@
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { expect, test } from '@playwright/test';
 import { createServer } from 'node:http';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
@@ -27,7 +27,7 @@ test('collects startup preload and warm ScreenshotToAll reuse performance', asyn
   const address = server.address();
   if (!address || typeof address === 'string') throw new Error('mock server unavailable');
 
-  const app = await launchMemberDesktop({
+  const app = await launchDesktop({
     args: ['.', `--user-data-dir=${directory}`],
     env: { ...process.env, SNIPVIA_PERF: process.env.SNIPVIA_PERF ?? '0', SNIPVIA_CAPTURE_BACKEND: 'electron' }
   });

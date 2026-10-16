@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { tokenColor } from '../helpers/appearance';
 import { version } from '../../package.json';
 
@@ -17,7 +17,7 @@ test('immersive notes and grouped preferences preserve files, focus, settings an
   await writeFile(join(book, '二分查找.md'), content);
   await writeFile(join(book, '栈与括号匹配.md'), '# 栈与括号匹配\n\n[[二分查找]]');
   await writeFile(join(book, 'assets/fixture.txt'), '合成附件');
-  const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${storage}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  const app = await launchDesktop({ args: ['.', `--user-data-dir=${storage}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow(); const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
     await app.evaluate(({ dialog }, path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, book);

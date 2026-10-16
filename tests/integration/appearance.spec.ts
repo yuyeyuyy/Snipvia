@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import tokens from '../../src/shared/design-tokens.json';
 import { defaults } from '../../src/shared/contracts';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 
 test('appearance synchronizes windows, preserves editor identity, follows system and survives restart', async () => {
   test.setTimeout(90_000);
@@ -12,7 +12,7 @@ test('appearance synchronizes windows, preserves editor identity, follows system
   const storage = join(directory, 'app'); const location = join(directory, 'books'); await mkdir(location);
   await mkdir('docs/ui/ui2-monochrome', { recursive: true });
   const options = { args: ['.', `--user-data-dir=${storage}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } };
-  const app = await launchMemberDesktop(options);
+  const app = await launchDesktop(options);
   let closed = false;
   try {
     const page = await app.firstWindow(); const errors: string[] = [];
@@ -98,7 +98,7 @@ test('appearance synchronizes windows, preserves editor identity, follows system
 test('saved Dark applies to a newly created QuickChat window without changing screenshot close behavior', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-theme-chat-'));
   await writeFile(join(directory, 'settings.json'), JSON.stringify({ settings: defaults, appearance: { mode: 'dark' } }));
-  const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  const app = await launchDesktop({ args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow(); await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await app.evaluate(({ desktopCapturer, nativeImage, screen, systemPreferences }) => {

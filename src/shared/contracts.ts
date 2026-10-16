@@ -126,9 +126,9 @@ export type ConversationSummary = {
 export type Conversation = ConversationSummary & { capture: Capture; messages: Message[] };
 export type WorkspaceConversation = ConversationSummary & { capture?: Capture; messages: Message[] };
 export type ChatState = { capture: Capture; messages: Message[]; performanceSessionId?: string; autoAction?: AutoActionSnapshot };
-export type PinnedCaptureState = { localOnly?: boolean; checkingAccess?: boolean; capture: Capture; chatActive: boolean; performanceSessionId: string };
+export type PinnedCaptureState = { localOnly?: boolean; capture: Capture; chatActive: boolean; performanceSessionId: string };
 export type CaptureMode = 'ai' | 'standard';
-export type CaptureOverlaySession = { mode: CaptureMode; performanceSessionId: string; frameReady: boolean; notice?: string };
+export type CaptureOverlaySession = { mode: CaptureMode; performanceSessionId: string; frameReady: boolean };
 export type ReusableWindowRole = 'capture' | 'pin' | 'quick-chat';
 export type CaptureFrameTransport = 'data-url' | 'png-base64' | 'png-binary' | 'jpeg-90' | 'jpeg-95';
 export type CaptureFramePayload = {
@@ -226,7 +226,6 @@ export type LoginItemState = { supported: boolean; enabled: boolean; description
 export type SnipviaAPI = {
   chatImages: import('./chat-images').ChatImagesAPI;
   updates: import('./updates').UpdatesAPI;
-  account: import('./account').AccountAPI;
   notes: import('./notes').NotesAPI;
   agentPermissions: AgentPermissionAPI;
   agent: AgentExecutionAPI;

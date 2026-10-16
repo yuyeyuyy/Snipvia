@@ -1,5 +1,7 @@
 # 私有源码与公开发行迁移
 
+> 2026-10-16 Phase 1 更新：当前源码的版本检查、下载和新发布目标已统一改为 `yuyeyuyy/Snipvia`。本文中旧发行记录与旧渠道说明仅用于历史过渡；新免费版尚未发布，旧安装包不会因源码变更自动切换渠道。详见 [Phase 1 报告](opensource/PHASE1_REPORT.md)。
+
 ## 仓库职责
 
 - 源码工程 `Snipvia` 保持私有，管理 Electron / React / TypeScript、平台测试、服务端、依赖与受信签名构建。

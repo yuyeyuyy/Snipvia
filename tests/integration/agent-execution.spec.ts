@@ -1,5 +1,5 @@
 import { tokenColor } from '../helpers/appearance';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { expect, test } from '@playwright/test';
 import { createServer, type ServerResponse } from 'node:http';
 import { mkdtemp, rm } from 'node:fs/promises';
@@ -53,7 +53,7 @@ test('prediction precedes Agent, web activity is inline, answers stream and Stop
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
   if (!address || typeof address === 'string') throw new Error('mock server unavailable');
-  const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${directory}`],
+  const app = await launchDesktop({ args: ['.', `--user-data-dir=${directory}`],
     env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow(); const errors: string[] = [];

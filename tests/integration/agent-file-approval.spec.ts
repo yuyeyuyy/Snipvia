@@ -1,4 +1,4 @@
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { expect, test } from '@playwright/test';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -8,7 +8,7 @@ import type { createFileToolSystem } from '../../src/main/agent/createFileToolSy
 test('product file mutation and Undo stay disabled even with a real workspace grant', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-file-policy-'));
   const file = join(directory, 'example.ts'); await writeFile(file, 'original');
-  const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${join(directory, 'data')}`],
+  const app = await launchDesktop({ args: ['.', `--user-data-dir=${join(directory, 'data')}`],
     env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const main = await app.firstWindow();

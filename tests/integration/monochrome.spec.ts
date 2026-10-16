@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { tokenColor } from '../helpers/appearance';
 
 import { expectNeutralChrome } from '../helpers/neutral-chrome';
@@ -11,7 +11,7 @@ test('Monochrome common controls, menus, dialogs and navigation retain legible i
   test.setTimeout(90_000);
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-monochrome-'));
   const output = 'docs/ui/ui2-monochrome'; await mkdir(output, { recursive: true });
-  const app = await launchMemberDesktop({ args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  const app = await launchDesktop({ args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow();
     for (const mode of ['light', 'dark'] as const) {

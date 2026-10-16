@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { Temporal } from '@js-temporal/polyfill';
 import { defaults, type ScheduleEvent } from '../../src/shared/contracts';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { tokenColor } from '../helpers/appearance';
 
 // NativeImage makes genuine JPEGs from deterministic pixels before the existing stores load.
@@ -48,7 +48,7 @@ test('calendar date agenda and readonly history preserve records, restore action
     }
     require(${JSON.stringify(resolve('out/main/index.js'))});
   `);
-  const app = await launchMemberDesktop({ args: [bootstrap, `--user-data-dir=${storage}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  const app = await launchDesktop({ args: [bootstrap, `--user-data-dir=${storage}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow(); const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
     const historyFile = join(storage, 'history/conversations.json'), scheduleFile = join(storage, 'schedule/jobs.json');

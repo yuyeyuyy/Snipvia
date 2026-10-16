@@ -232,13 +232,13 @@ API Key 只由 main 读写，按厂商和 endpoint 隔离后由 Electron `safeSt
 - 已接入启动版本检查与设置页更新入口；正式签名 Mac 安装版使用固定 `electron-updater 6.8.10` 下载完整 ZIP、校验 SHA-512，并在用户选择重启后先确认笔记保存，再通过原生签名更新机制安装。普通退出不自动安装；Windows 签名更新与独立回滚仍为后续能力。现有手动安装与数据迁移保留，见[客户端版本检查与更新](UPDATE_CHECK.md)。
 - 单元测试聚焦坐标、时区、ICS、去重、IPC 校验；集成测试使用可控 AI mock 验证取消、断流和坏 JSON。最终至少完成真实模型烟测与双端权限测试。
 
-## 客户端账号接入（2026-10-03 实现）
+## 本地优先客户端（Phase 1）
 
-账号服务已迁至独立私有工程。客户端主进程 `account/AccountService.ts` 通过固定 API 调用邮箱验证码认证和本人资格接口，Renderer 使用受主窗口身份约束的窄 IPC，长期会话 Cookie 不跨 IPC。会话经系统安全存储加密写入 `account/session.json`，绑定来源与有效期；安全存储不可用时仅保留内存会话。Agent 访问规则保护账号存储目录。
+不组装 AccountService，不暴露 account IPC，不读取或解密旧 Cookie。旧 `userData/account` 保留且继续属于 Agent 受保护目录。原模型密钥、笔记、历史、日程、appId 和 userData 路径不变。
 
-登录和退出串行，网络错误保留有效本机凭据，停用及会话到期清除；退出在掉线时仍清除本机存储并报告远端撤销未完成。正式构建的账号来源通过 `MAIN_VITE_CONSOLE_ORIGIN` 设置，要求 HTTPS。开发来源可使用本机 HTTP，服务端公开配置解决网页与 API 端口不一致时的 Origin 校验。
+ScreenshotAnalyzer 保留 OCR 文本，但分支选择统一由用户视觉模型完成。PredictionService 对启用分支与快照进行分类，响应有 128 KiB 上限及 45 秒超时；错误、取消、坏 JSON、未知分支和截断结果不会退回 OCR 自动执行。没有账号代理或 Jev 请求。模型配置改变会取消进行中的预测。
 
-当前普通截图可在本机使用，截图 AI 与部分 Agent 入口仍检查账号资格；本轮未改变这些业务规则。服务端邮件、预测密钥与部署文档已迁至私有工程，客户端兼容边界见[桌面账号说明](DESKTOP_ACCOUNT_AND_EMAIL.md)。
+发布源由 `src/shared/release-source.json` 统一定义为 `yuyeyuyy/Snipvia`，版本检查、签名 Mac 下载与发布计划共用该值。旧安装包中的旧值不会远程自动改变，需另行安排新免费版过渡发布。[实施报告](opensource/PHASE1_REPORT.md) 记录验收范围。
 
 ## 10. 官方参考与核实范围
 

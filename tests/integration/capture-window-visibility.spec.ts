@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 
 for (const backend of ['electron', 'screen-capture-kit'] as const) {
   test(`${backend}: capture exit stays hidden, return and deliberate Dock activation show main`, async () => {
@@ -56,7 +56,7 @@ for (const backend of ['electron', 'screen-capture-kit'] as const) {
       }
       require(${JSON.stringify(mainPath)});
     `);
-    const instance = await launchMemberDesktop({ args: [bootstrap, `--user-data-dir=${join(directory, 'data')}`], env: {
+    const instance = await launchDesktop({ args: [bootstrap, `--user-data-dir=${join(directory, 'data')}`], env: {
       ...process.env, SNIPVIA_CAPTURE_BACKEND: backend, SNIPVIA_CAPTURE_WARMUP: '0'
     } });
     try {

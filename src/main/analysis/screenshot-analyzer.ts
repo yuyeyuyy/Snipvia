@@ -1,5 +1,5 @@
 import type { PredictionBranch, ScreenshotAnalysis, ScreenshotContentType } from '../../shared/screenshot-understanding';
-import { needsSemanticPrediction, screenshotAnalysisSchema } from '../../shared/screenshot-understanding';
+import { screenshotAnalysisSchema } from '../../shared/screenshot-understanding';
 import { autoActionRouter } from './auto-action-router';
 import { PredictionError } from './PredictionError';
 
@@ -28,8 +28,6 @@ export type ScreenshotAnalyzerResult = {
 type ScreenshotAnalyzerDependencies = {
   recognizeText: (image: string, signal: AbortSignal) => Promise<OcrResult | null>;
   classifyWithVision: (image: string, signal: AbortSignal) => Promise<Pick<ScreenshotAnalysis, 'contentType' | 'confidence' | 'signals' | 'matchedBranchId'>>;
-  classifyWithServer?: (image: string, signal: AbortSignal) => Promise<ScreenshotAnalysis | null>;
-  visionThreshold?: number;
 };
 
 type Candidate = { contentType: ScreenshotContentType; confidence: number; signals: NonNullable<ScreenshotAnalysis['signals']> };
@@ -120,15 +118,10 @@ function finalize(candidate: Candidate, matchedBranchId?: ScreenshotAnalysis['ma
 }
 
 export class ScreenshotAnalyzer {
-  private readonly visionThreshold: number;
-
-  constructor(private readonly dependencies: ScreenshotAnalyzerDependencies) {
-    this.visionThreshold = dependencies.visionThreshold ?? 0.78;
-  }
+  constructor(private readonly dependencies: ScreenshotAnalyzerDependencies) {}
 
   async analyze(context: ScreenshotAnalysisContext, signal: AbortSignal): Promise<ScreenshotAnalyzerResult> {
     if (signal.aborted) throw signal.reason;
-    const semanticPrediction = needsSemanticPrediction(context.predictionBranches ?? []);
     if (context.predictionBranches && !context.predictionBranches.some((branch) => branch.enabled)) {
       return { analysis: finalize(analyzeOcrSignals('', context), null), ocrText: '', layer: 'local' };
     }
@@ -139,43 +132,18 @@ export class ScreenshotAnalyzer {
       if (signal.aborted) throw error;
     }
     const local = analyzeOcrSignals(ocr?.text ?? '', context, context.sourceApplication);
-    if (this.dependencies.classifyWithServer) {
-      try {
-        const prediction = await this.dependencies.classifyWithServer(context.image, signal);
-        if (signal.aborted) throw signal.reason;
-        if (prediction) return { analysis: screenshotAnalysisSchema.parse(prediction), ocrText: ocr?.text ?? '', layer: 'decision' };
-      } catch (error) {
-        if (signal.aborted) throw error;
-        // A failed central prediction must not execute a local branch or send the
-        // screenshot to a second, implicitly selected prediction provider.
-        return { analysis: finalize(local, null), ocrText: ocr?.text ?? '', layer: 'fallback', predictionError: error instanceof PredictionError ? error.message : '服务端预测未完成，请检查网络与后台配置后重试。' };
-      }
-    }
-    if (!semanticPrediction && local.confidence >= this.visionThreshold) {
-      return { analysis: finalize(local), ocrText: ocr?.text ?? '', layer: ocr?.text ? 'ocr' : 'local' };
-    }
     try {
       const vision = await this.dependencies.classifyWithVision(context.image, signal);
-      if (semanticPrediction && vision.matchedBranchId === undefined) throw new Error('截图预测没有返回适用分支');
-      const booleanSignal = (key: 'hasCode' | 'hasError' | 'hasTable' | 'hasQuestion' | 'hasUI' | 'hasSchedule') =>
-        local.signals[key] || vision.signals?.[key] ? true : undefined;
+      if (vision.matchedBranchId === undefined) throw new Error('截图预测没有返回适用分支');
       const analysis = finalize({
         contentType: vision.contentType,
         confidence: vision.confidence,
-        signals: {
-          ...(booleanSignal('hasCode') ? { hasCode: true } : {}),
-          ...(booleanSignal('hasError') ? { hasError: true } : {}),
-          ...(booleanSignal('hasTable') ? { hasTable: true } : {}),
-          ...(booleanSignal('hasQuestion') ? { hasQuestion: true } : {}),
-          ...(booleanSignal('hasUI') ? { hasUI: true } : {}),
-          ...(booleanSignal('hasSchedule') ? { hasSchedule: true } : {}),
-          ...((vision.signals?.detectedLanguage ?? local.signals.detectedLanguage) ? { detectedLanguage: vision.signals?.detectedLanguage ?? local.signals.detectedLanguage } : {})
-        }
+        signals: vision.signals ?? {}
       }, vision.matchedBranchId);
       return { analysis, ocrText: ocr?.text ?? '', layer: 'vision' };
     } catch (error) {
       if (signal.aborted) throw error;
-      return { analysis: finalize(local, semanticPrediction ? null : undefined), ocrText: ocr?.text ?? '', layer: 'fallback' };
+      return { analysis: finalize(local, null), ocrText: ocr?.text ?? '', layer: 'fallback', predictionError: error instanceof PredictionError ? error.message : '视觉理解模型预测失败，请检查模型与设置后重试。' };
     }
   }
 }

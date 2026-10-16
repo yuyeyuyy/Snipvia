@@ -1,4 +1,4 @@
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
@@ -43,7 +43,7 @@ function measure(report: ScreenshotPerformanceReport, id: string) {
 
 async function launch(extraEnvironment: Record<string, string> = {}): Promise<LaunchedApp> {
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-phase4-'));
-  const app = await launchMemberDesktop({
+  const app = await launchDesktop({
     args: ['.', `--user-data-dir=${directory}`],
     env: { ...process.env, SNIPVIA_PERF: '0', SNIPVIA_CAPTURE_WARMUP: '0', SNIPVIA_CAPTURE_BACKEND: 'electron', ...extraEnvironment }
   });

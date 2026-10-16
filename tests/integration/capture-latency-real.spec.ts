@@ -1,4 +1,4 @@
-import { launchMemberDesktop } from '../helpers/desktop-account';
+import { launchDesktop } from '../helpers/desktop';
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { arch, cpus, release, tmpdir } from 'node:os';
@@ -16,7 +16,7 @@ const percentile = (values: number[], ratio: number) => [...values].sort((a, b) 
 
 async function launch(): Promise<Launched> {
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-capture-latency-'));
-  const app = await launchMemberDesktop({
+  const app = await launchDesktop({
     args: ['.', `--user-data-dir=${directory}`],
     env: {
       ...process.env,

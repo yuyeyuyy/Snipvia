@@ -11,8 +11,6 @@ import { ScreenPermissionCard } from './permissions/ScreenPermissionCard';
 import { AppShell, type AppPage } from './components/AppShell';
 import { LoadingState } from './components/ui/LoadingState';
 import { formatAccelerator } from './settings/shortcut';
-import type { AccountState } from '../../shared/account';
-import { AccountPanel } from './account/AccountPanel';
 
 const scheduleSeenKey = 'snipvia.scheduleSeenAt';
 const sidebarCollapsedKey = 'snipvia.sidebarCollapsed';
@@ -37,13 +35,6 @@ export function App() {
   const [visitedPages, setVisitedPages] = useState(() => new Set<AppPage>(['notes']));
   useEffect(() => { setVisitedPages((previous) => previous.has(page) ? previous : new Set([...previous, page])); }, [page]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(storedSidebarCollapsed);
-  const [account, setAccount] = useState<AccountState | null>(null);
-  useEffect(() => {
-    let active = true;
-    const unsubscribe = window.snipvia.account.onChanged((state) => { if (active) setAccount(state); });
-    void window.snipvia.account.get().then((result) => { if (active && result.ok) setAccount(result.value); });
-    return () => { active = false; unsubscribe(); };
-  }, []);
   const [noteCreation, setNoteCreation] = useState<NoteCreationRequest | null>(null);
   const [noteOpen, setNoteOpen] = useState<NoteOpenRequest | null>(null);
   useEffect(() => window.snipvia.notes.onOpenRequested(request => { setNoteOpen(request); setNotesVisited(true); setPage('notes'); }), []);
@@ -185,7 +176,7 @@ export function App() {
 
   function newChat() { setConversationId(null); setNewChatRequest(value => value + 1); setPage('chat'); }
 
-  return <AppShell sidebarContent={<ChatSidebar items={historyItems} selected={conversationId} blocked={chatStatus.blocked || switchingModel} activeId={chatStatus.activeId} onSelect={id => { if (id) { setConversationId(id); setPage('chat'); } else newChat(); }} onDelete={deleteHistory} onHistory={() => navigate('history')} onSettings={() => navigate('settings')} />} page={page} signedIn={Boolean(account?.user)} sidebarCollapsed={sidebarCollapsed} unreadScheduleCount={unreadScheduleCount} onNavigate={navigate} onToggleSidebar={() => {
+  return <AppShell sidebarContent={<ChatSidebar items={historyItems} selected={conversationId} blocked={chatStatus.blocked || switchingModel} activeId={chatStatus.activeId} onSelect={id => { if (id) { setConversationId(id); setPage('chat'); } else newChat(); }} onDelete={deleteHistory} onHistory={() => navigate('history')} onSettings={() => navigate('settings')} />} page={page} sidebarCollapsed={sidebarCollapsed} unreadScheduleCount={unreadScheduleCount} onNavigate={navigate} onToggleSidebar={() => {
     const next = !sidebarCollapsed;
     setSidebarCollapsed(next);
     try { window.localStorage.setItem(sidebarCollapsedKey, String(next)); } catch { /* Keep the in-memory preference when storage is unavailable. */ }
@@ -193,7 +184,6 @@ export function App() {
       {notesVisited && <Suspense fallback={page === 'notes' ? <LoadingState>正在打开笔记…</LoadingState> : null}><NotesPanel openRequest={noteOpen} onOpenHandled={() => setNoteOpen(null)} active={page === 'notes'} flushRef={notesFlush} creationRequest={noteCreation} onCreationHandled={() => setNoteCreation(null)} onReturnToChat={() => setPage('chat')} onDiscuss={discuss} /></Suspense>}
       {error && <div className="error" role="alert"><span>{error}</span><button aria-label="关闭错误提示" onClick={() => setError('')}>×</button></div>}
       {permissionDialog && <div className="permission-backdrop"><div className="permission-dialog" role="dialog" aria-modal="true" aria-label="录屏权限设置"><button className="permission-close" aria-label="关闭录屏权限提示" onClick={() => setPermissionDialog(false)}>×</button><ScreenPermissionCard onChange={(info) => { if (info.status === 'granted') setPermissionDialog(false); }} /></div></div>}
-      {(page === 'account' || visitedPages.has('account')) && <Activity mode={page === 'account' ? 'visible' : 'hidden'}><AccountPanel state={account} onChanged={setAccount} /></Activity>}
       {(page === 'settings' || visitedPages.has('settings')) && <Activity mode={page === 'settings' ? 'visible' : 'hidden'}>{settings ? <SettingsPanel settings={settings} onSaved={setSettings} onDiscuss={discuss} /> : <LoadingState>正在读取设置…</LoadingState>}</Activity>}
       {(page === 'history' || visitedPages.has('history')) && <Activity mode={page === 'history' ? 'visible' : 'hidden'}><HistoryPanel items={historyItems} loading={historyLoading} onOpen={openHistory} onDelete={deleteHistory} onClear={clearHistory} /></Activity>}
       {(page === 'schedule' || visitedPages.has('schedule')) && <Activity mode={page === 'schedule' ? 'visible' : 'hidden'}><SchedulePanel items={scheduleItems} loading={scheduleLoading} shortcut={shortcutLabel(settings?.shortcut)} onRefresh={refreshSchedule} onError={setError} /></Activity>}

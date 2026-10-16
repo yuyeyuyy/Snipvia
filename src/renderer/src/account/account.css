@@ -1,0 +1,19 @@
+.account-panel .account-input { width: 280px; min-width: 0; height: 36px; border: 1px solid var(--border-default); border-radius: 6px; padding: 0 10px; background: var(--bg-input); color: var(--accent); font: inherit; font-size: 13px; }
+.account-panel .account-input:focus { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--focus); }
+.account-panel .account-input:disabled { background: var(--bg-input); color: var(--text-disabled); }
+.account-code-controls { display: flex; width: 280px; gap: 10px; }
+.account-code-controls .account-input { width: 140px; flex: 1; }
+.account-code-controls .preference-action { min-width: 110px; }
+.account-submit, .account-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 0; }
+.account-submit > span, .account-footer > span, .account-hint { color: var(--text-muted); font-size: 12px; line-height: 1.6; }
+.account-submit .primary { font-size: 13px; min-width: 110px; padding: 8px 16px; }
+.account-value { max-width: 330px; overflow-wrap: anywhere; text-align: right; color: var(--accent); font-size: 13px; }
+.account-access-label { color: var(--text-muted); font-size: 12px; }
+.account-footer { margin-top: 20px; border-top: 1px solid var(--border-subtle); }
+.account-development { padding: 10px 12px; background: var(--bg-panel); border-radius: 6px; color: var(--text-muted); font-size: 12px; line-height: 1.7; }
+.account-development code { color: var(--code-text); font-size: 14px; letter-spacing: 2px; }
+@media (max-width: 960px) {
+.account-panel .preference-row { gap: 20px; }
+.account-panel .account-input, .account-code-controls { width: 240px; }
+.account-code-controls .account-input { width: 110px; }
+}

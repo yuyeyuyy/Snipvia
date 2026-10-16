@@ -1,0 +1,23 @@
+# Internal, unsigned Windows builds. The shared macOS configuration is inherited
+# without changing its signing hooks, resources, icon or output directory.
+extends: ./electron-builder.yml
+directories:
+  output: dist/windows-internal
+files:
+  - out/**/*
+  - package.json
+  - '!node_modules/@anthropic-ai/sandbox-runtime/vendor/**/*'
+win:
+  signExecutable: false
+  requestedExecutionLevel: asInvoker
+nsis:
+  perMachine: false
+  selectPerMachineByDefault: false
+  allowElevation: false
+  packElevateHelper: false
+  createStartMenuShortcut: true
+  createDesktopShortcut: always
+  shortcutName: Snipvia
+  deleteAppDataOnUninstall: false
+  runAfterFinish: false
+publish: null

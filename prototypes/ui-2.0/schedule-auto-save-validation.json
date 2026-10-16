@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-09",
+  "scope": "独立原型",
+  "checks": [
+    {
+      "layout": "a",
+      "theme": "light",
+      "noPending": true,
+      "noConfirm": true
+    },
+    {
+      "layout": "a",
+      "theme": "dark",
+      "noPending": true,
+      "noConfirm": true
+    },
+    {
+      "layout": "b",
+      "theme": "light",
+      "noPending": true,
+      "noConfirm": true
+    },
+    {
+      "layout": "b",
+      "theme": "dark",
+      "noPending": true,
+      "noConfirm": true
+    },
+    {
+      "autoSaved": true,
+      "noDialog": true,
+      "dateMarker": true
+    },
+    {
+      "duplicateBlocked": true
+    },
+    {
+      "savedDetail": true
+    },
+    {
+      "savedDeadline": true
+    },
+    {
+      "monthIsolation": true
+    },
+    {
+      "compactNoOverflow": true
+    }
+  ],
+  "consoleErrors": []
+}

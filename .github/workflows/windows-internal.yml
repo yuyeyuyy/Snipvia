@@ -1,0 +1,74 @@
+name: Windows internal build and installation validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_internal_artifacts:
+        description: Upload unsigned internal installer (requires owner approval)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.15.0'
+      - name: Install pinned dependencies
+        run: |
+          npm install --global pnpm@11.1.3
+          pnpm install --frozen-lockfile
+          pnpm electron:install
+      - name: Lint and typecheck
+        run: |
+          pnpm lint
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm typecheck
+      - name: Check capture, IPC, storage and platform adapters
+        run: pnpm exec vitest run tests/unit/capture-engine.test.ts tests/unit/electron-capture-backend.test.ts tests/unit/geometry.test.ts tests/unit/thumbnail-size.test.ts tests/unit/desktop-source-selection.test.ts tests/unit/login-item.test.ts tests/unit/contracts.test.ts tests/unit/settings.test.ts tests/unit/history.test.ts tests/unit/account.test.ts tests/unit/shortcut.test.ts tests/unit/screenshot-editor.test.ts
+      - name: Build and inspect unsigned NSIS installer
+        run: pnpm dist:windows
+      - name: Validate synthetic desktop flows
+        run: pnpm exec playwright test tests/integration/account.spec.ts tests/integration/provider-settings.spec.ts tests/integration/screenshot-editor.spec.ts tests/integration/capture-window-visibility.spec.ts tests/integration/screenshot-membership.spec.ts tests/integration/windows-capture-ui.spec.ts
+      - name: Install in a temporary per-user directory
+        shell: pwsh
+        run: |
+          $output = Get-ChildItem dist/windows-internal -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          $metadata = Get-Content (Join-Path $output.FullName 'BUILD_METADATA.json') | ConvertFrom-Json
+          $installDir = Join-Path $env:RUNNER_TEMP 'Snipvia-install-validation'
+          $process = Start-Process -FilePath $metadata.installer -ArgumentList @('/S', "/D=$installDir") -PassThru -Wait
+          if ($process.ExitCode -ne 0) { throw "Installer failed: $($process.ExitCode)" }
+          $binary = Join-Path $installDir 'Snipvia.exe'
+          if (!(Test-Path $binary)) { throw 'Installed application missing' }
+          "SNIPVIA_TEST_APP_BINARY=$binary" >> $env:GITHUB_ENV
+          "SNIPVIA_TEST_INSTALL_DIR=$installDir" >> $env:GITHUB_ENV
+      - name: Validate installed application with synthetic screenshots
+        run: pnpm exec playwright test tests/integration/windows-release.spec.ts
+      - name: Uninstall temporary application
+        if: always() && env.SNIPVIA_TEST_INSTALL_DIR != ''
+        shell: pwsh
+        run: |
+          $uninstaller = Get-ChildItem $env:SNIPVIA_TEST_INSTALL_DIR -Filter 'Uninstall*.exe' | Select-Object -First 1
+          if (!$uninstaller) { throw 'Uninstaller missing' }
+          $process = Start-Process -FilePath $uninstaller.FullName -ArgumentList '/S' -PassThru -Wait
+          if ($process.ExitCode -ne 0) { throw "Uninstaller failed: $($process.ExitCode)" }
+          $binary = Join-Path $env:SNIPVIA_TEST_INSTALL_DIR 'Snipvia.exe'
+          for ($i = 0; $i -lt 40 -and (Test-Path $binary); $i++) { Start-Sleep -Milliseconds 250 }
+          if (Test-Path $binary) { throw 'Application was not removed' }
+      - name: Upload internal artifacts only when explicitly enabled
+        uses: actions/upload-artifact@v4
+        if: inputs.upload_internal_artifacts
+        with:
+          name: windows-unsigned-internal
+          path: |
+            dist/windows-internal/internal-*/*.exe
+            dist/windows-internal/internal-*/BUILD_METADATA.json
+            dist/windows-internal/internal-*/SHA256SUMS.txt
+            test-results/
+          retention-days: 7

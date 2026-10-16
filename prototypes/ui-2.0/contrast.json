@@ -1,0 +1,338 @@
+[
+  {
+    "theme": "light",
+    "text": "text-primary",
+    "background": "bg-window",
+    "ratio": 15.55,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-primary",
+    "background": "bg-panel",
+    "ratio": 14.76,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-primary",
+    "background": "bg-nav",
+    "ratio": 14.27,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-primary",
+    "background": "bg-input",
+    "ratio": 15.55,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-secondary",
+    "background": "bg-window",
+    "ratio": 6.75,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-secondary",
+    "background": "bg-panel",
+    "ratio": 6.41,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-secondary",
+    "background": "bg-nav",
+    "ratio": 6.19,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-secondary",
+    "background": "bg-input",
+    "ratio": 6.75,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-muted",
+    "background": "bg-window",
+    "ratio": 4.92,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-muted",
+    "background": "bg-panel",
+    "ratio": 4.67,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-muted",
+    "background": "bg-nav",
+    "ratio": 4.51,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-muted",
+    "background": "bg-input",
+    "ratio": 4.92,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-on-accent",
+    "background": "accent",
+    "ratio": 5.22,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "text-selected",
+    "background": "bg-selected",
+    "ratio": 5.34,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "code-text",
+    "background": "code-bg",
+    "ratio": 10.46,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "code-comment",
+    "background": "code-bg",
+    "ratio": 4.72,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "code-keyword",
+    "background": "code-bg",
+    "ratio": 5.62,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "code-string",
+    "background": "code-bg",
+    "ratio": 5.24,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "code-number",
+    "background": "code-bg",
+    "ratio": 4.99,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "code-function",
+    "background": "code-bg",
+    "ratio": 5.17,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "code-variable",
+    "background": "code-bg",
+    "ratio": 5.2,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "success",
+    "background": "success-bg",
+    "ratio": 5.23,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "warning",
+    "background": "warning-bg",
+    "ratio": 5.65,
+    "passed": true
+  },
+  {
+    "theme": "light",
+    "text": "danger",
+    "background": "danger-bg",
+    "ratio": 5.17,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-primary",
+    "background": "bg-window",
+    "ratio": 14.58,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-primary",
+    "background": "bg-panel",
+    "ratio": 13.96,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-primary",
+    "background": "bg-nav",
+    "ratio": 15.02,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-primary",
+    "background": "bg-input",
+    "ratio": 13.02,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-secondary",
+    "background": "bg-window",
+    "ratio": 9.2,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-secondary",
+    "background": "bg-panel",
+    "ratio": 8.8,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-secondary",
+    "background": "bg-nav",
+    "ratio": 9.47,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-secondary",
+    "background": "bg-input",
+    "ratio": 8.21,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-muted",
+    "background": "bg-window",
+    "ratio": 6.92,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-muted",
+    "background": "bg-panel",
+    "ratio": 6.63,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-muted",
+    "background": "bg-nav",
+    "ratio": 7.13,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-muted",
+    "background": "bg-input",
+    "ratio": 6.18,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-on-accent",
+    "background": "accent",
+    "ratio": 8.26,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "text-selected",
+    "background": "bg-selected",
+    "ratio": 6.76,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "code-text",
+    "background": "code-bg",
+    "ratio": 14.07,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "code-comment",
+    "background": "code-bg",
+    "ratio": 6.4,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "code-keyword",
+    "background": "code-bg",
+    "ratio": 8.86,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "code-string",
+    "background": "code-bg",
+    "ratio": 10.52,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "code-number",
+    "background": "code-bg",
+    "ratio": 8.56,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "code-function",
+    "background": "code-bg",
+    "ratio": 10.33,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "code-variable",
+    "background": "code-bg",
+    "ratio": 10.59,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "success",
+    "background": "success-bg",
+    "ratio": 7.32,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "warning",
+    "background": "warning-bg",
+    "ratio": 7.5,
+    "passed": true
+  },
+  {
+    "theme": "dark",
+    "text": "danger",
+    "background": "danger-bg",
+    "ratio": 6.49,
+    "passed": true
+  }
+]

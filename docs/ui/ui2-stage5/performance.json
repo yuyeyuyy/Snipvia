@@ -1,0 +1,91 @@
+{
+  "environment": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osVersion": "27.0.1",
+    "electron": "44.4.1",
+    "appVersion": "0.2.1",
+    "displayResolutionDip": {
+      "width": 1728,
+      "height": 1117
+    },
+    "displayBounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1728,
+      "height": 1117
+    },
+    "scaleFactor": 2
+  },
+  "method": "同机前后各 9 次，3 种尺寸 × 3 轮，合成图片；真实 Electron/IPC/NativeImage/Renderer，非实际 ScreenCaptureKit 捕获。",
+  "before": {
+    "collectedAt": "2026-10-09T08:48:33.071Z",
+    "captureStartToOverlayVisibleMs": {
+      "samples": [
+        104.19904200000019,
+        315.81645899999967,
+        103.40158299999985,
+        96.83845900000051,
+        101.73149999999987,
+        117.96983300000011,
+        105.03562499999953,
+        98.02679199999966,
+        112.08158300000014
+      ],
+      "median": 104.19904200000019,
+      "max": 315.81645899999967
+    },
+    "selectionToScreenshotVisibleMs": {
+      "samples": [
+        148.304083,
+        333.4414999999999,
+        235.33458400000018,
+        129.59312500000033,
+        238.85441699999956,
+        215.63525000000027,
+        126.41237499999988,
+        163.63987499999985,
+        156.30066700000043
+      ],
+      "median": 163.63987499999985,
+      "max": 333.4414999999999
+    },
+    "lastQuickChatCreateToDocumentLoadedMs": 141.9274170000008,
+    "lastScreenshotVisibleToAutoFirstTokenMs": 327.4689159999998
+  },
+  "after": {
+    "collectedAt": "2026-10-09T08:54:39.903Z",
+    "captureStartToOverlayVisibleMs": {
+      "samples": [
+        123.76716699999997,
+        98.30716699999994,
+        90.52262500000006,
+        107.63095799999974,
+        87.6590000000001,
+        109.10574999999972,
+        96.1023750000004,
+        101.4833749999998,
+        108.55612500000007
+      ],
+      "median": 101.4833749999998,
+      "max": 123.76716699999997
+    },
+    "selectionToScreenshotVisibleMs": {
+      "samples": [
+        139.79466700000012,
+        246.35408299999972,
+        208.43604199999982,
+        139.28683300000012,
+        157.02608400000008,
+        162.3463329999995,
+        99.1623750000008,
+        150.76295899999968,
+        146.66558299999997
+      ],
+      "median": 150.76295899999968,
+      "max": 246.35408299999972
+    },
+    "lastQuickChatCreateToDocumentLoadedMs": 155.91358299999956,
+    "lastScreenshotVisibleToAutoFirstTokenMs": 456.31066699999974
+  }
+}

@@ -1,0 +1,62 @@
+:root {
+  font-family: var(--font-ui);
+  background: transparent;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+html, body, #root { width: 100%; height: 100%; margin: 0; overflow: hidden; background: transparent; }
+.capture-overlay { position: fixed; inset: 0; cursor: crosshair; user-select: none; touch-action: none; }
+.screen-frame, .capture-shade { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.screen-frame { object-fit: fill; }
+.capture-shade { background: var(--capture-mask); }
+.selection { position: absolute; outline: 2px solid var(--capture-selection-border); box-shadow: 0 0 0 1px var(--capture-selection-shadow), 0 0 0 9999px var(--capture-selection-mask); pointer-events: none; }
+.selection span { position: absolute; top: -28px; left: 0; padding: 4px 7px; border: 1px solid var(--capture-dimension-border); border-radius: 5px; background: var(--capture-dimension-bg); color: var(--overlay-text); font-size: 10px; }
+.capture-hint { position: fixed; bottom: 25px; left: 50%; padding: 10px 15px; border: 1px solid var(--capture-hint-border); border-radius: 8px; background: var(--capture-hint-bg); box-shadow: var(--shadow-popover); color: var(--capture-hint-text); font-size: 11px; pointer-events: none; transform: translateX(-50%); }
+/* Only capture chrome is neutral; image pixels and annotation colors stay intact. */
+.screenshot-editor { position: absolute; inset: 0; font: 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: var(--accent); }
+.editor-preview { position: absolute; touch-action: none; }
+.tool-select .editor-preview { cursor: move; }
+.tool-text .editor-preview { cursor: text; }
+.editor-selection { position: absolute; outline: 2px solid var(--capture-editor-selection); box-shadow: 0 0 0 3px var(--capture-selection-shadow); pointer-events: none; }
+.editor-dimensions { position: absolute; left: 0; padding: 5px 10px; border-radius: 7px; color: var(--overlay-text); background: var(--capture-editor-dimension-bg); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.editor-dimensions small { color: var(--overlay-text-secondary); font-size: 10px; }
+.editor-handle { position: absolute; width: 9px; height: 9px; margin: -5px; border: 2px solid var(--overlay-text); border-radius: 50%; background: var(--capture-editor-selection); pointer-events: auto; box-shadow: 0 0 0 1px var(--capture-editor-handle-shadow); }
+.handle-nw { left: 0; top: 0; cursor: nwse-resize; }
+.handle-n { left: 50%; top: 0; cursor: ns-resize; }
+.handle-ne { left: 100%; top: 0; cursor: nesw-resize; }
+.handle-w { left: 0; top: 50%; cursor: ew-resize; }
+.handle-e { left: 100%; top: 50%; cursor: ew-resize; }
+.handle-sw { left: 0; top: 100%; cursor: nesw-resize; }
+.handle-s { left: 50%; top: 100%; cursor: ns-resize; }
+.handle-se { left: 100%; top: 100%; cursor: nwse-resize; }
+.editor-toolbar { position: absolute; box-sizing: border-box; padding: 7px; border-radius: 13px; background: var(--bg-window); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-popover); cursor: default; }
+.editor-tool-row { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; }
+.editor-toolbar button { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 5px; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: var(--accent); cursor: pointer; }
+.editor-toolbar button:hover { background: var(--bg-hover); }
+.editor-toolbar button[aria-pressed='true'] { color: var(--text-selected); background: var(--bg-selected); }
+.editor-toolbar button:focus-visible, .editor-options select:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.editor-toolbar button:disabled { opacity: .35; cursor: default; }
+.editor-toolbar .editor-ask { width: auto; padding: 0 10px; margin-left: auto; color: var(--text-on-accent); background: var(--accent); font-weight: 600; white-space: nowrap; }
+.editor-toolbar .editor-ask:hover:not(:disabled) { background: var(--accent-hover); }
+.editor-toolbar .editor-ask:active:not(:disabled) { background: var(--accent-active); }
+.editor-divider { height: 20px; width: 1px; background: var(--bg-selected); margin: 0 3px; }
+.editor-grip { width: 15px; color: var(--text-muted); cursor: grab; touch-action: none; }
+.editor-options { min-height: 29px; border-top: 1px solid var(--border-subtle); margin-top: 6px; padding: 7px 4px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.editor-colors { display: flex; align-items: center; gap: 7px; }
+.editor-colors button { height: 15px; width: 15px; border-radius: 50%; background: var(--swatch) !important; box-shadow: var(--shadow-control); }
+.editor-colors button[aria-pressed='true'] { outline: 2px solid var(--accent); outline-offset: 2px; }
+.editor-options label { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); }
+.editor-options select { border: 1px solid var(--border-subtle); border-radius: 5px; padding: 2px 5px; font: inherit; background: var(--bg-input); color: var(--text-primary); }
+.editor-help { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+.editor-text { position: absolute; box-sizing: border-box; width: 280px; min-height: 70px; padding: 0; border: 1px dashed var(--capture-editor-selection); outline: none; background: var(--capture-selection-shadow); resize: both; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-weight: 500; line-height: 1.3; cursor: text; user-select: text; }
+.editor-error { padding: 6px 4px 0; font-size: 12px; color: var(--danger); }
+.editor-error::before { content: '×' / ''; display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border: 1px solid currentColor; border-radius: 50%; margin-right: 7px; font-weight: 600; }
+.capture-membership-notice {
+  position: fixed; top: 24px; left: 50%; transform: translateX(-50%); z-index: 20;
+  max-width: min(620px, calc(100vw - 48px)); padding: 12px 16px;
+  color: var(--text-primary); background: var(--bg-window); border: 1px solid var(--border-subtle);
+  border-radius: 10px; box-shadow: var(--shadow-popover);
+  font-size: 13px; line-height: 1.6; pointer-events: none;
+}
+.capture-membership-notice::before { content: '!' / ''; display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border: 1px solid currentColor; border-radius: 50%; margin-right: 7px; font-weight: 600; }

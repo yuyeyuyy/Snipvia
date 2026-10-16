@@ -1,0 +1,57 @@
+/* Compact master/detail workspace; all surfaces use the existing Monochrome tokens. */
+.history-panel.workspace-panel { display: flex; flex-direction: column; flex: 1; width: 100%; max-width: none; min-height: 0; margin: 0; overflow: hidden; container-type: inline-size; }
+.history-panel .history-local-label { color: var(--text-muted); font-size: var(--font-caption); }
+.history-panel .history-toolbar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--border-subtle); }
+.history-panel .history-search { display: flex; align-items: center; flex: 1; max-width: 420px; min-width: 0; gap: var(--space-2); color: var(--text-muted); }
+.history-panel .history-search > svg { flex-shrink: 0; }
+.history-panel .history-search .ui-input { min-width: 0; margin: 0; background: transparent; }
+.history-panel .history-toolbar .ui-select { width: 134px; min-width: 0; margin: 0; background: transparent; }
+.history-panel .history-result-count { margin-left: auto; color: var(--text-muted); font-size: var(--font-caption); white-space: nowrap; }
+.history-panel .history-content { display: grid; grid-template-columns: clamp(240px, 28%, 300px) minmax(0, 1fr); flex: 1; width: 100%; max-width: none; min-height: 0; margin: 0; overflow: hidden; }
+.history-panel .history-list { display: block; min-height: 0; padding: var(--space-2) var(--space-3) var(--space-4) 0; overflow: auto; border-right: 1px solid var(--border-subtle); }
+.history-panel .history-group h2 { position: sticky; top: -8px; z-index: 1; margin: 0; padding: 12px 8px 7px; background: var(--bg-window); color: var(--text-muted); font-size: 11px; font-weight: 500; }
+.history-panel .history-item { position: relative; margin: 2px 0; border: 0; border-radius: var(--radius-control); background: transparent; box-shadow: none; }
+.history-panel .history-item + .history-item { border: 0; }
+.history-panel .history-item:hover { background: var(--bg-hover); box-shadow: none; }
+.history-panel .history-item.selected { background: var(--bg-selected); }
+.history-panel .history-item.selected::before { content: ''; position: absolute; left: 0; top: 12px; bottom: 12px; width: 2px; border-radius: 1px; background: var(--text-selected); }
+.history-panel .history-open { display: flex; align-items: center; gap: var(--space-2); width: 100%; min-height: 56px; padding: 9px 30px 9px 10px; border: 0; border-radius: var(--radius-control); background: transparent; color: var(--text-primary); text-align: left; }
+.history-panel .history-copy { flex: 1; min-width: 0; }
+.history-panel .history-copy strong { display: block; font-size: var(--font-control); font-weight: 500; }
+.history-panel .selected .history-copy strong { font-weight: 600; }
+.history-panel .history-copy small { margin-top: 4px; font-size: 10px; color: var(--text-muted); }
+.history-panel .history-open > time { flex-shrink: 0; align-self: flex-start; margin-top: 2px; color: var(--text-muted); font-size: 10px; font-variant-numeric: tabular-nums; }
+.history-panel .history-delete { position: absolute; top: 50%; right: 2px; width: 24px; height: 24px; padding: 0; transform: translateY(-50%); color: var(--text-muted); background: transparent; opacity: 0; }
+.history-panel .history-item:hover .history-delete, .history-panel .history-item:focus-within .history-delete { opacity: 1; }
+.history-panel .history-delete:focus-visible { opacity: 1; }
+.history-panel .history-preview { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.history-panel .history-preview-heading { display: flex; align-items: center; justify-content: flex-start; flex-shrink: 0; height: auto; min-height: 76px; gap: var(--space-2); padding: var(--space-4) var(--space-6); border: 0; border-bottom: 1px solid var(--border-subtle); }
+.history-panel .history-preview-heading > div { min-width: 0; }
+.history-panel .history-preview-heading h2 { margin: 0; color: var(--text-primary); font-size: 16px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.history-panel .history-preview-heading p { margin: 4px 0 0; color: var(--text-muted); font-size: 11px; overflow-wrap: anywhere; }
+.history-panel .history-back { display: none; flex-shrink: 0; transform: rotate(180deg); }
+.history-panel .history-preview-scroll { flex: 1; min-height: 0; overflow: auto; padding: var(--space-4) var(--space-6); }
+.history-panel .history-preview-body { max-width: 720px; margin: 0 auto; }
+.history-panel .history-capture { margin-bottom: var(--space-6); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border-subtle); }
+.history-panel .history-capture summary { display: flex; align-items: center; gap: var(--space-2); width: fit-content; max-width: 100%; padding: 4px 0; color: var(--text-secondary); font-size: var(--font-caption); cursor: pointer; }
+.history-panel .history-capture summary small { margin-left: var(--space-2); color: var(--text-muted); }
+.history-panel .history-capture img { display: block; width: auto; max-width: 100%; max-height: 260px; margin: var(--space-3) 0 0; border-radius: var(--radius-control); object-fit: contain; }
+.history-panel .history-message { margin: 0 0 var(--space-6); padding: 0; color: var(--text-primary); font-size: var(--font-body); line-height: 1.75; }
+.history-panel .history-message-heading { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); font-size: 11px; color: var(--text-muted); }
+.history-panel .history-message-heading strong { font-size: var(--font-caption); font-weight: 600; color: var(--text-primary); }
+.history-panel .history-message-heading span { min-width: 0; overflow-wrap: anywhere; }
+.history-panel .history-message-heading time { margin-left: auto; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.history-panel .history-message.user > p { margin: 0; padding: 10px 12px; border-radius: var(--radius-control); background: var(--bg-user-message); white-space: pre-wrap; overflow-wrap: anywhere; }
+.history-panel .history-note-summary { display: grid; gap: 4px; margin-top: var(--space-3); padding-left: var(--space-3); border-left: 1px solid var(--border-default); font-size: var(--font-caption); color: var(--text-secondary); overflow-wrap: anywhere; }
+.history-panel .history-note-summary strong { font-size: inherit; font-weight: 500; }
+.history-panel .history-preview-footer { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-6); border-top: 1px solid var(--border-subtle); }
+.history-panel .history-preview-footer > span { color: var(--text-muted); font-size: 10px; }
+.history-panel .history-preview-footer button { flex-shrink: 0; }
+.history-panel .history-action-error, .history-panel .history-read-error { padding: var(--space-3) var(--space-6); color: var(--danger); font-size: var(--font-control); }
+.history-panel > .ui-empty-state, .history-panel > .ui-loading-state { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: var(--space-2); }
+.history-confirmation { width: min(420px, calc(100vw - 48px)); padding: var(--space-6); }
+.history-confirmation h2 { margin: 0 0 var(--space-3); font-size: 16px; }
+.history-confirmation p { font-size: var(--font-control); line-height: 1.7; color: var(--text-secondary); overflow-wrap: anywhere; }
+.history-confirmation > div { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-5); }
+@container (max-width: 720px) { .history-panel .history-content { grid-template-columns: 230px minmax(0, 1fr); } .history-panel .history-preview-heading, .history-panel .history-preview-scroll, .history-panel .history-preview-footer { padding-inline: var(--space-4); } .history-panel .history-preview-footer > span { display: none; } .history-panel .history-preview-footer { justify-content: flex-end; } }
+@container (max-width: 580px) { .history-panel .history-content { grid-template-columns: minmax(0, 1fr); } .history-panel .history-preview { display: none; } .history-panel.showing-detail .history-list { display: none; } .history-panel.showing-detail .history-preview { display: flex; } .history-panel .history-back { display: inline-flex; } .history-panel .history-toolbar .ui-select { width: 110px; } .history-panel .history-result-count { display: none; } .history-panel .history-list { border-right: 0; padding-right: 0; } }

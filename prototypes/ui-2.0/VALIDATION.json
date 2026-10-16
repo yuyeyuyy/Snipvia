@@ -1,0 +1,859 @@
+{
+  "date": "2026-10-09",
+  "environment": "Codex in-app Chromium browser; standalone synthetic-data prototype",
+  "checks": [
+    {
+      "check": "A/notes/light",
+      "passed": true
+    },
+    {
+      "check": "A/schedule/light",
+      "passed": true
+    },
+    {
+      "check": "A/history/light",
+      "passed": true
+    },
+    {
+      "check": "A/capture/light",
+      "passed": true
+    },
+    {
+      "check": "A/settings/light",
+      "passed": true
+    },
+    {
+      "check": "A/notes/dark",
+      "passed": true
+    },
+    {
+      "check": "A/schedule/dark",
+      "passed": true
+    },
+    {
+      "check": "A/history/dark",
+      "passed": true
+    },
+    {
+      "check": "A/capture/dark",
+      "passed": true
+    },
+    {
+      "check": "A/settings/dark",
+      "passed": true
+    },
+    {
+      "check": "折叠与主题切换保留笔记草稿",
+      "passed": true
+    },
+    {
+      "check": "历史按标题搜索",
+      "passed": true
+    },
+    {
+      "check": "选中对话时列表仍在原位",
+      "passed": true
+    },
+    {
+      "check": "Return 不批准 Agent 操作",
+      "passed": true
+    },
+    {
+      "check": "无资格禁用 AI 输入",
+      "passed": true
+    },
+    {
+      "check": "主导航连续收起",
+      "passed": true,
+      "measurements": [
+        176,
+        176,
+        158.9765625,
+        145.40625,
+        124.9609375,
+        113.671875,
+        100.375,
+        90.1640625,
+        83.0078125,
+        77.2421875,
+        72.5703125,
+        68.828125,
+        65.7578125,
+        63.21875,
+        61.0859375,
+        59.3203125,
+        57.8359375,
+        56.671875,
+        55.5625,
+        54.7265625,
+        54.015625,
+        53.4375,
+        53.0625,
+        52.609375,
+        52.359375,
+        52.1640625,
+        52.0625,
+        52,
+        52,
+        52,
+        52,
+        52,
+        52,
+        52
+      ]
+    },
+    {
+      "check": "文件列表连续收起",
+      "passed": true,
+      "measurements": [
+        208,
+        208,
+        179.65625,
+        151.078125,
+        128.234375,
+        103.890625,
+        83.4453125,
+        66.8203125,
+        51.703125,
+        42.7265625,
+        34.5625,
+        28.2734375,
+        23.1171875,
+        19.1328125,
+        15.2265625,
+        12.3046875,
+        9.8359375,
+        7.8046875,
+        5.9921875,
+        4.578125,
+        3.3828125,
+        2.421875,
+        1.6484375,
+        1.0546875,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "check": "System 解析为当前系统主题",
+      "passed": true,
+      "dark": false,
+      "resolved": "light"
+    },
+    {
+      "check": "正在编辑文件使用状态行",
+      "passed": true
+    },
+    {
+      "check": "状态结束后展示回复与可点击文件",
+      "passed": true
+    },
+    {
+      "check": "关闭截图不打开主窗口",
+      "passed": true
+    },
+    {
+      "check": "返回软件主动打开历史工作区",
+      "passed": true
+    },
+    {
+      "check": "日期详情跟随月历选择",
+      "passed": true
+    },
+    {
+      "check": "日程确认展示起止和时区",
+      "passed": true
+    },
+    {
+      "check": "日程保存必须显式确认",
+      "passed": true
+    },
+    {
+      "check": "刷新按钮在模型选择左侧且禁收 Key",
+      "passed": true,
+      "keyDisabled": true,
+      "refreshLeft": 691.5,
+      "refreshRight": 721.5,
+      "selectLeft": 729.5
+    },
+    {
+      "check": "命令搜索键盘打开历史",
+      "passed": true
+    },
+    {
+      "check": "笔记 empty 状态保留导航",
+      "passed": true
+    },
+    {
+      "check": "笔记 loading 状态保留导航",
+      "passed": true
+    },
+    {
+      "check": "笔记 error 状态保留导航",
+      "passed": true
+    },
+    {
+      "check": "小窗口大纲默认隐藏",
+      "passed": true
+    },
+    {
+      "check": "小窗口可主动浮出大纲",
+      "passed": true
+    },
+    {
+      "check": "840×600 展开浮窗边界",
+      "passed": true,
+      "bottom": 532.5,
+      "right": 820,
+      "viewportHeight": 600,
+      "viewportWidth": 840
+    }
+  ],
+  "layoutChecks": [
+    {
+      "layout": "a",
+      "surface": "notes",
+      "width": 840,
+      "height": 600,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 588,
+        "height": 512,
+        "right": 828,
+        "width": 816
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "schedule",
+      "width": 840,
+      "height": 600,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 588,
+        "height": 512,
+        "right": 828,
+        "width": 816
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "history",
+      "width": 840,
+      "height": 600,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 588,
+        "height": 512,
+        "right": 828,
+        "width": 816
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "settings",
+      "width": 840,
+      "height": 600,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 588,
+        "height": 512,
+        "right": 828,
+        "width": 816
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "capture",
+      "width": 840,
+      "height": 600,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 512.125,
+        "height": 346.25,
+        "right": 730,
+        "width": 620
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "notes",
+      "width": 840,
+      "height": 600,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 588,
+        "height": 512,
+        "right": 828,
+        "width": 816
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "schedule",
+      "width": 840,
+      "height": 600,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 588,
+        "height": 512,
+        "right": 828,
+        "width": 816
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "history",
+      "width": 840,
+      "height": 600,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 588,
+        "height": 512,
+        "right": 828,
+        "width": 816
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "settings",
+      "width": 840,
+      "height": 600,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 588,
+        "height": 512,
+        "right": 828,
+        "width": 816
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "capture",
+      "width": 840,
+      "height": 600,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 512.125,
+        "height": 346.25,
+        "right": 730,
+        "width": 620
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "notes",
+      "width": 1120,
+      "height": 780,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 756,
+        "height": 668,
+        "right": 1096,
+        "width": 1072
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "schedule",
+      "width": 1120,
+      "height": 780,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 756,
+        "height": 668,
+        "right": 1096,
+        "width": 1072
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "history",
+      "width": 1120,
+      "height": 780,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 756,
+        "height": 668,
+        "right": 1096,
+        "width": 1072
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "settings",
+      "width": 1120,
+      "height": 780,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 756,
+        "height": 668,
+        "right": 1096,
+        "width": 1072
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "capture",
+      "width": 1120,
+      "height": 780,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 602.125,
+        "height": 346.25,
+        "right": 870,
+        "width": 620
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "notes",
+      "width": 1120,
+      "height": 780,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 756,
+        "height": 668,
+        "right": 1096,
+        "width": 1072
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "schedule",
+      "width": 1120,
+      "height": 780,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 756,
+        "height": 668,
+        "right": 1096,
+        "width": 1072
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "history",
+      "width": 1120,
+      "height": 780,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 756,
+        "height": 668,
+        "right": 1096,
+        "width": 1072
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "settings",
+      "width": 1120,
+      "height": 780,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 756,
+        "height": 668,
+        "right": 1096,
+        "width": 1072
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "capture",
+      "width": 1120,
+      "height": 780,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 602.125,
+        "height": 346.25,
+        "right": 870,
+        "width": 620
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "notes",
+      "width": 1440,
+      "height": 900,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 876,
+        "height": 788,
+        "right": 1416,
+        "width": 1392
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "schedule",
+      "width": 1440,
+      "height": 900,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 876,
+        "height": 788,
+        "right": 1416,
+        "width": 1392
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "history",
+      "width": 1440,
+      "height": 900,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 876,
+        "height": 788,
+        "right": 1416,
+        "width": 1392
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "settings",
+      "width": 1440,
+      "height": 900,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 876,
+        "height": 788,
+        "right": 1416,
+        "width": 1392
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "capture",
+      "width": 1440,
+      "height": 900,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 662.125,
+        "height": 346.25,
+        "right": 1030,
+        "width": 620
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "notes",
+      "width": 1440,
+      "height": 900,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 876,
+        "height": 788,
+        "right": 1416,
+        "width": 1392
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "schedule",
+      "width": 1440,
+      "height": 900,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 876,
+        "height": 788,
+        "right": 1416,
+        "width": 1392
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "history",
+      "width": 1440,
+      "height": 900,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 876,
+        "height": 788,
+        "right": 1416,
+        "width": 1392
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "settings",
+      "width": 1440,
+      "height": 900,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 876,
+        "height": 788,
+        "right": 1416,
+        "width": 1392
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "capture",
+      "width": 1440,
+      "height": 900,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 662.125,
+        "height": 346.25,
+        "right": 1030,
+        "width": 620
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "notes",
+      "width": 1920,
+      "height": 1080,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 1056,
+        "height": 968,
+        "right": 1896,
+        "width": 1872
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "schedule",
+      "width": 1920,
+      "height": 1080,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 1056,
+        "height": 968,
+        "right": 1896,
+        "width": 1872
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "history",
+      "width": 1920,
+      "height": 1080,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 1056,
+        "height": 968,
+        "right": 1896,
+        "width": 1872
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "settings",
+      "width": 1920,
+      "height": 1080,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 1056,
+        "height": 968,
+        "right": 1896,
+        "width": 1872
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "a",
+      "surface": "capture",
+      "width": 1920,
+      "height": 1080,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 752.125,
+        "height": 346.25,
+        "right": 1270,
+        "width": 620
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "notes",
+      "width": 1920,
+      "height": 1080,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 1056,
+        "height": 968,
+        "right": 1896,
+        "width": 1872
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "schedule",
+      "width": 1920,
+      "height": 1080,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 1056,
+        "height": 968,
+        "right": 1896,
+        "width": 1872
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "history",
+      "width": 1920,
+      "height": 1080,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 1056,
+        "height": 968,
+        "right": 1896,
+        "width": 1872
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "settings",
+      "width": 1920,
+      "height": 1080,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 1056,
+        "height": 968,
+        "right": 1896,
+        "width": 1872
+      },
+      "verticalOverflow": false
+    },
+    {
+      "layout": "b",
+      "surface": "capture",
+      "width": 1920,
+      "height": 1080,
+      "fits": true,
+      "horizontalOverflow": false,
+      "shell": {
+        "bottom": 752.125,
+        "height": 346.25,
+        "right": 1270,
+        "width": 620
+      },
+      "verticalOverflow": false
+    }
+  ],
+  "screenshots": [
+    "a-capture-840-dark.jpg",
+    "a-capture-dark.jpg",
+    "a-capture-editing-light.jpg",
+    "a-capture-expanded-dark.jpg",
+    "a-capture-expanded-light.jpg",
+    "a-capture-light.jpg",
+    "a-capture-no-access-dark.jpg",
+    "a-history-dark.jpg",
+    "a-history-light.jpg",
+    "a-notes-840-dark.jpg",
+    "a-notes-code-dark.jpg",
+    "a-notes-code-light.jpg",
+    "a-notes-dark.jpg",
+    "a-notes-light.jpg",
+    "a-schedule-dark.jpg",
+    "a-schedule-light.jpg",
+    "a-settings-dark.jpg",
+    "a-settings-light.jpg",
+    "b-capture-dark.jpg",
+    "b-capture-light.jpg",
+    "b-history-dark.jpg",
+    "b-history-light.jpg",
+    "b-notes-dark.jpg",
+    "b-notes-light.jpg",
+    "b-schedule-dark.jpg",
+    "b-schedule-light.jpg",
+    "b-settings-dark.jpg",
+    "b-settings-light.jpg"
+  ],
+  "browserErrors": [],
+  "limitations": [
+    "No native Electron windows exercised",
+    "No real API keys or provider calls",
+    "No real file, clipboard image, account or calendar transactions",
+    "System theme resolution checked against current OS only; no OS preference changed",
+    "Reduced motion rule reviewed; OS preference not toggled"
+  ]
+}

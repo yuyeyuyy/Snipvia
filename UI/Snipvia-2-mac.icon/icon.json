@@ -1,0 +1,133 @@
+{
+  "fill" : "automatic",
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "hidden" : true,
+          "image-name" : "image_rounded_uniform_v2.svg",
+          "name" : "image_rounded_uniform_v2",
+          "position" : {
+            "scale" : 0.7,
+            "translation-in-points" : [
+              -75.5163372614278,
+              -74.88681256149675
+            ]
+          }
+        },
+        {
+          "hidden" : true,
+          "image-name" : "image_rounded.svg",
+          "name" : "image_rounded"
+        },
+        {
+          "fill" : {
+            "solid" : "srgb:1.00000,1.00000,1.00000,1.00000"
+          },
+          "hidden" : false,
+          "image-name" : "image.svg",
+          "name" : "image",
+          "opacity" : 1,
+          "position" : {
+            "scale" : 0.5,
+            "translation-in-points" : [
+              -76.09958726142781,
+              -75.25781256149673
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "specular" : false,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "blur-material" : 0.5,
+      "hidden" : false,
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "fill" : {
+            "solid" : "srgb:0.00000,0.99144,1.00000,1.00000"
+          },
+          "glass" : true,
+          "hidden" : false,
+          "image-name" : "a-single-flat-solid-fill-rounded-rectangle--rounde.svg",
+          "name" : "a-single-flat-solid-fill-rounded-rectangle--rounde",
+          "opacity" : 0.5,
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -75,
+              -75
+            ]
+          }
+        }
+      ],
+      "name" : "Group",
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 1
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.3
+      }
+    },
+    {
+      "blur-material" : 0.71,
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "fill" : {
+            "solid" : "srgb:0.00000,0.53333,1.00000,1.00000"
+          },
+          "glass-specializations" : [
+            {
+              "value" : true
+            },
+            {
+              "idiom" : "square",
+              "value" : true
+            }
+          ],
+          "hidden" : false,
+          "image-name" : "a-single-flat-solid-fill-rounded-rectangle--rounde.svg",
+          "name" : "a-single-flat-solid-fill-rounded-rectangle--rounde",
+          "opacity" : 0.75,
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              75,
+              75
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "opacity" : 1,
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 1
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.3
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

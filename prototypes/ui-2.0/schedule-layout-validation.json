@@ -1,0 +1,130 @@
+{
+  "date": "2026-10-09",
+  "scope": "独立原型",
+  "checks": [
+    {
+      "width": 840,
+      "height": 600,
+      "layout": "a",
+      "theme": "light",
+      "calendarWidth": 457,
+      "dateCount": 42,
+      "detailsWidth": 305,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 840,
+      "height": 600,
+      "layout": "a",
+      "theme": "dark",
+      "calendarWidth": 457,
+      "dateCount": 42,
+      "detailsWidth": 305,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 840,
+      "height": 600,
+      "layout": "b",
+      "theme": "light",
+      "calendarWidth": 488,
+      "dateCount": 42,
+      "detailsWidth": 326,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 840,
+      "height": 600,
+      "layout": "b",
+      "theme": "dark",
+      "calendarWidth": 488,
+      "dateCount": 42,
+      "detailsWidth": 326,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1120,
+      "height": 780,
+      "layout": "a",
+      "theme": "light",
+      "calendarWidth": 536,
+      "dateCount": 42,
+      "detailsWidth": 358,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1120,
+      "height": 780,
+      "layout": "a",
+      "theme": "dark",
+      "calendarWidth": 536,
+      "dateCount": 42,
+      "detailsWidth": 358,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1120,
+      "height": 780,
+      "layout": "b",
+      "theme": "light",
+      "calendarWidth": 642,
+      "dateCount": 42,
+      "detailsWidth": 428,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1120,
+      "height": 780,
+      "layout": "b",
+      "theme": "dark",
+      "calendarWidth": 642,
+      "dateCount": 42,
+      "detailsWidth": 428,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "layout": "a",
+      "theme": "light",
+      "calendarWidth": 1016,
+      "dateCount": 42,
+      "detailsWidth": 678,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "layout": "a",
+      "theme": "dark",
+      "calendarWidth": 1016,
+      "dateCount": 42,
+      "detailsWidth": 678,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "layout": "b",
+      "theme": "light",
+      "calendarWidth": 1122,
+      "dateCount": 42,
+      "detailsWidth": 748,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "layout": "b",
+      "theme": "dark",
+      "calendarWidth": 1122,
+      "dateCount": 42,
+      "detailsWidth": 748,
+      "horizontalOverflow": false
+    }
+  ],
+  "dateSelection": true,
+  "reviewDialog": true,
+  "weekdayDateAlignment": true,
+  "consoleErrors": []
+}

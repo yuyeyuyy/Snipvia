@@ -1,0 +1,57 @@
+{
+  "repository": "yuyeyuyy/Snipvia-releases",
+  "tag": "v0.2.2",
+  "url": "https://github.com/yuyeyuyy/Snipvia-releases/releases/tag/v0.2.2",
+  "publishedAt": "2026-10-12T11:16:46Z",
+  "remoteDigestsMatchFrozenFiles": true,
+  "autoUpdateEnabled": true,
+  "assets": [
+    {
+      "name": "latest-mac.yml",
+      "size": 964,
+      "digest": "sha256:ffb48ffbdd6dd81ad6a7767f13391ba411808881c2bdab8063eb8e850decee79",
+      "url": "https://github.com/yuyeyuyy/Snipvia-releases/releases/download/v0.2.2/latest-mac.yml"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 356,
+      "digest": "sha256:ef915ebbc51cdc8ea5a991dfc866f492cd84f5c6c5417fcb4f844b72a60a259a",
+      "url": "https://github.com/yuyeyuyy/Snipvia-releases/releases/download/v0.2.2/SHA256SUMS.txt"
+    },
+    {
+      "name": "Snipvia-0.2.2-arm64.dmg",
+      "size": 139332249,
+      "digest": "sha256:acc3be14428e8bd3674df7d1561b6732a7c1e8379171366f5b5f3c27d5cd6de5",
+      "url": "https://github.com/yuyeyuyy/Snipvia-releases/releases/download/v0.2.2/Snipvia-0.2.2-arm64.dmg"
+    },
+    {
+      "name": "Snipvia-0.2.2-arm64.zip",
+      "size": 139793672,
+      "digest": "sha256:15f555835a2fbc9576d716b6254939addf4c1f66aefa27bf82f22b99bbbe5484",
+      "url": "https://github.com/yuyeyuyy/Snipvia-releases/releases/download/v0.2.2/Snipvia-0.2.2-arm64.zip"
+    },
+    {
+      "name": "Snipvia-0.2.2-x64.dmg",
+      "size": 146143477,
+      "digest": "sha256:65f6ebeaff93b6be501dd07f5564139235fce30d72606b22c48a9dcfecf3dfe4",
+      "url": "https://github.com/yuyeyuyy/Snipvia-releases/releases/download/v0.2.2/Snipvia-0.2.2-x64.dmg"
+    },
+    {
+      "name": "Snipvia-0.2.2-x64.zip",
+      "size": 146596832,
+      "digest": "sha256:366a50e1fc5e878934b70d8c0108dd8a6fdcd4c6307316dc509c10c2e849cd64",
+      "url": "https://github.com/yuyeyuyy/Snipvia-releases/releases/download/v0.2.2/Snipvia-0.2.2-x64.zip"
+    }
+  ],
+  "anonymousManifest": {
+    "url": "https://github.com/yuyeyuyy/Snipvia-releases/releases/download/v0.2.2/latest-mac.yml",
+    "sha256": "ffb48ffbdd6dd81ad6a7767f13391ba411808881c2bdab8063eb8e850decee79",
+    "matchesFrozenFile": true
+  },
+  "releaseValidation": {
+    "runId": 38241625250,
+    "conclusion": "success",
+    "url": "https://github.com/yuyeyuyy/Snipvia-releases/actions/runs/38241625250"
+  },
+  "publicMainCommit": "8b21e8e"
+}

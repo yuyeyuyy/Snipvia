@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-16",
+  "method": "Local regex and high-entropy-assignment scan; git cat-file --batch-all-objects includes reachable, reflog and unreachable blobs. Binary/large objects counted but not semantically inspected. No network validation.",
+  "originalHistory": {
+    "textBlobs": 1923,
+    "binaryOrLargeBlobs": 1162,
+    "patternHits": 46
+  },
+  "privateCandidateHistory": {
+    "textBlobs": 1935,
+    "binaryOrLargeBlobs": 1162,
+    "patternHits": 47,
+    "newCredentialFingerprints": 0
+  },
+  "review": "Credential URL matches use example hosts/templates; remaining assignment matches are synthetic test/benchmark values. No confirmed active credentials were identified. This is not a guarantee of absence.",
+  "ignoredLocalEnvironment": [
+    {
+      "path": "apps/server/.env",
+      "line": 14,
+      "variable": "SMTP_URL",
+      "finding": "Nonempty credential-bearing URL; not copied, staged, committed or remotely tested. Owner should verify and rotate if previously shared."
+    }
+  ],
+  "publicCandidate": {
+    "privateApplicationPaths": 0,
+    "runtimeDataOrCredentialFilePaths": 0,
+    "credentialPatternHits": 0,
+    "historyPolicy": "Fresh git init; verify exactly one parentless root commit, no remotes, object alternates or old server paths across all reachable trees."
+  },
+  "legalReview": [
+    "Root package license remains UNLICENSED; no repository LICENSE/NOTICE chosen.",
+    "Icon and UI screenshot provenance/redistribution rights require owner review.",
+    "Dependency license metadata inventory covers 669 installed packages; metadata is not a distribution license review."
+  ],
+  "limitations": [
+    "Regex cannot detect all secret formats or establish validity.",
+    "Binary assets were not OCR scanned or exhaustively reviewed for personal content.",
+    "No Apple keychain or external production system inspection."
+  ]
+}

@@ -51,13 +51,24 @@ export async function verifyWindowsBuild(outputDirectory) {
   const appAsar = join(appDirectory, 'resources', 'app.asar');
   const executable = await readFile(join(appDirectory, 'Snipvia.exe'));
   const pe = inspectPe(executable);
+  const sourceIcon = await readFile(join(root, 'UI', 'Snipvia-Win-transparent.ico'));
+  const iconFrames = [];
+  assert.equal(sourceIcon.readUInt16LE(0), 0); assert.equal(sourceIcon.readUInt16LE(2), 1);
+  for (let index = 0; index < sourceIcon.readUInt16LE(4); index++) {
+    const entry = 6 + index * 16, size = sourceIcon.readUInt32LE(entry + 8), offset = sourceIcon.readUInt32LE(entry + 12);
+    assert(offset + size <= sourceIcon.length, 'Truncated source ICO');
+    iconFrames.push(hash(sourceIcon.subarray(offset, offset + size)));
+  }
+  const embeddedIconHashes = buffer => NtExecutableResource.from(NtExecutable.from(buffer)).entries
+    .filter(entry => entry.type === 3).map(entry => hash(Buffer.from(entry.bin))).sort();
+  assert.deepEqual(embeddedIconHashes(executable), [...iconFrames].sort(), 'Application PE icon differs from selected ICO');
   assert.equal(pe.machine, 0x8664, 'Application must be Windows x64');
   assert.equal(pe.certificateBytes, 0, 'Internal application must be unsigned');
   assert(pe.strings.some(value => value.ProductName === 'Snipvia' && value.FileVersion === version));
   assert(pe.iconCount >= 7, 'Multi-size brand icon missing');
   assert.match(pe.manifest, /requestedExecutionLevel[^>]+level="asInvoker"/);
   const icon = await readFile(join(appDirectory, 'resources', 'Snipvia.ico'));
-  assert.equal(hash(icon), hash(await readFile(join(root, 'UI', 'Snipvia-Win.ico'))));
+  assert.equal(hash(icon), hash(sourceIcon));
   const paths = asar.listPackage(appAsar);
   const forbidden = paths.filter(path => /snipvia-capture-helper|\.(?:node|dylib|so|swift|icns)$|\.icon\/|\/vendor\//i.test(path));
   assert.deepEqual(forbidden, [], 'Unexpected native or macOS resources in ASAR');
@@ -67,6 +78,7 @@ export async function verifyWindowsBuild(outputDirectory) {
   assert(!resources.some(path => /snipvia-capture-helper|elevate\.exe|\.(?:node|dylib|so|swift|icns)$/i.test(path)));
   const installerBytes = await readFile(installer);
   const installerPe = inspectPe(installerBytes);
+  assert.deepEqual(embeddedIconHashes(installerBytes), [...iconFrames].sort(), 'Installer PE icon differs from selected ICO');
   assert.equal(installerPe.certificateBytes, 0, 'Internal installer must be unsigned');
   assert(installerPe.strings.some(value => value.ProductName === 'Snipvia' && value.ProductVersion === version));
   assert.match(installerPe.manifest, /requestedExecutionLevel[^>]+level="asInvoker"/);
@@ -88,6 +100,8 @@ export async function verifyWindowsBuild(outputDirectory) {
   const metadata = { version, architecture: 'x64', installer, filename: `Snipvia-Setup-${version}-x64.exe`,
     bytes: (await stat(installer)).size, sha256: hash(installerBytes), signed: false,
     verification: 'Static PE, ASAR, NSIS payload and uninstaller checks passed; Windows runtime not verified',
+    iconSource: 'UI/Snipvia-Win-transparent.ico', iconSha256: hash(sourceIcon),
+    embeddedApplicationIconsMatch: true, embeddedInstallerIconsMatch: true,
     nativeNodeModules: 0, appIconSizes: pe.iconCount };
   await writeFile(join(output, 'BUILD_METADATA.json'), JSON.stringify(metadata, null, 2) + '\n');
   await writeFile(join(output, 'SHA256SUMS.txt'), `${metadata.sha256}  ${metadata.filename}\n`);

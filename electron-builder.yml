@@ -38,9 +38,9 @@ mac:
       arch: [arm64]
 win:
   artifactName: 'Snipvia-Setup-${version}-${arch}.${ext}'
-  icon: UI/Snipvia-Win.ico
+  icon: UI/Snipvia-Win-transparent.ico
   extraResources:
-    - from: UI/Snipvia-Win.ico
+    - from: UI/Snipvia-Win-transparent.ico
       to: Snipvia.ico
   target:
     - target: nsis

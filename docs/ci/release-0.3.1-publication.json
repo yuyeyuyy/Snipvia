@@ -1,0 +1,92 @@
+{
+  "version": "0.3.1",
+  "repository": "yuyeyuyy/Snipvia",
+  "releaseId": 416233260,
+  "url": "https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.1",
+  "tag": "v0.3.1",
+  "sourceCommit": "bcbe19afab07c200464205e2e0923dee535682d7",
+  "publishedAt": "2026-10-18T04:45:47Z",
+  "latest": true,
+  "repositoryPublic": true,
+  "assetCount": 8,
+  "assets": [
+    {
+      "name": "latest-mac.yml",
+      "size": 964,
+      "digest": "sha256:c9fe11cc2bdfc800f3899f5b24a0ad7b7449d10b400c843e0ceb5586e7584013",
+      "url": "https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/latest-mac.yml"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 622,
+      "digest": "sha256:f90ae7fa121556c594cab3742351856276e91b78481299c6e90ab87a6b9461ce",
+      "url": "https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/SHA256SUMS.txt"
+    },
+    {
+      "name": "Snipvia-0.3.1-arm64.dmg",
+      "size": 141558038,
+      "digest": "sha256:2c625c622ac650fdc886207eeb23158fe892ea27100e0975da5f5f46d9a7d227",
+      "url": "https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/Snipvia-0.3.1-arm64.dmg"
+    },
+    {
+      "name": "Snipvia-0.3.1-arm64.zip",
+      "size": 141958348,
+      "digest": "sha256:1137a85fa26beb51f6af5a86779b5b2d77340da2f6fabb1de6852ecc7a8fd4dd",
+      "url": "https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/Snipvia-0.3.1-arm64.zip"
+    },
+    {
+      "name": "Snipvia-0.3.1-x64.dmg",
+      "size": 148324197,
+      "digest": "sha256:84bf9768363f2d8b94cc5f608bd2fb63c2bce0afe8f35bbf5d22817ab8de0f0b",
+      "url": "https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/Snipvia-0.3.1-x64.dmg"
+    },
+    {
+      "name": "Snipvia-0.3.1-x64.zip",
+      "size": 148761493,
+      "digest": "sha256:d7111044d6c2adfafd539217fd8525fd7988cec5e7c9cddf755de70ddd96ba69",
+      "url": "https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/Snipvia-0.3.1-x64.zip"
+    },
+    {
+      "name": "Snipvia-Setup-0.3.1-x64.exe",
+      "size": 118689671,
+      "digest": "sha256:b6e4c520eef5641023760e912105c6c0aafbf0f532778f9300eccadb896256b9",
+      "url": "https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/Snipvia-Setup-0.3.1-x64.exe"
+    },
+    {
+      "name": "WINDOWS_INSTALL_GUIDE.md",
+      "size": 1197,
+      "digest": "sha256:2eaeaffb6570165cd4a0da076394ea0f4da11ac8214e0cd8bebbcaf81cdd6562",
+      "url": "https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/WINDOWS_INSTALL_GUIDE.md"
+    }
+  ],
+  "anonymous": {
+    "passed": true,
+    "assetCount": 8,
+    "largeFiles": "first 65536 bytes match; full hashes match GitHub asset digests",
+    "metadata": "full file bytes match",
+    "latestMacChannelVerified": true
+  },
+  "updateFrom030": {
+    "passed": true,
+    "platform": "darwin",
+    "arch": "arm64",
+    "currentVersion": "0.3.0",
+    "latestVersion": "0.3.1",
+    "status": "available",
+    "downloadSupported": true,
+    "isolatedUserData": true,
+    "downloadedOrInstalledUpdate": false
+  },
+  "previousRelease": {
+    "tag": "v0.3.0",
+    "releaseId": 416174053,
+    "assetCount": 8,
+    "assetsUnchanged": true
+  },
+  "validationReused": "Existing functional tests, macOS signing/notarization and Windows static inspection were not repeated. Only frozen hashes and new remote publication/update state checked.",
+  "platformLimits": {
+    "macOS": "Intel real hardware and actual installation upgrade not verified",
+    "windows": "unsigned preview; Windows real hardware not verified"
+  },
+  "localRecords": ".dev-runtime/publication-0.3.1/"
+}

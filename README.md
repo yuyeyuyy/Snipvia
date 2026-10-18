@@ -6,29 +6,29 @@
 
 ## 当前状态
 
-文档更新：2026-10-18。当前免费客户端版本为 **0.3.0**，源码采用 [Apache License 2.0](LICENSE)。客户端不需要 Snipvia 账号、会员或后台数据库；截图预测使用用户配置的视觉模型，也可选配自己的 Jev 图片预测 Key。服务端、管理后台和官网已从本仓库分离，当前仓库使用独立客户端历史。
+文档更新：2026-10-18。当前免费客户端版本为 **0.3.1**，源码采用 [Apache License 2.0](LICENSE)。客户端不需要 Snipvia 账号、会员或后台数据库；截图预测使用用户配置的视觉模型，也可选配自己的 Jev 图片预测 Key。服务端、管理后台和官网已从本仓库分离，当前仓库使用独立客户端历史。
 
-## 下载 0.3.0
+## 下载 0.3.1
 
-安装包和更新源统一使用 [本仓库的 GitHub Releases](https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.0)。Windows 明确作为未签名预览包提供；下载前可与 Release 中的 `SHA256SUMS.txt` 核对。
+安装包和更新源统一使用 [本仓库的 GitHub Releases](https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.1)。Windows 明确作为未签名预览包提供；下载前可与 Release 中的 `SHA256SUMS.txt` 核对。
 
 | 平台 | 安装包 | 验收边界 |
 | --- | --- | --- |
-| macOS 14+ Apple Silicon | [DMG](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.0/Snipvia-0.3.0-arm64.dmg) | Developer ID 签名、Apple 公证、Staple、Gatekeeper 通过 |
-| macOS 14+ Intel | [DMG](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.0/Snipvia-0.3.0-x64.dmg) | 签名和公证通过，Rosetta 直接启动通过；Intel 真机仍待验收 |
-| Windows x64 预览 | [EXE](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.0/Snipvia-Setup-0.3.0-x64.exe) | 未签名；静态内容与合成 UI 检查通过；安装、DPAPI、真实截图仍待 Windows 真机验收 |
+| macOS 14+ Apple Silicon | [DMG](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/Snipvia-0.3.1-arm64.dmg) | Developer ID 签名、Apple 公证、Staple、Gatekeeper 通过 |
+| macOS 14+ Intel | [DMG](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/Snipvia-0.3.1-x64.dmg) | 签名和公证通过；Intel 真机仍待验收 |
+| Windows x64 预览 | [EXE](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/Snipvia-Setup-0.3.1-x64.exe) | 未签名；静态内容检查通过；安装、DPAPI、真实截图仍待 Windows 真机验收 |
 
 免费表示桌面核心功能不收费，不包含模型厂商的 API Key 或额度。没有 Key 时可使用本地截图、编辑、历史与笔记；AI 需要自行配置模型服务。
 
-0.3.0 的变化见[发布说明](docs/RELEASE_NOTES_0_3_0.md)，签名、构建、测试失败与未完成项见 [macOS 报告](docs/MACOS_RELEASE_0_3_0.md)和 [Windows 报告](docs/WINDOWS_RELEASE_0_3_0.md)。生产依赖仍有一项 node-forge 高危告警，不把本次发布当作漏洞已修复或全部平台已验收。
+0.3.1 的变化见[发布说明](docs/RELEASE_NOTES_0_3_1.md)，本次打包、验收复用和平台限制见[打包记录](docs/RELEASE_0_3_1.md)及[发布记录](docs/RELEASE_0_3_1_PUBLICATION.md)。既有依赖告警仍见[依赖安全记录](docs/opensource/dependency-security.json)，不把本次发布当作漏洞已修复或全部平台已验收。
 
-旧账号版 v0.2.3 及更早版本仍使用旧分发源，**需手动安装 0.3.0 才切换到本仓库更新渠道**；不会追溯修改旧安装包或停止旧服务。卸载或升级前请备份重要数据和笔记。历史隔离、分离与各阶段审计见 [开源文档](docs/opensource/REPOSITORY_ISOLATION_REPORT.md)及[分发说明](docs/RELEASE_DISTRIBUTION.md)，报告中的日期与结论保留其当时范围。
+旧账号版 v0.2.3 及更早版本仍使用旧分发源，**需手动安装 0.3.1 才切换到本仓库更新渠道**；不会追溯修改旧安装包或停止旧服务。卸载或升级前请备份重要数据和笔记。历史隔离、分离与各阶段审计见 [开源文档](docs/opensource/REPOSITORY_ISOLATION_REPORT.md)及[分发说明](docs/RELEASE_DISTRIBUTION.md)，报告中的日期与结论保留其当时范围。
 
 | 模块 | 当前源码已实现 | 边界 |
 | --- | --- | --- |
 | 截图与对话 | 快捷键框选、置顶图片、截图旁流式对话、续拍追问、本地历史 | 只上传选中区域；普通截图支持标注，长截图未实现 |
 | 截图预测 | 四个内置分支：解释错误、解释代码、回答问题、创建日程草稿；名称、适用内容、执行指令和笔记本绑定可编辑 | 空输入按 Enter 才触发；低置信度、无命中或调用失败时等待手动操作 |
-| AI 笔记 | 本地 Markdown、三种编辑模式、代码高亮与复制、GFM 表格、标题大纲、双向链接、附件、ZIP 导出、文件拖拽、侧栏连续收起 | 移除笔记本只取消链接；Agent 可提出新建、追加与局部编辑建议，每次查看差异并确认后保存；实际修改可撤销，之后被改过的笔记不覆盖；附件自动写入未实现 |
+| AI 笔记 | 本地 Markdown、三种编辑模式、代码高亮与复制、GFM 表格、标题大纲、双向链接、附件、ZIP 导出、文件拖拽、侧栏连续收起 | 移除笔记本只取消链接；Agent 可在所选范围内直接新建、追加与局部编辑，无需逐次审批；实际修改可撤销，之后被改过的笔记不覆盖；附件自动写入未实现 |
 | AI 对话工作区 | 居中欢迎页、分组会话侧栏、重命名与模型恢复；流式输出、停止、重新生成；授权笔记 / 预测规则与确认编辑；本地图片选择、⌘V 粘贴、拖放、已有截图、消息图片预览与历史恢复 | 模型只能提出结构化修改，没有直接写文件或命令权限；图片能力不足会明确提示；详见 [Phase 3](docs/AI_CHAT_WORKSPACE_PHASE3.md)与 [Phase 4](docs/AI_CHAT_WORKSPACE_PHASE4.md)；最新源码界面见 [UI 重构](docs/AI_CHAT_UI_REDESIGN.md) |
 | Agent | 图像问答、联网搜索、网页分块阅读、授权工作区检索、自动整理笔记、沙箱命令与 JavaScript / Python / Shell 脚本、计划清单、步骤时间线、来源展示、停止任务；会话跨重启保留，长对话自动摘要压缩 | 脚本及非只读命令需确认；命令限当前笔记本，macOS 已验证，Windows 暂不开放；通用文件修改和外部 MCP 执行未开放 |
 
@@ -121,7 +121,7 @@ pnpm dev:raw
 
 主窗口默认进入「AI 笔记」，主导航提供 AI 对话、AI 笔记、截图日程和历史对话。进入「AI 笔记」创建笔记本，或打开已有 Markdown 目录。左侧文件列表、中央编辑器、右侧标题大纲与反向链接随窗口适配，两侧可以独立连续收起。文件和文件夹可拖入目录或移回根目录；`assets/` 在文件树中隐藏，附件仍可使用。
 
-笔记支持实时预览、源码和阅读模式、自动保存、Wiki 链接、图片附件及 ZIP 导出。移除笔记本只取消应用中的链接，原文件保留。在笔记页点击「与 AI 讨论」，或在 AI 对话底部选择笔记上下文，可以生成创建、整理、补充和局部修改提案；查看完整差异后点击「确认并保存」才写入。取消、过期或文件发生冲突时不覆盖原文。预测分支设置也提供「用 AI 编辑已保存分支」，支持经确认的新增、编辑、删除自定义规则与调整顺序。截图浮窗的笔记写入同样逐次确认，完成后才回复并展示实际修改清单。详见 [AI 笔记说明](docs/AI_NOTES.md)和 [Phase 3 报告](docs/AI_CHAT_WORKSPACE_PHASE3.md)。
+笔记支持实时预览、源码和阅读模式、自动保存、Wiki 链接、图片附件及 ZIP 导出。移除笔记本只取消应用中的链接，原文件保留。在笔记页点击「与 AI 讨论」，或在 AI 对话底部选择笔记上下文，可以直接创建、整理、补充和局部修改所选范围内的 Markdown，完成后展示差异和撤销入口。只读指令、取消或文件冲突时保留原有保护。预测分支设置也提供「用 AI 编辑已保存分支」，支持经确认的新增、编辑、删除自定义规则与调整顺序。截图浮窗的笔记写入同样直接保存，实际提交完成后才回复并展示修改清单。详见 [AI 笔记说明](docs/AI_NOTES.md)和 [Phase 3 报告](docs/AI_CHAT_WORKSPACE_PHASE3.md)。
 
 选定笔记本后，Agent 还可以通过 `run_command` 创建目录和移动文件，或通过 `run_script` 验证算法、批量整理笔记。命令在本机 OS 沙箱中运行，默认不联网、不继承应用密钥，单次最多 10 秒；执行完成后再回复，Markdown 变更列表来自真实文件核对。详见 [Agent 命令与脚本](docs/AGENT_COMMANDS.md)。
 
@@ -202,7 +202,7 @@ Renderer 不直接读取文件或凭据；IPC 和模型输出均做校验。笔�
 - [Agent 运行时](docs/AGENT_RUNTIME.md)、[执行界面](docs/AGENT_EXECUTION_UI.md)、[工具系统](docs/AGENT_TOOL_SYSTEM.md)。
 - [Agent 权限](docs/AGENT_PERMISSIONS.md)、[文件变更基础设施](docs/AGENT_FILE_CHANGES.md)、[MCP 适配](docs/AGENT_MCP.md)。
 - [网页工具](docs/AGENT_WEB_TOOLS.md)、[联网研究与来源](docs/AGENT_WEB_RESEARCH.md)。
-- [Agent 整理与确认写入笔记](docs/AGENT_NOTE_WRITING_PLAN.md)、[本地日程模型备选方案](docs/LOCAL_SCHEDULE_MODEL_PLAN.md)：逐次确认、写入保护与本地模型备选规划。
+- [Agent 自动整理与写入笔记](docs/AGENT_NOTE_WRITING_PLAN.md)、[本地日程模型备选方案](docs/LOCAL_SCHEDULE_MODEL_PLAN.md)：自动保存、写入保护与本地模型备选规划。
 
 ### 数据迁移
 

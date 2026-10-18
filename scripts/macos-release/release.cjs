@@ -3,7 +3,7 @@ const { randomUUID } = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const process = require('node:process');
-const { macUpdateMetadata } = require('./update-metadata.cjs');
+const { writeVerificationFiles } = require('./update-metadata.cjs');
 const { repository } = require('../../src/shared/release-source.json');
 const {
   releaseRoot, appName, version, ensure, run, preflight, releaseEnvironment,
@@ -58,6 +58,8 @@ try {
     const zipVerification = verifyZip(zip, arch);
     report.architectures.push({ arch, app: appVerification, dmg: dmgVerification, zip: zipVerification, notarization });
     for (const file of [dmg, zip]) report.artifacts.push({ name: path.basename(file), sha256: digest(file) });
+    // Persist successful evidence before the next architecture can fail.
+    fs.writeFileSync(path.join(output, 'verification-' + arch + '.json'), JSON.stringify(report, null, 2) + '\n', { flag: 'wx' });
   }
   // Stapling changes the DMG. Regenerate update hashes only after all files are frozen.
   const verified = path.join(output, 'verified');
@@ -68,9 +70,7 @@ try {
     fs.copyFileSync(path.join(output, artifact.name), destination, fs.constants.COPYFILE_EXCL);
     ensure(digest(destination) === artifact.sha256, '分发副本的 SHA-256 不匹配。');
   }
-  fs.writeFileSync(path.join(pending, 'SHA256SUMS.txt'), report.artifacts.map((artifact) => `${artifact.sha256}  ${artifact.name}\n`).join(''), { flag: 'wx' });
-  fs.writeFileSync(path.join(pending, 'verification.json'), `${JSON.stringify(report, null, 2)}\n`, { flag: 'wx' });
-  fs.writeFileSync(path.join(pending, 'latest-mac.yml'), macUpdateMetadata(pending), { flag: 'wx' });
+  writeVerificationFiles(pending, report);
   ensure(!fs.existsSync(verified), '验收目录已存在，拒绝覆盖。');
   fs.renameSync(pending, verified);
   console.log(`全部验收通过；独立 Release 待发布文件：${verified}`);

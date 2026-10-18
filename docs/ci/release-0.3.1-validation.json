@@ -181,10 +181,63 @@
     }
   ],
   "newToolingChecks": {
-    "lint": "passed",
-    "testFiles": 1,
-    "testsPassed": 4
+    "lint": "passed (build cache and manifest changes)",
+    "testFiles": 2,
+    "testsPassed": 6,
+    "typecheck": "passed after both new tooling test files were added"
   },
   "fullFunctionalSuiteRerun": false,
-  "windowsRealDeviceVerified": false
+  "windowsRealDeviceVerified": false,
+  "newPackagedStartup": {
+    "passed": true,
+    "at": "2026-10-18T04:14:57.853Z",
+    "packaged": true,
+    "version": "0.3.1",
+    "platform": "darwin",
+    "arch": "arm64",
+    "windows": [
+      {
+        "sandbox": true,
+        "contextIsolation": true,
+        "nodeIntegration": false
+      }
+    ],
+    "userDataIsolated": true,
+    "usedProductionUserData": false,
+    "madeAIRequests": false,
+    "installedApplication": false,
+    "scope": "New packaged version, startup, preload availability and BrowserWindow security; prior functional checks reused."
+  },
+  "packagingOnlyFix": "Correct literal escaped newline suffixes in release verification JSON/checksum output; no changes to compiled application inputs.",
+  "architectureRecovery": {
+    "reason": "Intel signing failed due to an absent Apple timestamp; retried Intel only in a new directory.",
+    "arm64EvidenceRecovery": "Original process did not persist its artifact receipts before exiting. Real app/DMG/ZIP checks were performed once during recovery, followed by a durable SHA-256 checkpoint; no fabricated passed evidence and no repeat signing/notarization.",
+    "futurePerArchitectureCheckpoints": true
+  },
+  "toolingLogs": [
+    {
+      "name": "tooling-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tooling-tests.log",
+      "sha256": "3d207128eeeb2a1623a67516a40c87c2cdb6759321ffc70cef05acee508206d6"
+    },
+    {
+      "name": "manifest-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "manifest-tests.log",
+      "sha256": "851f219cc667cad1d2a6f1a6d55ff19a78fb62415c7e81e49ba5ff108a26dadc"
+    },
+    {
+      "name": "checkpoint-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tooling-typecheck.log",
+      "sha256": "8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92"
+    }
+  ]
 }

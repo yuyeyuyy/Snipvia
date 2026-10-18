@@ -1,0 +1,74 @@
+{
+  "version": "0.3.1",
+  "applicationSourceCommit": "cb50b23775ad27b8ed0fa6a5087f8201ba66d1fe",
+  "completedAt": "2026-10-18T04:29:47.918638+00:00",
+  "candidateDirectory": "dist/Snipvia-0.3.1-candidate-1b59aa65",
+  "macOS": {
+    "architectures": [
+      "arm64",
+      "x64"
+    ],
+    "signed": true,
+    "hardenedRuntime": true,
+    "notarization": "Accepted",
+    "stapled": true,
+    "gatekeeper": "accepted",
+    "dmgSubmissions": [
+      {
+        "arch": "arm64",
+        "id": "2fa6a860-7fc8-4824-a84c-6daa50f74272",
+        "status": "Accepted"
+      },
+      {
+        "arch": "x64",
+        "id": "4e0859ce-8238-4230-9c28-30947a1de973",
+        "status": "Accepted"
+      }
+    ],
+    "fullVerificationRecord": "dist/macos-release/0.3.1-x64-retry-2026-10-18T04-21-23-944Z-07846da0/verified/verification.json"
+  },
+  "windows": {
+    "architecture": "x64",
+    "signed": false,
+    "staticVerification": "passed",
+    "realDeviceVerified": false
+  },
+  "releasePublished": false,
+  "assets": [
+    {
+      "name": "Snipvia-0.3.1-arm64.dmg",
+      "bytes": 141558038,
+      "sha256": "2c625c622ac650fdc886207eeb23158fe892ea27100e0975da5f5f46d9a7d227"
+    },
+    {
+      "name": "Snipvia-0.3.1-arm64.zip",
+      "bytes": 141958348,
+      "sha256": "1137a85fa26beb51f6af5a86779b5b2d77340da2f6fabb1de6852ecc7a8fd4dd"
+    },
+    {
+      "name": "Snipvia-0.3.1-x64.dmg",
+      "bytes": 148324197,
+      "sha256": "84bf9768363f2d8b94cc5f608bd2fb63c2bce0afe8f35bbf5d22817ab8de0f0b"
+    },
+    {
+      "name": "Snipvia-0.3.1-x64.zip",
+      "bytes": 148761493,
+      "sha256": "d7111044d6c2adfafd539217fd8525fd7988cec5e7c9cddf755de70ddd96ba69"
+    },
+    {
+      "name": "Snipvia-Setup-0.3.1-x64.exe",
+      "bytes": 118689671,
+      "sha256": "b6e4c520eef5641023760e912105c6c0aafbf0f532778f9300eccadb896256b9"
+    },
+    {
+      "name": "latest-mac.yml",
+      "bytes": 964,
+      "sha256": "c9fe11cc2bdfc800f3899f5b24a0ad7b7449d10b400c843e0ceb5586e7584013"
+    },
+    {
+      "name": "WINDOWS_INSTALL_GUIDE.md",
+      "bytes": 1197,
+      "sha256": "2eaeaffb6570165cd4a0da076394ea0f4da11ac8214e0cd8bebbcaf81cdd6562"
+    }
+  ]
+}

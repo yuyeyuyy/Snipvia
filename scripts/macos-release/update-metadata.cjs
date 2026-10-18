@@ -25,6 +25,14 @@ function macUpdateMetadata(directory) {
     releaseDate: new Date().toISOString() }, null, 2) + '\n';
 }
 
+/** Write parseable manifests once, after the final artifact hashes are frozen. */
+function writeVerificationFiles(directory, report) {
+  fs.writeFileSync(path.join(directory, 'verification.json'), JSON.stringify(report, null, 2) + '\n', { flag: 'wx' });
+  const metadata = macUpdateMetadata(directory); // Recheck the frozen artifact hashes before writing the channel.
+  fs.writeFileSync(path.join(directory, 'SHA256SUMS.txt'), report.artifacts.map(artifact => `${artifact.sha256}  ${artifact.name}\n`).join(''), { flag: 'wx' });
+  fs.writeFileSync(path.join(directory, 'latest-mac.yml'), metadata, { flag: 'wx' });
+}
+
 if (require.main === module) {
   try {
     if (process.argv.length !== 4) throw new Error('用法：node scripts/macos-release/update-metadata.cjs <verified 目录> <新输出文件>');
@@ -33,4 +41,4 @@ if (require.main === module) {
     console.log('已生成基于最终冻结文件的 Mac 更新元数据；尚未上传。');
   } catch (error) { console.error(error instanceof Error ? error.message : '更新元数据生成失败'); process.exitCode = 1; }
 }
-module.exports = { macUpdateMetadata };
+module.exports = { macUpdateMetadata, writeVerificationFiles };

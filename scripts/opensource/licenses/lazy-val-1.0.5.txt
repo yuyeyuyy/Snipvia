@@ -1,0 +1,28 @@
+lazy-val@1.0.5 — reviewed license supplement
+
+Upstream declares this package under the MIT license.
+Author attribution from the published package: Vladimir Krivosheev.
+The published archive and upstream commit contain no separate copyright or
+license file. No copyright year or original copyright notice is invented here.
+This supplement is NOT an original upstream LICENSE file or a new license grant
+by Snipvia. It reproduces the standard MIT grant, conditions and disclaimer for
+the license explicitly selected by the upstream author. Existing upstream
+attributions are retained unchanged. See lazy-val-1.0.5.json for exact sources,
+archive integrity and installed-file hashes.
+
+MIT License — standard grant and conditions
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the
+following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial
+portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+USE OR OTHER DEALINGS IN THE SOFTWARE.

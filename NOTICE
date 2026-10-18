@@ -1,0 +1,11 @@
+Snipvia (截然)
+Copyright 2026 Snipvia contributors
+
+Project-owned source code is licensed under the Apache License, Version 2.0.
+Individual contributors retain their copyrights. This notice does not change
+the licenses of third-party components or grant rights to third-party marks.
+
+Third-party notices are described in THIRD_PARTY_NOTICES.md. Packaged builds
+include original dependency license texts and Electron/Chromium notices under
+licenses/ in the application archive. Asset provenance is tracked separately
+in docs/opensource/ASSET_PROVENANCE.md and must be reviewed before publication.

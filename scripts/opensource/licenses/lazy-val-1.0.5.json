@@ -1,0 +1,26 @@
+{
+  "name": "lazy-val",
+  "version": "1.0.5",
+  "license": "MIT",
+  "author": "Vladimir Krivosheev",
+  "reviewedOn": "2026-10-17",
+  "kind": "standard-license-supplement",
+  "originalNoticeSupplied": false,
+  "sources": {
+    "publishedMetadata": "https://registry.npmjs.org/lazy-val/1.0.5",
+    "upstreamMetadata": "https://github.com/develar/lazy-val/blob/b69ad4119f1b19bdab13c61ee2fcc88d46b89071/package.json",
+    "tarball": "https://registry.npmjs.org/lazy-val/-/lazy-val-1.0.5.tgz",
+    "integrity": "sha512-0/BnGCCfyUMkBpeDgWihanIAF9JmZhHBgUhEqzvf+adhNGLoP6TaiI5oF8oyb3I45P+PcnrqihSf01M0l0G5+Q==",
+    "standardLicense": "https://github.com/spdx/license-list-data/blob/v3.27.0/json/details/MIT.json",
+    "standardLicenseParsedJsonSha256": "907a87eac3326cf80665858eca56f5f88163d4b705991dd6f671e5f83410eb81"
+  },
+  "files": {
+    "out/main.js": "358fa8cba70c9140edafa85c0b7b25c7261939480186167e6b3440905f5b47da",
+    "package.json": "a5096f95098452cf6fe5c8ac9be8f13f59ab7c9f605ba5ef92c91b2c505744f0",
+    "out/main.js.map": "aa3e70f08a0ce115832e5324c4b96aa1475a3b8b36728f50091ebd22aa0f6646",
+    "readme.md": "87dd77cd27b045ab279f6f2c99acedaeec6b7c92e296a354bb2687b9f2965438",
+    "out/main.d.ts": "e4bd94e97e08af3a3b8a6b2e85c6b93a690f572c1bffca113681ee7390f53411"
+  },
+  "notice": "lazy-val-1.0.5.txt",
+  "noticeSha256": "d5013255068743f694bb49cf01ae8cafa007d35e8275687e123bab28d1cb5773"
+}

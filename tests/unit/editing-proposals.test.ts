@@ -101,12 +101,12 @@ describe('用户确认的编辑提案', () => {
     expect(await f.service.execute(scope, { kind: 'note', change: { mode: 'replace', path: '二分.md', content: '总结' } }, f.signal)).toMatchObject({ saved: false });
     expect(await readFile(join(f.root, '二分.md'), 'utf8')).toBe('内容'.repeat(3000));
   });
-  it('保存失败、资格失败和重复点击不会更改文件；附属记录失败如实报告已提交', async () => {
+  it('保存失败、编辑器刷新失败和重复点击不会更改文件；附属记录失败如实报告已提交', async () => {
     const f = await fixture(); const { summary } = await candidate(f); f.service.preview(1, f.id, summary.id);
     const spy = vi.spyOn(f.workspaces, 'commitSnapshot').mockRejectedValueOnce(new Error('WRITE_FAILED'));
     await expect(f.service.apply(1, f.id, summary.id, summary.digest)).rejects.toThrow('WRITE_FAILED'); expect(await readFile(join(f.root, '二分.md'), 'utf8')).toContain('left = mid\r\n'); spy.mockRestore();
-    f.beforeWrite.mockRejectedValueOnce(new Error('无会员资格'));
-    await expect(f.service.apply(1, f.id, summary.id, summary.digest)).rejects.toThrow('无会员资格');
+    f.beforeWrite.mockRejectedValueOnce(new Error('编辑器刷新失败'));
+    await expect(f.service.apply(1, f.id, summary.id, summary.digest)).rejects.toThrow('编辑器刷新失败');
     let release!: () => void; const gate = new Promise<void>(resolve => { release = resolve; }); f.beforeWrite.mockImplementationOnce(() => gate);
     f.applied.mockRejectedValueOnce(new Error('history failed'));
     const first = f.service.apply(1, f.id, summary.id, summary.digest);

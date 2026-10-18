@@ -236,7 +236,7 @@ API Key 只由 main 读写，按厂商和 endpoint 隔离后由 Electron `safeSt
 
 不组装 AccountService，不暴露 account IPC，不读取或解密旧 Cookie。旧 `userData/account` 保留且继续属于 Agent 受保护目录。原模型密钥、笔记、历史、日程、appId 和 userData 路径不变。
 
-ScreenshotAnalyzer 保留 OCR 文本，但分支选择统一由用户视觉模型完成。PredictionService 对启用分支与快照进行分类，响应有 128 KiB 上限及 45 秒超时；错误、取消、坏 JSON、未知分支和截断结果不会退回 OCR 自动执行。没有账号代理或 Jev 请求。模型配置改变会取消进行中的预测。
+ScreenshotAnalyzer 保留 OCR 文本，分支选择默认由用户视觉模型完成；可选 Jev 原生图片策略的当前路径见 [Jev 图片预测](JEV_PREDICTION.md)。PredictionService 对启用分支与快照进行分类，响应有 128 KiB 上限及 45 秒超时；错误、取消、坏 JSON、未知分支和截断结果不会退回 OCR 自动执行。没有账号代理；启用 Jev 且有独立 Key 时 Main 直连 TypeSafe 图片 API，缺少配置时使用默认模型，失败不自动换服务。模型或 Jev 配置改变会取消进行中的预测。
 
 发布源由 `src/shared/release-source.json` 统一定义为 `yuyeyuyy/Snipvia`，版本检查、签名 Mac 下载与发布计划共用该值。旧安装包中的旧值不会远程自动改变，需另行安排新免费版过渡发布。[实施报告](opensource/PHASE1_REPORT.md) 记录验收范围。
 

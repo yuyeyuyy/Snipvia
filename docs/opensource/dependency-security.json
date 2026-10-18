@@ -1,0 +1,122 @@
+{
+  "date": "2026-10-16",
+  "method": "pnpm 11.1.3 audit --prod --json and audit --json after targeted updates; registry results are not exploitability proof",
+  "changes": [
+    {
+      "package": "@modelcontextprotocol/sdk",
+      "from": "1.30.1",
+      "to": "1.31.0",
+      "advisory": "https://github.com/modelcontextprotocol/typescript-sdk/security/advisories/GHSA-6qxp-vccf-f47h"
+    },
+    {
+      "package": "source-map-js",
+      "from": "1.2.1",
+      "to": "1.2.2",
+      "advisory": "https://github.com/7rulnik/source-map-js/releases/tag/v1.2.2"
+    },
+    {
+      "package": "http-cache-semantics",
+      "from": "4.2.0",
+      "to": "4.3.0",
+      "advisory": "https://github.com/kornelski/http-cache-semantics/issues/56",
+      "result": "No longer reported by registry audit; no unpublished 4.2.1 version invented"
+    }
+  ],
+  "remaining": [
+    {
+      "package": "node-forge",
+      "version": "1.4.0",
+      "severity": "high",
+      "scope": "production",
+      "advisory": "https://github.com/digitalbazaar/forge/pull/1152",
+      "path": "@anthropic-ai/sandbox-runtime > node-forge",
+      "evidence": [
+        "src/main/agent/commands/ProcessSandbox.ts config denies network and omits tlsTerminate/mitmProxy",
+        "installed sandbox-runtime dist/sandbox/sandbox-manager.js creates MITM CA only when tlsTerminate is provided"
+      ],
+      "assessment": "No enabled path to the affected signature verifier identified in this review; dependency remains affected and is not waived. No published 1.4.1 found.",
+      "releaseCondition": "Use a published upstream fix, or separately review and document vulnerability reachability and distribution decision before formal release."
+    },
+    {
+      "package": "sprintf-js",
+      "version": "1.1.3",
+      "severity": "moderate",
+      "scope": "development/optional build tools",
+      "advisory": "https://github.com/alexei/sprintf.js/issues/237",
+      "path": "electron-builder > app-builder-lib > @electron/get > global-agent > roarr > sprintf-js",
+      "assessment": "Not in installed production graph. Build tooling still affected; no published 1.1.4 found.",
+      "releaseCondition": "Continue tracking upstream; build trusted source with controlled environment and do not treat audit as passing."
+    }
+  ],
+  "auditSummary": [
+    {
+      "scope": "production",
+      "exitCode": 1,
+      "metadata": {
+        "vulnerabilities": {
+          "info": 0,
+          "low": 0,
+          "moderate": 0,
+          "high": 1,
+          "critical": 0
+        },
+        "dependencies": 276,
+        "devDependencies": 0,
+        "optionalDependencies": 0,
+        "totalDependencies": 276
+      },
+      "advisories": [
+        {
+          "module": "node-forge",
+          "severity": "high",
+          "url": "https://github.com/advisories/GHSA-86w9-cpqp-85rv",
+          "paths": [
+            [
+              ".>@anthropic-ai/sandbox-runtime>node-forge"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "scope": "all",
+      "exitCode": 1,
+      "metadata": {
+        "vulnerabilities": {
+          "info": 0,
+          "low": 0,
+          "moderate": 1,
+          "high": 1,
+          "critical": 0
+        },
+        "dependencies": 276,
+        "devDependencies": 468,
+        "optionalDependencies": 101,
+        "totalDependencies": 744
+      },
+      "advisories": [
+        {
+          "module": "node-forge",
+          "severity": "high",
+          "url": "https://github.com/advisories/GHSA-86w9-cpqp-85rv",
+          "paths": [
+            [
+              ".>@anthropic-ai/sandbox-runtime>node-forge"
+            ]
+          ]
+        },
+        {
+          "module": "sprintf-js",
+          "severity": "moderate",
+          "url": "https://github.com/advisories/GHSA-hp3w-g68c-fv3c",
+          "paths": [
+            [
+              ".>electron-builder>app-builder-lib>@electron/get>global-agent>roarr>sprintf-js",
+              ".>electron-builder>dmg-builder>app-builder-lib>@electron/get>global-agent>roarr>sprintf-js"
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

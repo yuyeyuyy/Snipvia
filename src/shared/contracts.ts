@@ -226,6 +226,7 @@ export type LoginItemState = { supported: boolean; enabled: boolean; description
 export type SnipviaAPI = {
   chatImages: import('./chat-images').ChatImagesAPI;
   updates: import('./updates').UpdatesAPI;
+  prediction: import('./prediction-settings').PredictionSettingsAPI;
   notes: import('./notes').NotesAPI;
   agentPermissions: AgentPermissionAPI;
   agent: AgentExecutionAPI;

@@ -46,6 +46,11 @@ const api: SnipviaAPI = {
     bind: (conversationId, imageIds) => ipcRenderer.invoke('chat-images:bind', { conversationId, imageIds }),
     capability: () => ipcRenderer.invoke('chat-images:capability')
   },
+  prediction: {
+    get: () => ipcRenderer.invoke('prediction-settings:get'),
+    save: value => ipcRenderer.invoke('prediction-settings:save', value),
+    openConsole: () => ipcRenderer.invoke('prediction-settings:open-console')
+  },
   updates: {
     current: () => ipcRenderer.invoke('updates:current'),
     check: () => ipcRenderer.invoke('updates:check'),

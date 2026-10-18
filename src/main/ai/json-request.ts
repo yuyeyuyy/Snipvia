@@ -1,7 +1,8 @@
+import type { PredictionFailure } from '../../shared/prediction-failure';
 import { PredictionError } from '../analysis/PredictionError';
 
 /** Bounded, cancellable model JSON transport. Never relays response bodies. */
-export async function requestPredictionJson(url: string, init: RequestInit, signal: AbortSignal, timeoutMs = 45_000): Promise<unknown> {
+export async function requestPredictionJson(url: string, init: RequestInit, signal: AbortSignal, timeoutMs = 45_000, stage: PredictionFailure['stage'] = 'vision'): Promise<unknown> {
   signal.throwIfAborted();
   const timeout = AbortSignal.timeout(timeoutMs);
   const active = AbortSignal.any([signal, timeout]);
@@ -11,11 +12,11 @@ export async function requestPredictionJson(url: string, init: RequestInit, sign
     if (!response.ok) {
       await response.body?.cancel();
       const status = response.status;
-      throw new PredictionError({ stage: 'vision', reason: status === 401 || status === 403 ? 'auth' : status === 429 ? 'busy' : status === 404 ? 'endpoint' : status === 400 || status === 422 ? 'request' : 'unavailable', upstreamStatus: status >= 400 && status <= 599 ? status : undefined });
+      throw new PredictionError({ stage, reason: status === 401 || status === 403 ? 'auth' : status === 429 ? 'busy' : status === 404 ? 'endpoint' : status === 400 || status === 422 ? 'request' : 'unavailable', upstreamStatus: status >= 400 && status <= 599 ? status : undefined });
     }
     if (Number(response.headers.get('content-length')) > limit || !response.body) {
       await response.body?.cancel();
-      throw new PredictionError({ stage: 'vision', reason: 'invalid_response' });
+      throw new PredictionError({ stage, reason: 'invalid_response' });
     }
     const reader = response.body.getReader();
     const cancel = () => { void reader.cancel().catch(() => undefined); };
@@ -29,15 +30,15 @@ export async function requestPredictionJson(url: string, init: RequestInit, sign
         active.throwIfAborted();
         if (chunk.done) break;
         size += chunk.value.byteLength;
-        if (size > limit) { await reader.cancel(); throw new PredictionError({ stage: 'vision', reason: 'invalid_response' }); }
+        if (size > limit) { await reader.cancel(); throw new PredictionError({ stage, reason: 'invalid_response' }); }
         chunks.push(chunk.value);
       }
       try { return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Buffer.concat(chunks))); }
-      catch { throw new PredictionError({ stage: 'vision', reason: 'invalid_response' }); }
+      catch { throw new PredictionError({ stage, reason: 'invalid_response' }); }
     } finally { active.removeEventListener('abort', cancel); reader.releaseLock(); }
   } catch (error) {
     signal.throwIfAborted();
     if (error instanceof PredictionError) throw error;
-    throw new PredictionError({ stage: 'vision', reason: timeout.aborted ? 'timeout' : 'network' });
+    throw new PredictionError({ stage, reason: timeout.aborted ? 'timeout' : 'network' });
   }
 }

@@ -7,7 +7,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   { files: ['**/*.ts', '**/*.tsx'], rules: { '@typescript-eslint/no-explicit-any': 'error' } },
   {
-    files: ['electron-builder.macos-release.cjs', 'electron-builder.macos-validation.cjs', 'scripts/macos-release/*.cjs'],
+    files: ['electron-builder.macos-release.cjs', 'electron-builder.macos-validation.cjs', 'scripts/macos-release/*.cjs', 'scripts/opensource/*.cjs'],
     languageOptions: { sourceType: 'commonjs', globals: { require: 'readonly', module: 'readonly' } },
     rules: { '@typescript-eslint/no-require-imports': 'off' }
   }

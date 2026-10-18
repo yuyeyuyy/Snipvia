@@ -16,6 +16,11 @@ async function beforePack(context) {
   assertReleaseContext();
   ensure(context.electronPlatformName === 'darwin', '此配置仅用于 macOS 正式发布。');
   architecture(context);
+  const notices = JSON.parse(fs.readFileSync(path.join(root, 'out/licenses/dependencies.json'), 'utf8'));
+  ensure(Array.isArray(notices.missingLicenseFiles) && notices.missingLicenseFiles.length === 0
+    && Array.isArray(notices.packages) && notices.packages.length > 0
+    && notices.packages.every(item => Array.isArray(item.notices) && item.notices.length > 0),
+  '依赖许可证文本尚未核实完整，禁止正式打包；请检查 out/licenses/dependencies.json。');
   const identity = preflight();
   ensure(identity.hash === process.env.SNIPVIA_SIGNING_HASH, '签名身份在预检后发生变化。');
   const config = context.packager.config;

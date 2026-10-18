@@ -6,9 +6,23 @@
 
 ## 当前状态
 
-文档更新：2026-10-16。当前为独立 Electron 桌面工程，Phase 1 已移除官方账号和会员限制，预测直接使用用户视觉模型。服务端、控制台和官网已迁至私有仓库 `yuyeyuyy/Snipvia-server`。[Phase 1 实施报告](docs/opensource/PHASE1_REPORT.md) 记录验证、数据兼容与剩余发布门槛。旧混合历史保留在私有归档 `Snipvia-legacy`；当前同名 `Snipvia` 是独立客户端历史的新私有仓库，见[仓库历史隔离报告](docs/opensource/REPOSITORY_ISOLATION_REPORT.md)。许可证和素材授权待确认，尚未公开或发布新的免费安装包。
+文档更新：2026-10-18。当前免费客户端版本为 **0.3.0**，源码采用 [Apache License 2.0](LICENSE)。客户端不需要 Snipvia 账号、会员或后台数据库；截图预测使用用户配置的视觉模型，也可选配自己的 Jev 图片预测 Key。服务端、管理后台和官网已从本仓库分离，当前仓库使用独立客户端历史。
 
-Mac 桌面应用 **v0.2.3** 的变更见 [发布说明](docs/RELEASE_NOTES_0_2_3.md)，签名、公证与验证见[发布报告](docs/MACOS_RELEASE_0_2_3.md)，安装包从独立公开的 [GitHub Release](https://github.com/yuyeyuyy/Snipvia-releases/releases/tag/v0.2.3) 下载。v0.2.2 可直接通过应用内下载并确认重启更新；v0.2.1 或更早版本需先手动安装新版 DMG。Windows 沿用 v0.2.1 预览版。源码仓库保持私有，分发机制见[迁移说明](docs/RELEASE_DISTRIBUTION.md)。下表描述本版源码与已知边界。私有系统已独立保存，见[分离报告](docs/opensource/SEPARATION_REPORT.md)。
+## 下载 0.3.0
+
+安装包和更新源统一使用 [本仓库的 GitHub Releases](https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.0)。Windows 明确作为未签名预览包提供；下载前可与 Release 中的 `SHA256SUMS.txt` 核对。
+
+| 平台 | 安装包 | 验收边界 |
+| --- | --- | --- |
+| macOS 14+ Apple Silicon | [DMG](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.0/Snipvia-0.3.0-arm64.dmg) | Developer ID 签名、Apple 公证、Staple、Gatekeeper 通过 |
+| macOS 14+ Intel | [DMG](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.0/Snipvia-0.3.0-x64.dmg) | 签名和公证通过，Rosetta 直接启动通过；Intel 真机仍待验收 |
+| Windows x64 预览 | [EXE](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.0/Snipvia-Setup-0.3.0-x64.exe) | 未签名；静态内容与合成 UI 检查通过；安装、DPAPI、真实截图仍待 Windows 真机验收 |
+
+免费表示桌面核心功能不收费，不包含模型厂商的 API Key 或额度。没有 Key 时可使用本地截图、编辑、历史与笔记；AI 需要自行配置模型服务。
+
+0.3.0 的变化见[发布说明](docs/RELEASE_NOTES_0_3_0.md)，签名、构建、测试失败与未完成项见 [macOS 报告](docs/MACOS_RELEASE_0_3_0.md)和 [Windows 报告](docs/WINDOWS_RELEASE_0_3_0.md)。生产依赖仍有一项 node-forge 高危告警，不把本次发布当作漏洞已修复或全部平台已验收。
+
+旧账号版 v0.2.3 及更早版本仍使用旧分发源，**需手动安装 0.3.0 才切换到本仓库更新渠道**；不会追溯修改旧安装包或停止旧服务。卸载或升级前请备份重要数据和笔记。历史隔离、分离与各阶段审计见 [开源文档](docs/opensource/REPOSITORY_ISOLATION_REPORT.md)及[分发说明](docs/RELEASE_DISTRIBUTION.md)，报告中的日期与结论保留其当时范围。
 
 | 模块 | 当前源码已实现 | 边界 |
 | --- | --- | --- |
@@ -24,7 +38,7 @@ macOS 是优先验证平台，提供 macOS 14+ Apple 芯片与 Intel 的独立�
 
 2026-10-12 Mac 更新实机测试：独立签名测试包从 0.2.1 自行升级并重启到 0.2.2，笔记与签名检查通过；迁移前的私有仓库匿名更新源返回 404，当时尚未完成线上分发验收，详见[测试报告](docs/MACOS_UPDATE_TEST.md)。
 
-同日分发迁移后：源码保持私有，`Snipvia-releases` 已公开发布原 v0.2.1；真实匿名客户端版本检查和公开资产校验通过。更新与正式发布改用统一公开仓库配置，旧包仍需手动升级，详见[分发迁移记录](docs/RELEASE_DISTRIBUTION.md)。
+历史记录（2026-10-12，当时源码仍私有）：`Snipvia-releases` 已公开发布原 v0.2.1；真实匿名客户端版本检查和公开资产校验通过。更新与正式发布改用统一公开仓库配置，旧包仍需手动升级，详见[分发迁移记录](docs/RELEASE_DISTRIBUTION.md)。
 
 UI 2.0 阶段 2 已在源码实现：Light / Dark / System（默认跟随系统）、跨窗口主题同步、176px / 52px 可折叠导航和快捷导航。阶段 2.5 将客户端视觉统一为黑白灰 Monochrome，保留截图与标注内容原色。通过「设置 → 外观」切换，重启后保留选择。这些界面改造现随 v0.2.2 Mac 安装包分发。见 [阶段 2 实施记录](docs/UI_2_0_STAGE_2.md)与 [Monochrome Token、验证与截图](docs/UI_2_0_MONOCHROME.md)。阶段 3 已接入月历日期详情与历史同屏只读预览，见 [页面重构与验证](docs/UI_2_0_STAGE_3.md)。阶段 4 已实现 AI 笔记的居中编辑表面、按需大纲与紧凑分组设置，文件与模型业务保持，见 [实施清单、验证与亮暗截图](docs/UI_2_0_STAGE_4.md)。阶段 5 已接入截图 AI 紧凑浮窗与可调整双栏工作台，见 [截图、性能对比及验证范围](docs/UI_2_0_STAGE_5.md)。阶段 6 已完成桌面 Monochrome 审查并修复编辑器搜索样式，见 [全局验收、实际截图与实机检查边界](docs/UI_2_0_STAGE_6.md)。
 
@@ -48,7 +62,11 @@ pnpm electron:install
 ### 启动桌面应用
 
 ```sh
+# macOS：固定开发应用
 pnpm dev
+
+# Windows：直接启动 Electron 开发模式
+pnpm dev:raw
 ```
 
 开发模式使用固定的 `~/Applications/截然 Dev.app` 和独立数据目录 `~/Library/Application Support/snipvia-dev`，可以与已打包的 Snipvia 同时运行。源码修改会热更新开发版，已安装应用需要重新打包。
@@ -59,7 +77,7 @@ pnpm dev
 
 客户端无需注册、登录、资格或官方 Cookie。首次启动可直接截图编辑、保存、使用笔记与历史；AI 功能需要在「模型与设置」选择支持图片的模型并配置自己的 Key。自定义本地服务可不使用 Key。模型厂商可能收取 API 费用。
 
-空输入 Enter 显式触发分支预测，直接把选中裁剪图和已启用分支的适用条件发给用户模型；没有匹配或预测失败时等待手动操作。可选 Jev 属于后续 Phase 2，本阶段不调用 Jev 或旧预测代理。
+空输入 Enter 显式触发分支预测，默认把选中裁剪图和已启用分支的适用条件发给用户视觉模型。可在模型配置中启用 Jev 图片预测并独立保存自己的 Key；未配置或关闭 Jev 时使用原视觉模型，Jev 失败则提示并等待明确重试。命中后继续原来的 AI / Agent / 笔记 / 日程流程，详见 [Jev 图片预测](docs/JEV_PREDICTION.md)。
 
 旧 `account/session.json` 保留原位但不读取、不解密；旧账号环境变量无效。私有系统迁移见[分离报告](docs/opensource/SEPARATION_REPORT.md)。
 
@@ -90,7 +108,7 @@ pnpm dev
 
 客户端预设支持 OpenAI、Anthropic Claude、Gemini、xAI Grok、百炼 Qwen、DeepSeek、智谱 GLM、Kimi、火山方舟 Doubao与自定义服务。刷新按钮位于模型下拉框左侧，动态查询 / 官方清单回退直接更新下拉选项，只展示已确认支持图片理解的模型；保留 24 小时缓存及手动 ID。OpenAI 预设更新为 GPT-6.1 Sol / GPT-6 系列，旧配置保持原模型；百度、腾讯、硅基流动和 OpenRouter 的入口已移除，已有配置以自定义服务展示并保留原凭据；详见[模型目录与能力识别](docs/MODEL_DISCOVERY.md)。千问、Kimi 和智谱可选择接口来源，凭据按来源独立保存；DeepSeek 预设使用支持图片的 `deepseek-flash`。配置、模型限制及验证范围见 [客户端模型厂商](docs/DESKTOP_MODEL_PROVIDERS.md)。
 
-1. 在标题栏打开「模型与设置」，选择支持图片的对话模型并配置自己的 Key。桌面对话使用 Chat Completions 兼容协议，Agent 还需要 Tool Calling。分支预测也使用这一用户模型；不需要官方服务或 Jev Key。
+1. 在标题栏打开「模型与设置」，选择支持图片的对话模型并配置自己的 Key。桌面对话使用 Chat Completions 兼容协议，Agent 还需要 Tool Calling。分支预测默认使用这一用户模型；也可选配 Jev Key，直接用 Jev 图片模型判断分支，不需要 Snipvia 官方服务。
 2. 使用默认 `⌘⇧Space`（Windows：`Ctrl+Shift+Space`）框选；没有录屏权限时可通过主窗口导入图片。置顶截图可拖动，关闭图片会结束当前流程。
 3. 截图后等待输入。空输入按 Enter 会预测分支；输入提示词后按 Enter 直接对话。默认 `⌘⇧Enter` 续拍并沿用最近对话上下文，跳过预测。
 4. 无需账号即可使用截图对话、主窗口对话和 Agent。分支条件、置信度和日程信号仍须通过校验；失败显示模型设置提示，可明确重试。
@@ -163,7 +181,7 @@ Snipvia/
 | 对话和日程 | `userData/history/`、`userData/schedule/` 中的本地 JSON 与裁剪截图，当前不加密 |
 | 笔记本 | 用户选择的目录内保存 Markdown 与附件；`userData/notebooks.json` 保存链接登记 |
 | Agent 会话与笔记检查点 | `userData/agent-sessions/` 保存每个对话的完整 Agent 记录（含工具结果）；`userData/agent-checkpoints/` 保存每轮笔记修改前后的内容，供撤销，最多 100 份 / 64 MiB。均为本地 JSON、不加密，删除对话或清空历史时一并删除 |
-| 预测内容 | 用户视觉模型接收选中裁剪图与适用条件；不发送执行 prompt、笔记本路径或账号 Cookie |
+| 预测内容 | 默认用户视觉模型，或已启用的 Jev 接收选中裁剪图与适用条件；不发送执行 prompt、笔记本路径或账号 Cookie |
 
 不将 `.env`、生产密钥、数据库、个人截图或用户数据提交到仓库。分类、问答、网页检索的接收方取决于用户配置；模型厂商的数据保留政策应由用户确认。本地优先不表示模型默认在本机运行。
 
@@ -213,3 +231,9 @@ Renderer 不直接读取文件或凭据；IPC 和模型输出均做校验。笔�
 项目当前未授予开源许可，`package.json` 标记为 `UNLICENSED`。
 
 当前源码的新版本检查、下载和发布计划统一使用 [Snipvia Releases](https://github.com/yuyeyuyy/Snipvia/releases)。旧安装包仍读取旧渠道；新免费版发布前不能删除旧 Release 或停用旧客户端所需服务。本阶段未签名、打包、迁移 Release 或停服。
+
+## 许可证与安全
+
+项目原创代码采用 [Apache License 2.0](LICENSE)，声明见 [NOTICE](NOTICE)。第三方组件继续遵循各自许可，见[第三方声明](THIRD_PARTY_NOTICES.md)；图标与图片的权属确认及来源记录见[素材核对表](docs/opensource/ASSET_PROVENANCE.md)。第三方内容继续适用原许可，项目许可证不授予商标权。
+
+开发和报告问题前请阅读[贡献指南](CONTRIBUTING.md)、[安全说明](SECURITY.md)与[隐私边界](docs/PRIVACY.md)。

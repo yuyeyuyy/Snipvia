@@ -1,4 +1,5 @@
 import type { EditingContextRequest } from '../../../shared/agent/editing';
+import { PredictionSettings } from './PredictionSettings';
 import { AppearanceSettings } from './AppearanceSettings';
 import { UpdateSettings } from './UpdateSettings';
 import { useEffect, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
@@ -12,6 +13,7 @@ import { Button, IconButton, Input, Select } from '../components/ui/Button';
 import { Dialog } from '../components/ui/Dialog';
 import { version } from '../../../../package.json';
 import { acceleratorFromKeyboardEvent, formatAccelerator, isModifierKey } from './shortcut';
+import { modelTransportNotice } from '../../../shared/model-endpoint';
 import './settings.css';
 
 type Status = { kind: 'success' | 'error'; message: string } | null;
@@ -225,7 +227,7 @@ export function SettingsPanel({ settings, onSaved, onDiscuss }: { settings: Publ
       <h2 tabIndex={-1} id="model-settings-title">模型配置</h2>
       <div className="preference-card">
         <div className="preference-row">
-          <div className="preference-copy"><strong>选择厂商</strong><span>选择已配置的截图对话模型；分支预测使用后台配置</span></div>
+          <div className="preference-copy"><strong>选择厂商</strong><span>对话与 Agent 使用你配置的模型；分支预测可选 Jev</span></div>
           <Select className="preference-select" aria-label="选择厂商" value={activeScope} disabled={saving} onChange={(event) => void chooseConfiguredModel(event.target.value)}>
             {settings.configuredModels.map((profile) => <option key={credentialScope(profile)} value={credentialScope(profile)}>{modelProfileLabel(profile, settings.configuredModels)}</option>)}
           </Select>
@@ -235,6 +237,9 @@ export function SettingsPanel({ settings, onSaved, onDiscuss }: { settings: Publ
           <Button type="button" className="preference-action" onClick={openConfigDialog}>配置…</Button>
         </div>
       </div>
+    {modelTransportNotice(settings.endpoint) && <p className="notice" role="note" aria-label="模型传输提示">{modelTransportNotice(settings.endpoint)}</p>}
+
+    <PredictionSettings />
     <div className="preference-subsection" aria-labelledby="prediction-settings-title">
       <h3 id="prediction-settings-title">截图预测</h3>
       <div className="preference-card prediction-card">
@@ -359,6 +364,7 @@ export function SettingsPanel({ settings, onSaved, onDiscuss }: { settings: Publ
               <Input id="provider-key" aria-label="API Key" type="password" autoComplete="off" value={key} disabled={clearKey} onChange={(event) => setKey(event.target.value)} placeholder={hasKey ? '留空保持不变' : '输入 API Key'} />
             </div>
             {hasKey && <div className="config-row compact"><div className="preference-copy"><strong>删除 API Key</strong><span>移除当前厂商保存在本机的密钥</span></div><label className="config-checkbox"><input aria-label="删除当前服务的密钥" type="checkbox" checked={clearKey} onChange={(event) => setClearKey(event.target.checked)} /><span /></label></div>}
+            {modelTransportNotice(form.endpoint) && <p className="notice" role="note" aria-label="模型传输提示">{modelTransportNotice(form.endpoint)}</p>}
             <p className="notice">{window.snipvia.platform === 'darwin'
               ? 'API Key 使用 macOS 钥匙串保护加密密钥，密文保存在本机设置文件中。首次访问或应用身份变化后可能需要钥匙串授权。'
               : 'API Key 使用 Windows 系统凭据保护（DPAPI）加密，密文保存在本机设置文件中。请使用自己的 Windows 用户账户登录。'}</p>

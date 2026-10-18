@@ -74,8 +74,8 @@ try {
   fs.writeFileSync(path.join(pending, 'latest-mac.yml'), macUpdateMetadata(pending), { flag: 'wx' });
   ensure(!fs.existsSync(verified), '验收目录已存在，拒绝覆盖。');
   fs.renameSync(pending, verified);
-  console.log(`全部验收通过；官网可分发文件：${verified}`);
-  console.log('没有上传官网或执行自动发布。Apple Silicon、Intel 真机功能验收仍须记录。');
+  console.log(`全部验收通过；独立 Release 待发布文件：${verified}`);
+  console.log('没有上传 GitHub Release 或执行自动发布。Apple Silicon、Intel 真机功能验收仍须记录。');
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;

@@ -14,6 +14,8 @@ import { chatStreamRequestSchema, type AutoActionSnapshot, type ChatStreamEvent,
 import { editorFinishSchema, validateEditorPng } from '../shared/screenshot-editor';
 import { cropRectangle } from '../shared/geometry';
 import { renameConversation, clearConversations, createConversation, deleteConversation, listConversations, capturedConversations, loadHistory, readConversation, readWorkspaceConversation, createTextConversation, replaceConversationCapture, recordAppliedProposal, saveConversationAnswer, saveConversationMessages } from './storage/history';
+import { PredictionSettingsStore } from './storage/prediction-settings';
+import { savePredictionSettingsSchema } from '../shared/prediction-settings';
 import { loadSettings, publicSettings, readKey, saveSettings, savePredictionBranches } from './storage/settings';
 import { AppearanceService } from './appearance';
 import { ModelCatalog } from './ai/models/ModelCatalog';
@@ -145,6 +147,7 @@ export const notebooks = new NotebookService(join(app.getPath('userData'), 'note
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('notes:changed', id);
 });
 // Main owns tools, workspace capabilities and execution; Renderer only sends chat intent and approval decisions.
+const predictionSettingsStore = new PredictionSettingsStore(join(app.getPath('userData'), 'prediction-settings.json'));
 const agentPermissionDirectory = join(app.getPath('userData'), 'agent-permissions');
 const agentMCPDirectory = join(app.getPath('userData'), 'mcp');
 // Old account data is never read or decrypted, but stays protected from Agent tools.
@@ -839,7 +842,7 @@ async function beginAutoUnderstanding(captureId: string, jpeg: Buffer) {
   const predictionSettings = structuredClone(publicSettings());
   const branches = predictionSettings.predictionBranches;
   const predictionKey = () => { try { return readKey(predictionSettings); } catch { throw new PredictionError({ stage: 'vision', reason: 'configuration' }); } };
-  const prediction = new PredictionService();
+  const prediction = new PredictionService({ jev: () => predictionSettingsStore.snapshot() });
   const analyzer = new ScreenshotAnalyzer({
     recognizeText: async (_image, signal) => {
       screenshotPerformance.mark(current.performanceSessionId, 'local_ocr_start');
@@ -848,7 +851,7 @@ async function beginAutoUnderstanding(captureId: string, jpeg: Buffer) {
     },
     classifyWithVision: async (image, signal) => {
       screenshotPerformance.mark(current.performanceSessionId, 'vision_classification_start');
-      try { return await prediction.predict(predictionSettings, predictionKey(), image, signal); }
+      try { return await prediction.predict(predictionSettings, predictionKey, image, signal); }
       finally { screenshotPerformance.mark(current.performanceSessionId, 'vision_classification_end'); }
     }
   });
@@ -1479,6 +1482,18 @@ function setupIPC() {
     if (!benchmark) throw new Error('当前未启用截图质量基准');
     return compareCaptureFrame(benchmark.source, benchmark.encoded);
   });
+  handle('prediction-settings:get', 'main', value => { z.undefined().parse(value); return predictionSettingsStore.public(); });
+  handle('prediction-settings:save', 'main', value => {
+    const parsed = savePredictionSettingsSchema.safeParse(value);
+    if (!parsed.success) throw new Error('Jev 配置无效，请检查模型和 API Key');
+    const saved = predictionSettingsStore.save(parsed.data);
+    if (autoActionController) abortAutoAction('预测配置已改变，请重新开始分析');
+    return saved;
+  });
+  handle('prediction-settings:open-console', 'main', async value => {
+    z.undefined().parse(value);
+    await shell.openExternal('https://console.typesafe.ai/');
+  });
   handle('settings:get', ['main', 'quickChat'], () => publicSettings());
   modelCatalog = new ModelCatalog({ file: join(app.getPath('userData'), 'model-catalog.json'), readKey });
   handle('models:list', 'main', value => modelCatalog.list(modelListRequestSchema.parse(value)));
@@ -1901,6 +1916,7 @@ else {
     restoreDock();
     let startupError = '';
     try { loadSettings(); } catch { startupError = '设置文件读取失败，已使用默认值；原文件未修改。'; }
+    predictionSettingsStore.load();
     appearance.start();
     try { loadHistory(); } catch { startupError += `${startupError ? '\n' : ''}历史记录读取失败；为避免覆盖原文件，本次请勿创建新对话。`; }
     try { loadSchedule(); } catch { startupError += `${startupError ? '\n' : ''}日程记录读取失败；为避免覆盖原文件，本次请勿创建新日程。`; }

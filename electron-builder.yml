@@ -7,6 +7,9 @@ toolsets:
 files:
   - out/**/*
   - package.json
+  - LICENSE
+  - NOTICE
+  - THIRD_PARTY_NOTICES.md
 mac:
   category: public.app-category.productivity
   minimumSystemVersion: '14.0'

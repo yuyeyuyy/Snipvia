@@ -1,80 +1,63 @@
-# Auto Screenshot Understanding
+# 截图预测与分支执行
 
-## 目标链路
+2026-10-17。当前免费客户端无需账号；可选 Jev 原生图片预测的配置、协议和验证见 [Jev 图片预测](JEV_PREDICTION.md)。旧服务端、管理控制台和账号预测不在当前路径中。
+
+## 当前调用链
 
 ```text
-ScreenshotToAll 可见
-→ 等待用户输入
-  ├ 空输入按 Enter → 本机 OCR → 已登录且云端启用时：服务端视觉 → TypeSafe Jev
-  │                           └ 未提供云端预测时：本机快速信号 / Vision 分类
-  │                → AutoActionRouter 核对匹配分支 → 执行并流式显示
-  └ 输入提示词并按 Enter → 跳过 OCR / 分类 → 按提示词进入 Agent 对话
+截图可见，打开对话输入窗
+→ 等待用户明确输入
+  ├ 空输入 Enter → 本机 OCR 辅助 → PredictionService
+  │                             ├ 已启用 Jev 且有 Key：Main 直连 Jev 图片 API
+  │                             └ 未启用或无 Key：用户视觉模型分类
+  │              → 校验 ScreenshotAnalysis → AutoActionRouter → 原分支执行
+  └ 输入提示词 Enter / 续拍 → 跳过预测 → 原 Agent / 对话流程
 ```
 
-截图窗口的显示仍是最高优先级。Main 在图片可见后打开输入窗口，状态为 `awaiting_input`；此时不启动 OCR、分类或模型请求。只有用户空输入提交才经 `auto-action:start` 启动预测；提交提示词则直接走 Agent 或用户选择的普通聊天模式。输入框自动获得焦点，Shift+Enter 只换行，输入法确认不触发提交。
-
-Main 校验当前置顶截图 ID，并限制每张截图只进行一次初始分流，重复 Enter 和迟到 IPC 不会重启预测。已有续拍行为保留：同一上下文中等待用户对新截图提问，不重新预测。
+截图显示仍是最高优先级。`awaiting_input` 阶段不启动 OCR 或模型请求；空输入提交才经 `auto-action:start` 开始预测。Shift+Enter 换行，输入法确认不提交。Main 校验置顶截图 ID 与当前操作状态，重复 Enter、取消或迟到结果不会重复执行分支。
 
 ## 模块
 
-- `src/shared/screenshot-understanding.ts`：内容类型、Action ID、分析结果、状态与 IPC 类型。
-- `src/main/analysis/screenshot-analyzer.ts`：云端预测、本地信号、OCR 特征和 Vision fallback 编排。
-- `src/main/account/AccountService.ts`：使用账号会话提交裁剪图及启用分支条件，校验云端响应；取消或退出登录中断请求。
-- `apps/server/src/prediction-pipeline.ts`：服务端视觉理解 → TypeSafe Jev，返回有界分支选择；配置、隐私及配额见[服务端预测说明](CONSOLE_PREDICTION_PROXY.md)。
-- `src/main/analysis/auto-action-router.ts`：内容类型到 Action 的唯一映射及第一版 Prompt Registry。
-- `src/main/ai/provider.ts`：结构化视觉分类和 Chat Completions SSE Streaming。
-- `native/screen-capture-kit-helper/main.swift`：使用 macOS Vision 的本机 OCR；失败时返回不可用状态，由 Analyzer 自动进入 Vision fallback。
-- `src/renderer/src/chat/QuickChat.tsx`：展示单行预测状态、右上角只读分支标签、流式结果和输入，不包含分类映射；预测与 Agent 状态共用 `AgentActivityLine`。
+- `src/main/index.ts`：`beginAutoUnderstanding`、统一取消与 `executeAutoAction`；Jev 配置变更同样取消进行中的预测。
+- `src/main/analysis/screenshot-analyzer.ts`：保留 OCR 文本和诊断信息；分类失败不以 OCR 自动执行。
+- `src/main/analysis/PredictionService.ts`：选择默认用户视觉模型或可选 Jev 图片策略。
+- `src/main/ai/jev/`：TypeSafe 原生图片协议与裁剪图尺寸处理。
+- `src/main/analysis/auto-action-router.ts`：匹配本次启用分支，生成已有 Action。
+- `src/main/ai/provider.ts`：默认用户视觉模型分类、实际回答与日程提取。
+- `src/shared/screenshot-understanding.ts`：原有内容类型、分支、状态与输出契约。
+- `native/screen-capture-kit-helper/main.swift`：macOS 本机 OCR；OCR 不可用不替换分支模型。
+- `src/renderer/src/chat/QuickChat.tsx`：只读分支标签、单行状态、流式内容和手动输入。
 
-## 分类与执行
+## 分支与执行规则
 
-内容类型保留 `error`、`code`、`text`、`table`、`ui`、`question`、`unknown`，用于默认快速分类与诊断。分支的「适用内容」改为可编辑的多行描述，最多 1000 字符，可包含具体场景与排除条件；内置与自定义分支使用同一编辑入口。「适用内容」决定何时执行，「执行指令」决定执行什么。
+适用内容可编辑、多行、最多 1000 字符，支持具体场景与排除条件；内置和自定义分支使用相同编辑入口。旧配置缺失该字段时按原 trigger 提供默认描述，保留名称、指令、启用状态和笔记本绑定。
 
-旧配置没有 `applicableContent` 时，根据原 `trigger` 显示默认描述，不丢失名称、指令、启用状态或笔记本绑定。保持默认描述时继续使用 OCR 快速分流；任何启用分支使用不同的描述时，即使 OCR 高置信度识别出代码或报错，也需通过视觉模型按描述匹配。关闭的分支不参与匹配。
+本机 OCR 不再直接决定分支。模型根据适用内容选择最具体的启用分支，同等条件下优先自定义分支、再按列表顺序。关闭的分支不参与匹配；执行指令与笔记本 ID 不参与模型分类。Jev 使用本次启用集合的临时索引，响应校验后映射回本地分支 ID；默认视觉模型同样校验 ID 白名单。
 
-上述本机快速分流适用于账号服务未提供云端预测的情况。已登录且管理员启用云端预测时，服务端结果优先于本机 OCR；视觉理解与 Jev 都由服务端调用，客户端不读取两层 Key。服务端失败、超时或无匹配时回到手动操作，不自动改用本机模型或另一家视觉厂商。所有分支关闭时不发起预测。
+现有 Router 和 Main 的行为保留：
 
-视觉分类只接收启用分支的 ID、适用内容和日程标记，不接收执行指令或笔记本 ID。模型按描述及排除条件选择最具体的分支，同等条件下优先自定义分支、再按列表顺序；返回 `matchedBranchId` 或明确的 `null`。Main 校验 ID 属于启用分支，Router 按此 ID 路由，不再用固定内容类型覆盖语义匹配结果。无法匹配、置信度不足或自定义描述分类失败时等待用户提问，不使用旧类型绕过排除条件。分类取消仍由同一 AbortController 管理。
+- 匹配分支且置信度至少 0.82：进入原执行流程。
+- 置信度 0.65 至 0.82：保留原 700ms 推荐等待，可被用户输入取消。
+- 低于 0.65 或没有适用分支：等待用户提问，不通过固定内容类型绕过排除条件。
+- 日程分支额外要求 `hasSchedule`；Jev 将日程 Noul 至少 0.82 映射为此信号。日程提取、草稿编辑及系统日历/提醒事项的用户确认仍按原流程。
+- 所有分支关闭：不读取预测凭据、不发起模型请求。
 
-内置预测分支只保留「解释错误」「解释代码」「回答问题」「创建日程草稿」。普通文本、表格、界面和无法识别的截图没有默认执行分支，分析后等待用户提问；用户仍可为这些内容添加自定义分支。已有设置及各厂商配置会自动移除「理解文本」「分析表格」「分析界面」「描述图片」，保留其余分支的编辑内容、启用状态、笔记本绑定和自定义分支。
+模型命中后，AI / Agent、笔记授权和日程处理沿用原执行器。Jev 不生成执行命令，不代替用户的聊天模型；后续任务仍可能调用用户视觉模型和已授权工具。
 
-日期、时间和安排意图作为独立 `hasSchedule` 信号。日程分支也可编辑适用内容，例如限定为会议邀请，但仍要求存在可执行的日期/时间组合；由现有结构化提取链路生成 Snipvia 草稿。模型不能直接写入系统日历或提醒事项，外部写入仍由用户在草稿编辑器中明确确认。
+## 配置、错误与取消
 
-- 匹配到启用分支且置信度 `>= 0.82`：立即执行推荐 Action。
-- 匹配到启用分支且置信度 `0.65–0.82`：展示推荐状态 700ms；用户未干预时执行。
-- 置信度 `< 0.65`：描述匹配模式下等待用户提问；旧版固定类型模式仍按 `unknown` 匹配，独立日程信号优先选择启用的日程分支。
-- 没有匹配的启用分支：保留截图并等待用户提问，不自动生成回答。
+Jev 独立配置与密文保存在 `prediction-settings.json`。未启用或没有 Key 时使用原用户视觉模型；已保存 Key 无法解密、文件损坏或请求失败时，显示脱敏错误并等待明确重试，不自动换一家模型。失败和无匹配不等价。
 
-阈值位于 Main 架构层，不写入 React。后续应使用真实标注集校准，而不是继续增加截图类型。
+用户输入、Esc、截图替换、模型或 Jev 配置变更通过原 AbortController 取消。异步结果仍核对 captureId、operationId 和当前 controller；迟到结果不能恢复旧流程。没有手动切换执行分支的新增 IPC。
 
-## 抢占与取消
+## 隐私与性能
 
-- 分支由预测自动决定，聊天窗口不能切换。分支启用与编辑在设置页管理，不再提供手动切换的 Renderer API / IPC。
-- 用户开始输入：取消自动流程，用户请求获得最高优先级。
-- 尚未按 Enter 时只编辑提示词，不发起模型请求；提交提示词后关闭该截图的初始预测入口。
-- 第一次 `Esc`：取消分析或生成；空闲时再次按下关闭 ScreenshotToAll。
-- 所有异步结果同时校验 `captureId`、`operationId` 和 `AbortController`，旧截图结果不能覆盖新截图。
+只有选中的裁剪图参与 OCR 和模型预测；等待输入期间不发送图片。默认发到用户视觉模型，启用 Jev 时由 Main 直接发送到 TypeSafe，不经过 Snipvia 后台。Jev 和聊天模型 Key 不交叉，执行 prompt、笔记本路径、账号 Cookie 不进入 Jev 请求。适用条件与截图文字是分类数据，不能变成任意执行权限。
 
-## 数据与隐私
+Jev 图片要求通过仅处理裁剪图的等比例缩小和居中补白满足；不会为了凑尺寸扩展到原屏幕。详细尺寸和模型约束见 [Jev 图片预测](JEV_PREDICTION.md)。
 
-等待输入期间截图保留在本地。空输入提交后，本机 OCR 接收裁剪后的 JPEG，不接触完整屏幕帧。启用云端预测时，裁剪图及启用分支的 ID、适用内容经登录会话发送至自己的服务器；服务端将图发给所选视觉厂商，再把文字描述交给 Jev，只有累计次数持久化，不保存预测内容。厂商的数据条款仍适用。未提供云端预测时，OCR/本地信号置信度不足、启用自定义适用描述或需要执行模型 Action 时，裁剪图发送到用户配置的模型服务。提示词提交会直接将裁剪图及提示词发送给对话模型。适用描述作为分类数据传入，不能覆盖系统分类规则；分类结果经过 Zod 与启用 ID 白名单校验，Router 不执行模型返回的自由文本。
+原 OCR、视觉分类、选择分支、开始执行和首 Token 埋点保留。分析时延从用户按 Enter 后的 `auto_analysis_start` 计算，不把等待输入时间当成模型耗时。
 
-## 性能埋点
+## 验证边界
 
-自动理解增加了 OCR、Vision 分类、Action 选择、Action 启动及首 Token 节点。核心新增指标为：
-
-```text
-ScreenshotToAll Visible → Auto First Token
-```
-
-网络分类与本地 OCR 分开记录，避免把模型延迟误判为本地性能问题。
-
-等待输入模式下，上述端到端指标包含用户输入或思考时间。比较自动理解的处理耗时时，应从 `auto_analysis_start` 开始计算，不能把按 Enter 前的等待算作模型或截图性能退化。直接提交提示词不产生 OCR、分类埋点，使用 Agent 的请求指标。
-
-## 当前验证边界
-
-2026-10-05 服务端预测适配：647 项单元测试、桌面构建、2 项网页验收及 Linux amd64 镜像验收通过。覆盖强 OCR 不绕过云端判断、云端异常等待用户输入、仅提交启用条件与裁剪图、账号退出取消、三家视觉协议和两层单次计数。测试使用合成图片与模拟上游，尚未使用真实 Key 验证模型连通或准确率；也未重新进行 Windows 真机验证。
-
-2026-10-05 适用内容编辑验证：Lint、TypeScript、构建及 618 项单元测试通过；适用描述编辑、桌面工作流、对话笔记本绑定和 Agent 执行四项 macOS Electron 检查通过。测试使用临时配置、合成截图和模拟模型，覆盖内置 / 自定义描述的保存与恢复、多行和空白校验、描述传入分类、按匹配 ID 路由、未匹配等待输入、禁用分支与非法 ID 拒绝、强 OCR 不绕过排除条件、分类失败降级及日程草稿。测试验证配置和路由链路，真实模型对描述的理解仍取决于所选视觉模型；Windows 本次未进行真机验证。
-
-Helper 协议、universal 构建及降级路径已经验证。当前开发机运行 macOS 27，系统 Vision OCR 对测试图片返回不可用状态；应用会自动进入 Vision 分类，不会中断截图或自动 Action。发布前仍需在目标 macOS 14、15 和 26 真机分别验证本机 OCR 的准确率与可用性。
+当前回归使用临时数据、合成图片与模拟上游，未调用真实付费 Jev。历史服务端版本的验收数字不能代表当前客户端或新图片模型的准确率。正式签名升级、Windows / Intel 真机及真实录屏条件用例仍须独立记录，见 [Phase 3 报告](opensource/PHASE3_READINESS.md)。

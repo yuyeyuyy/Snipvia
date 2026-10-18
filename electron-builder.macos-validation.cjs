@@ -10,9 +10,11 @@ module.exports = {
   extends: null,
   directories: { ...release.directories, output: `dist/macos-validation/${Date.now()}-${randomUUID().slice(0, 8)}` },
   forceCodeSigning: false,
+  extraMetadata: { ...release.extraMetadata, snipviaAutoUpdate: false },
   beforePack: (context) => {
     const config = context.packager.config;
     const mac = context.packager.platformSpecificBuildOptions;
+    ensure(config.extraMetadata?.snipviaAutoUpdate === false, '未签名验证包不得启用安装更新。');
     ensure(context.electronPlatformName === 'darwin' && mac.identity === null
       && mac.sign === null && mac.notarize === false && config.forceCodeSigning === false
       && config.dmg?.sign === false, '验证构建禁止签名和公证。');

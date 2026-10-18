@@ -10,6 +10,8 @@
 
 ## 下载 0.3.1
 
+Windows 安装包已换用透明图标，版本仍为 0.3.1，见[本次重包记录](docs/WINDOWS_ICON_REFRESH_0_3_1.md)。
+
 安装包和更新源统一使用 [本仓库的 GitHub Releases](https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.1)。Windows 明确作为未签名预览包提供；下载前可与 Release 中的 `SHA256SUMS.txt` 核对。
 
 | 平台 | 安装包 | 验收边界 |

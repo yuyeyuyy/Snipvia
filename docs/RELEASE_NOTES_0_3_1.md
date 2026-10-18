@@ -24,3 +24,7 @@
 macOS 保留应用内检查、下载和确认重启更新。旧账号版 v0.2.3 及更早版本仍需手动安装新客户端，才能切换至本仓库更新渠道。保留原有模型配置、快捷键、主题、本地历史和笔记；升级前请备份重要数据。
 
 本版复用已通过的功能验收，仅对新增工具、冻结产物哈希及发布链路作相应检查，没有将未验收的平台记为通过。真实模型、Intel/Windows 真机、混合 DPI 及安装升级仍保留原验证边界。本次未调整依赖或处理已记录的依赖告警，详见 [打包记录](https://github.com/yuyeyuyy/Snipvia/blob/main/docs/RELEASE_0_3_1.md) 和 [依赖安全记录](https://github.com/yuyeyuyy/Snipvia/blob/main/docs/opensource/dependency-security.json)。
+
+## Windows 图标更新（2026-10-18）
+
+Windows 安装包已换用透明背景图标，应用、安装器和运行时图标资源均已核对。版本仍为 0.3.1；已安装 Windows 版可手动重新下载安装。macOS 安装包未改动。Windows 图标与打包配置对应[源码提交](https://github.com/yuyeyuyy/Snipvia/commit/cb2cbf9d326c231787cb3e20b1ce4b1d544f9e03)。Windows 仍为未签名预览版。

@@ -88,5 +88,6 @@
     "macOS": "Intel real hardware and actual installation upgrade not verified",
     "windows": "unsigned preview; Windows real hardware not verified"
   },
-  "localRecords": ".dev-runtime/publication-0.3.1/"
+  "localRecords": ".dev-runtime/publication-0.3.1/",
+  "subsequentWindowsIconRefresh": "release-0.3.1-windows-icon.json"
 }

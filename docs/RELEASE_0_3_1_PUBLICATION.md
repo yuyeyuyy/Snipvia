@@ -1,5 +1,7 @@
 # Snipvia 0.3.1 公开发布记录
 
+> 2026-10-18 后续更新：Windows 安装包已换用透明图标并重新上传；本页保留首次构建/发布快照，最新 Windows 哈希与来源见[图标重包记录](WINDOWS_ICON_REFRESH_0_3_1.md)。macOS 包和更新元数据未改动。
+
 2026-10-18（Asia/Taipei），经用户明确授权，[v0.3.1](https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.1) 已正式发布并设为 Latest。源码标签对应 bcbe19afab07c200464205e2e0923dee535682d7；本次不改变仓库可见性，不改写 Git 历史或调整私有服务。
 
 ## 资产与更新渠道

@@ -1,5 +1,7 @@
 # Snipvia 0.3.1 推送与打包记录
 
+> 2026-10-18 后续更新：Windows 安装包已换用透明图标并重新上传；本页保留首次构建/发布快照，最新 Windows 哈希与来源见[图标重包记录](WINDOWS_ICON_REFRESH_0_3_1.md)。macOS 包和更新元数据未改动。
+
 0.3.1 安装包已在本地完成。macOS arm64 / x64 正式签名、公证与容器验收通过；Windows x64 生成未签名预览版。应用源码提交 [`cb50b23`](https://github.com/yuyeyuyy/Snipvia/commit/cb50b23775ad27b8ed0fa6a5087f8201ba66d1fe) 已推送 main。本报告和打包工具收尾单独提交，不改变安装包内业务源码。
 
 仅在 `Snipvia-public-baseline` 操作；原目录、私有仓库和生产服务未改动。保留既有 0.3.0 标签和安装包。本次打包后另经用户授权，已将 0.3.1 发布为[最新正式 Release](https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.1)，见[发布记录](RELEASE_0_3_1_PUBLICATION.md)。

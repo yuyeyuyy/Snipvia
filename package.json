@@ -1,6 +1,6 @@
 {
   "name": "snipvia",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "Screenshot-first AI desktop assistant",
   "main": "out/main/index.js",
@@ -53,8 +53,9 @@
     "release:publish": "node scripts/macos-release/publish.cjs",
     "dist:friend": "./scripts/package-friend.sh",
     "dist:windows-friend": "./scripts/package-windows-friend.sh",
-    "dist:windows": "pnpm build && node scripts/package-windows.mjs",
-    "windows:verify": "node scripts/verify-windows-build.mjs"
+    "dist:windows": "node scripts/package-windows.mjs",
+    "windows:verify": "node scripts/verify-windows-build.mjs",
+    "release:prepare": "node scripts/prepare-release-build.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sandbox-runtime": "0.0.78",

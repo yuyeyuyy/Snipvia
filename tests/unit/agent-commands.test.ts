@@ -22,7 +22,7 @@ async function fixture(sandbox?: CommandSandbox, decision: PermissionDecision = 
   const notebooks = new NotebookService(join(directory, 'registry.json'), async () => {}), book = await notebooks.open(root);
   const guard = vi.fn<(id: string, signal: AbortSignal) => Promise<void>>(async () => {}), changed = vi.fn();
   const system = createFileToolSystem({ readOnly: true, prompt: async (request) => { prompts.push(request); return decision; },
-    commands: { protectedPaths: [], sandbox }, notebookWriter: workspaces => new NotebookWriter({ workspaces, notebook: id => notebooks.authorizedNotebook(id), beforeWrite: guard, review: async () => {}, changed }) });
+    commands: { protectedPaths: [], sandbox }, notebookWriter: workspaces => new NotebookWriter({ workspaces, notebook: id => notebooks.authorizedNotebook(id), beforeWrite: guard, changed }) });
   const grant = await system.workspaces.authorizeWorkspace(root), writer = system.noteWriter!, scope = writer.createScope(book, grant);
   cleanups.push(async () => { writer.closeScope(scope); notebooks.dispose(); await rm(directory, { recursive: true, force: true }); });
   const signal = new AbortController().signal;

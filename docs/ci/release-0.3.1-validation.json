@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "version": "0.3.1",
+  "functionalEvidence": "ci/chat-controls-2026-10-18.json",
+  "previousChecksReused": true,
+  "provenance": "Imported from previous successful checks in this session, before packaging; original runs did not record a complete input fingerprint. Changed functional source/tests match the before-packaging snapshot; only packaging tooling, version and documentation changed.",
+  "unchangedFunctionalFiles": [
+    {
+      "path": "src/main/agent/ToolExecutor.ts",
+      "sha256": "4d2ea88dde151b8fe957eff49e3ca3eff38d11867aa83e2f89c35fd12956121a"
+    },
+    {
+      "path": "src/main/agent/editing/EditingProposals.ts",
+      "sha256": "2b7adb976f877eedef9f301fe3d5b59748b2bf1bbaffe5e44dc3ca4c64dde9e6"
+    },
+    {
+      "path": "src/main/agent/editing/registerEditingTools.ts",
+      "sha256": "2f190ae23d78b1c271f517d3e8bb9fbfe3c5c99b0e102267f47f063782bcdc07"
+    },
+    {
+      "path": "src/main/agent/notes/NotebookWriter.ts",
+      "sha256": "a14c1a7a0183d05d8bbd74af74b789ff2e4b8e23da1cda358173e7aecb003d1b"
+    },
+    {
+      "path": "src/main/agent/notes/registerNotebookTools.ts",
+      "sha256": "d01b40a9b85d6c9437154af290aea6e8fcba762d09e529c576fc553608bb62fa"
+    },
+    {
+      "path": "src/main/agent/ui/AgentExecutionService.ts",
+      "sha256": "9a61e0785e8c357547ea18d595b290718630b1fb6202d88dcd6e3b3cae35a8da"
+    },
+    {
+      "path": "src/main/agent/ui/ExecutionPresenter.ts",
+      "sha256": "f59943d626c04ed797f5873d76a47f15127d7405900ac0afe3e97a65e781940e"
+    },
+    {
+      "path": "src/main/appearance.ts",
+      "sha256": "0df512966105b7a7f363340379e6f6dbf4953d05636fe2f3745255903e3e6f44"
+    },
+    {
+      "path": "src/main/index.ts",
+      "sha256": "bb1447c7c2de10e94e778f77d63a0421f5a7378bd306f45f5230ab56b11713e9"
+    },
+    {
+      "path": "src/main/storage/settings.ts",
+      "sha256": "3263fdf19cf58b4c9aa21ac23e7dde37a872e5ad3987f1f35197877340e29815"
+    },
+    {
+      "path": "src/main/windows/quick-chat-placement.ts",
+      "sha256": "a7c3db40e09f4e8a32389ee7836ab75b6ab25818414d6885d77e4ef7c7f3065b"
+    },
+    {
+      "path": "src/preload/index.ts",
+      "sha256": "24dc6ca843858d18f2ab1ad2d70962abc698a1f0247b39e81eb5f148cc568cad"
+    },
+    {
+      "path": "src/renderer/src/agent/AgentNotebook.tsx",
+      "sha256": "dee36c52de1041fec9fe413d161b5021b0e5bff771359485a312fc1819263f17"
+    },
+    {
+      "path": "src/renderer/src/chat/ChatResizeHandle.tsx",
+      "sha256": "806c814eda55d41f2f1acd5a0020291e474fafe3450a27613afc4743d980a22f"
+    },
+    {
+      "path": "src/renderer/src/chat/EditingPanel.tsx",
+      "sha256": "114da3e626ea30c1846812f3d01d55e2d0579926531bd45fc009f7b17582b0dd"
+    },
+    {
+      "path": "src/renderer/src/chat/QuickChat.tsx",
+      "sha256": "5e171485822614f6bcd110ac1759599035ffaf330c42fbe5a838c460ef2d8a7c"
+    },
+    {
+      "path": "src/renderer/src/chat/quick-chat.css",
+      "sha256": "fc2e4f8565cd16a175a9b7158cad1c04f32f187b487418aeee795a5dc4749365"
+    },
+    {
+      "path": "src/renderer/src/chat/workspace.css",
+      "sha256": "812a22e44ae6a1a6649217dc35e94ec338cba2c3de9f2765ead2d3659233a8ac"
+    },
+    {
+      "path": "src/renderer/src/refined.css",
+      "sha256": "372e4cc40367dfcee2a1611c7ec876b6c673dc1efa615da722431e2f1ebc2cc8"
+    },
+    {
+      "path": "src/renderer/src/settings/AppearanceSettings.tsx",
+      "sha256": "30124787bc61e09a42d2793c59ad123dbfd4aed976c2da341684c2fa5bc23370"
+    },
+    {
+      "path": "src/renderer/src/settings/settings.css",
+      "sha256": "a62029857bed05c0c228d6a37f9176319f4d92887511843ef2799ae39d33fbe1"
+    },
+    {
+      "path": "src/shared/appearance.ts",
+      "sha256": "d23160b0c9c3992cdf809a1ef0adcbf2aec63c64885ee7ac2e32d8bf4f02e1dd"
+    },
+    {
+      "path": "src/shared/chat-window.ts",
+      "sha256": "04d05c8524c807314b1e26edf1185f4092e73de742d4029af4f07a491d2e4325"
+    },
+    {
+      "path": "src/shared/contracts.ts",
+      "sha256": "2377bca26ecd0e83a88efc5463d3d0b2276863495038b1753c560d8ad00934a4"
+    },
+    {
+      "path": "tests/integration/agent-note-writing.spec.ts",
+      "sha256": "030ff493d0c0be9542504f88f968bc94c51c5fe65b29fcbb45e27c99d3be18d7"
+    },
+    {
+      "path": "tests/integration/chat-controls.spec.ts",
+      "sha256": "281624cd15ff348a915075d94d028e19a24cb523ef231d9c36e80301b36c966e"
+    },
+    {
+      "path": "tests/integration/editing-workspace.spec.ts",
+      "sha256": "17f79f97ed174feb3aba79fc35ebd6c4da019478a2f4525deedbe6b4eb9c0f1a"
+    },
+    {
+      "path": "tests/integration/quick-chat-workspace.spec.ts",
+      "sha256": "c12e9ff0c5624e174435022ee3cfd755027c85772b29c9b9900aad9195dd2af6"
+    },
+    {
+      "path": "tests/unit/agent-commands.test.ts",
+      "sha256": "32a75ba8f906eda55b4541a8349a225beb2c992120087d15852fa66275d400ea"
+    },
+    {
+      "path": "tests/unit/agent-note-checkpoints.test.ts",
+      "sha256": "d373d0f7a56bb10359ebde202b6d3f144a4ffb8d0d43e654ed920a573fd71680"
+    },
+    {
+      "path": "tests/unit/agent-note-writing.test.ts",
+      "sha256": "f5031578b031679bc2be2e804b4515c0d1669362ec4815da5f71d8409c8d87bf"
+    },
+    {
+      "path": "tests/unit/appearance.test.ts",
+      "sha256": "27be17d860dbe9526522fb913b3c71397e23c9aa8487332153d805bb2a237380"
+    },
+    {
+      "path": "tests/unit/editing-proposals.test.ts",
+      "sha256": "57bebbb01af80521ead400ca9bf9ccb2da810b72304a73914f2fadf328952e43"
+    },
+    {
+      "path": "tests/unit/quick-chat-placement.test.ts",
+      "sha256": "64969bccee09371e49f71162e99279114703f24f1297615e5e4fde164fa9ebad"
+    },
+    {
+      "path": "tests/unit/settings.test.ts",
+      "sha256": "98537be865360a20170c7c958ec64fa4499eb1e60e37dd44c0d7484ee0fcb057"
+    }
+  ],
+  "previousLogs": [
+    {
+      "name": "lint-verified.log",
+      "sha256": "050c69da23536758722729aeda55a8d0fb9d557495ef6d33d70873a3b64a71c1"
+    },
+    {
+      "name": "unit-verified.log",
+      "sha256": "02352437c1f0138fb3944833cc57bae330d44e21484ed4df2789628d9c7f4229"
+    },
+    {
+      "name": "build-delivery.log",
+      "sha256": "3d7291c00c5d0857d71e7395b7ff6710b55cef13c83cd4df4676be0dd302f1e5"
+    },
+    {
+      "name": "integration.log",
+      "sha256": "16954a82c69a5a6ca744a2211a74682cf590a284339f2befe66f93fb8521db34"
+    },
+    {
+      "name": "integration-safety.log",
+      "sha256": "fd4f55784df280616d77e26f75b4257b81544851da3de2d87403342d5f79bd5d"
+    },
+    {
+      "name": "integration-appearance-final.log",
+      "sha256": "86f83b95abbe98ad216a9e2a496a2da01f6dcf18c46dcaf09086ac2954852061"
+    },
+    {
+      "name": "integration-editing-final.log",
+      "sha256": "e36ea614f0adb014488ad50d78576ed482048f0d6d5ba8d41159d8fe2f9b5215"
+    },
+    {
+      "name": "integration-window-delivery.log",
+      "sha256": "6f2907c221055b1a9672836af5659f4366d70098dfc70b7ad0eeaa19cba22ae9"
+    }
+  ],
+  "newToolingChecks": {
+    "lint": "passed",
+    "testFiles": 1,
+    "testsPassed": 4
+  },
+  "fullFunctionalSuiteRerun": false,
+  "windowsRealDeviceVerified": false
+}

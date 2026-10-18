@@ -19,3 +19,11 @@ export function quickWorkspaceBounds(workArea: Rectangle, size: Size): Rectangle
   return { x: Math.round(workArea.x + (workArea.width - width) / 2),
     y: Math.round(workArea.y + (workArea.height - height) / 2), width, height };
 }
+
+/** Keep a manually resized floating chat inside its current display's work area. */
+export function resizedQuickChatBounds(current: Rectangle, workArea: Rectangle, size: Size): Rectangle {
+  const width = Math.min(workArea.width, Math.max(340, Math.round(size.width)));
+  const height = Math.min(workArea.height, Math.max(360, Math.round(size.height)));
+  return { x: Math.round(Math.max(workArea.x, Math.min(current.x, workArea.x + workArea.width - width))),
+    y: Math.round(Math.max(workArea.y, Math.min(current.y, workArea.y + workArea.height - height))), width, height };
+}

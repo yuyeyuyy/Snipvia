@@ -16,7 +16,7 @@ async function fixture() {
   const notebooks = new NotebookService(join(directory, 'registry.json'), async () => {});
   const book = await notebooks.open(root);
   const changed = vi.fn(), flush = vi.fn(async () => {});
-  const system = createFileToolSystem({ readOnly: true, notebookWriter: workspaces => new NotebookWriter({ workspaces, notebook: id => notebooks.authorizedNotebook(id), beforeWrite: async () => {}, review: async () => {}, changed }) });
+  const system = createFileToolSystem({ readOnly: true, notebookWriter: workspaces => new NotebookWriter({ workspaces, notebook: id => notebooks.authorizedNotebook(id), beforeWrite: async () => {}, changed }) });
   const grant = await system.workspaces.authorizeWorkspace(root), writer = system.noteWriter!;
   const store = new NoteCheckpointStore(join(directory, 'checkpoints'));
   const conversationId = randomUUID(), signal = new AbortController().signal;

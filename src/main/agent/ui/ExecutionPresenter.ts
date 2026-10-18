@@ -6,7 +6,7 @@ import { collectWebSources } from './WebSourceCollector';
 import { noteChangeSchema } from '../../../shared/agent/note-writing';
 
 const labels: Record<string, string> = {
-  read_edit_context: '读取编辑上下文', propose_note_change: '生成笔记修改建议', propose_branch_changes: '生成分支修改建议',
+  read_edit_context: '读取编辑上下文', propose_note_change: '编辑笔记', propose_branch_changes: '生成分支修改建议',
   read_file: '读取文件', list_directory: '查看目录', search_files: '搜索文件', write_file: '写入文件', edit_file: '编辑文件',
   web_search: '搜索网页', fetch_url: '读取网页', read_web_chunk: '继续读取网页', run_command: '执行命令', run_script: '运行脚本', write_note: '编辑笔记', edit_note: '编辑笔记'
 };
@@ -107,8 +107,8 @@ export class ExecutionPresenter {
       step.state = event.result.success ? 'tool_success' : event.result.error.code === 'ABORTED' ? 'cancelled' : 'tool_error';
       step.permission = undefined; step.summary = summary(event.name, event.result); step.durationMs = event.result.metadata?.durationMs;
       if (event.result.success) this.view.sources = collectWebSources(this.view.sources ?? [], event.name, event.result.output);
-      if (event.result.success && ['write_note', 'edit_note'].includes(event.name)) {
-        const parsed = noteChangeSchema.safeParse(event.result.output);
+      if (event.result.success && ['write_note', 'edit_note', 'propose_note_change'].includes(event.name)) {
+        const parsed = noteChangeSchema.safeParse(event.name === 'propose_note_change' ? record(event.result.output).noteChange : event.result.output);
         if (parsed.success) {
           this.view.noteChanges ??= [];
           const index = this.view.noteChanges.findIndex(change => change.id === parsed.data.id);

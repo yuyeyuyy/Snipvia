@@ -1,15 +1,11 @@
-import type { FileChangePreview } from '../../../shared/agent-file-change';
-import type { PermissionCallOptions } from '../PermissionManager';
 import { randomUUID } from 'node:crypto';
 import { agentNotePathSchema, type NoteChangeIntent, type NoteChangeSummary } from '../../../shared/agent/note-writing';
 import type { Notebook } from '../../../shared/notes';
 import type { AgentDiffView } from '../../../shared/agent/execution';
 import { ToolError, throwIfAborted } from '../ToolError';
-import { WorkspaceService, fileHash, type WorkspaceGrant, type FileSnapshot } from '../WorkspaceService';
+import { WorkspaceService, type WorkspaceGrant, type FileSnapshot } from '../WorkspaceService';
 import { applySearchReplace, createFileDiff, newlineStyle, normalizeNewlines, validateText } from '../fileChanges/textPatch';
 import { utf8Prefix } from '../web/operation';
-
-export interface NotebookReviewOptions extends PermissionCallOptions { toolCallId?: string; beforeReview?(): void; afterReview?(): void }
 
 interface Scope { notebook: Notebook; grant: WorkspaceGrant; active: boolean; readOnly: boolean; writtenPaths: Set<string>; changes: Map<string, RecordValue>; receipts: Map<string, NoteChangeSummary> }
 type NoteVersion = Pick<FileSnapshot, 'path' | 'content' | 'bom' | 'version'>;
@@ -34,7 +30,6 @@ export class NotebookWriter {
     notebook(id: string): Promise<Notebook>;
     beforeWrite(notebookId: string, signal: AbortSignal): Promise<void>;
     changed(notebookId: string): void;
-    review?(preview: FileChangePreview, signal: AbortSignal, options: NotebookReviewOptions): Promise<void>;
   }) {}
   createScope(notebook: Notebook, grant: WorkspaceGrant, readOnly = false): object {
     if (this.deps.workspaces.displayPath(grant) !== notebook.directory) throw new ToolError('WORKSPACE_CHANGED', '笔记本授权范围不一致');
@@ -48,7 +43,7 @@ export class NotebookWriter {
     if (!value) throw new ToolError('NOT_FOUND', '修改预览已过期，可打开笔记查看当前内容');
     return structuredClone(value);
   }
-  async apply(capability: object | undefined, intent: NoteChangeIntent, signal: AbortSignal, options: NotebookReviewOptions = {}): Promise<NoteChangeSummary> {
+  async apply(capability: object | undefined, intent: NoteChangeIntent, signal: AbortSignal): Promise<NoteChangeSummary> {
     const scope = capability && this.scopes.get(capability);
     if (!scope?.active) throw new ToolError('WORKSPACE_REQUIRED', '请先选择当前对话的笔记本');
     if (scope.readOnly) throw new ToolError('PERMISSION_DENIED', '本轮笔记本只读');
@@ -83,16 +78,10 @@ export class NotebookWriter {
     }
     validateText(after);
     if (after === before.content) throw new ToolError('NO_CHANGES', '笔记内容没有变化');
-    if (!this.deps.review) throw new ToolError('APPROVAL_REQUIRED', '笔记修改必须先预览并由用户确认');
     const previewDiff = createFileDiff(path.data, before.content, after);
-    if (Buffer.byteLength(previewDiff) > 512 * 1024) throw new ToolError('FILE_TOO_LARGE', '差异过长，请拆分后确认');
-    const preview: FileChangePreview = { id: randomUUID(), toolCallId: options.toolCallId ?? randomUUID(), workspaceId: scope.grant.id, workspacePath: notebook.directory,
-      path: path.data, operation: before.content === null ? 'create' : 'replace', before: before.content, after, beforeHash: before.hash,
-      afterHash: fileHash(Buffer.from(`${bom ? '\ufeff' : ''}${after}`)), diff: previewDiff, newline: newlineStyle(after), utf8Bom: bom };
-    options.beforeReview?.();
-    try { await this.deps.review(preview, signal, options); } finally { options.afterReview?.(); }
+    if (Buffer.byteLength(previewDiff) > 512 * 1024) throw new ToolError('FILE_TOO_LARGE', '差异过长，请拆分修改');
     throwIfAborted(signal);
-    if (!scope.active || (await this.deps.notebook(notebook.id)).directory !== notebook.directory) throw new ToolError('WORKSPACE_CHANGED', '确认后笔记本授权已变化');
+    if (!scope.active || (await this.deps.notebook(notebook.id)).directory !== notebook.directory) throw new ToolError('WORKSPACE_CHANGED', '写入前笔记本授权已变化');
     await this.deps.beforeWrite(notebook.id, signal);
     // Wait for the atomic syscall's actual result, even if Stop arrives during commit.
     const committed = await this.deps.workspaces.commitSnapshot(before, after, bom, signal);

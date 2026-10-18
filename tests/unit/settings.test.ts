@@ -77,6 +77,21 @@ describe('provider credentials', () => {
     expect(restarted.publicSettings().configuredModels).toHaveLength(1);
   });
 
+  it('chat font defaults old settings, persists independently and preserves encrypted model credentials', async () => {
+    writeFileSync(join(runtime.directory, 'settings.json'), JSON.stringify({ settings: defaults, appearance: { mode: 'dark' } }));
+    const storage = await import('../../src/main/storage/settings'); storage.loadSettings();
+    expect(storage.chatFontSize()).toBe(15); storage.saveSettings(defaults, 'synthetic-font-key');
+    const before = JSON.parse(readFileSync(join(runtime.directory, 'settings.json'), 'utf8'));
+    storage.saveChatFontSize(20); storage.saveAppearanceMode('light'); storage.saveSettings({ ...defaults, model: 'font-fixture-model' });
+    expect(storage.chatFontSize()).toBe(20); expect(storage.readKey()).toBe('synthetic-font-key');
+    expect(JSON.parse(readFileSync(join(runtime.directory, 'settings.json'), 'utf8')).encryptedKeys).toEqual(before.encryptedKeys);
+    const saved = readFileSync(join(runtime.directory, 'settings.json'), 'utf8');
+    for (const invalid of [0, 25, 15.5, NaN, Infinity]) expect(() => storage.saveChatFontSize(invalid)).toThrow();
+    expect(readFileSync(join(runtime.directory, 'settings.json'), 'utf8')).toBe(saved);
+    vi.resetModules(); const restarted = await import('../../src/main/storage/settings'); restarted.loadSettings();
+    expect(restarted.chatFontSize()).toBe(20); expect(restarted.appearanceMode()).toBe('light');
+  });
+
   it('rejects invalid appearance writes and tolerates an invalid stored preference without losing model settings', async () => {
     const storage = await import('../../src/main/storage/settings');
     storage.saveSettings(defaults, 'theme-test-key');

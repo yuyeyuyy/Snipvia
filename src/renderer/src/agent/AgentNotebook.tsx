@@ -35,7 +35,7 @@ export function AgentNotebookButton({ controller, disabled }: { controller: Agen
     disabled={disabled || controller.busy || controller.selecting || loading} onClick={() => void open()}><Icon name="notebook" size={13} /><span className="agent-workspace-name">{loading || controller.selecting ? '正在选择…' : notebook?.name ?? '选择笔记'}</span><span aria-hidden="true">⌄</span></button>
     {(error || controller.snapshot?.notebookNotice) && <span className="agent-notebook-notice" role="status">{error || controller.snapshot?.notebookNotice}</span>}
     {books && <NotebookDialog title="选择笔记" close={() => setBooks(null)}><div className="agent-notebook-list">
-      <p>选择一个笔记本；AI 可检索内容，并提出 Markdown 修改建议。每次写入都须先查看差异并确认；取消或拒绝后不会保存。</p>
+      <p>选择一个笔记本；AI 可检索并直接整理其中的 Markdown，无需逐次审批；修改后可查看差异或撤销。不会写入笔记本以外的文件。</p>
       <button disabled={controller.selecting || controller.busy} onClick={() => void choose(null)}><span>不选择笔记</span>{!notebook && <span>✓</span>}</button>
       {books.map((book) => <button key={book.id} disabled={controller.selecting || controller.busy} onClick={() => void choose(book.id)}><span>{book.name}</span>{notebook?.id === book.id && <span>✓</span>}</button>)}
     </div><footer><button type="button" disabled={controller.selecting || controller.busy} onClick={() => { void create().catch((error) => setError(error instanceof Error ? error.message : '无法创建笔记')); }}>＋ 创建笔记本</button></footer></NotebookDialog>}

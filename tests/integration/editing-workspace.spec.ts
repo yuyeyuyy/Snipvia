@@ -4,10 +4,9 @@ import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { launchDesktop } from '../helpers/desktop';
-import { tokenColor } from '../helpers/appearance';
 import { visionTestImage } from '../../src/main/ai/models/vision-test';
 
-test('selected notes and prediction rules become proposals, save only after review, preserve data and isolate Main IPC', async () => {
+test('notes save without approval and retain diff/undo, rules still require review and Main IPC stays isolated', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-editing-ui-')); const root = join(directory, '算法'); await mkdir(root);
   const original = '# 二分查找\n\nleft = mid\n'; await writeFile(join(root, '二分.md'), original);
   await writeFile(join(root, '其他.md'), 'PRIVATE_OTHER_NOTE_DO_NOT_SEND');
@@ -27,7 +26,7 @@ test('selected notes and prediction rules become proposals, save only after revi
       if (!tools.length) call = { name: 'read_edit_context', arguments: '{}' };
       else if (tools.length === 1) call = question.includes('分支') ? { name: 'propose_branch_changes', arguments: JSON.stringify({ operations: [{ op: 'update', id: 'explain-code', patch: { label: '算法代码讲解', applicableContent: '算法与数据结构代码', prompt: '解释算法，突出边界情况。' } }, { op: 'create', branch: { label: '复杂度分析', runningLabel: '正在分析复杂度…', trigger: 'code', prompt: '分析代码的时间与空间复杂度。', enabled: true } }] }) }
         : { name: 'propose_note_change', arguments: JSON.stringify({ path: '二分.md', mode: 'edit', edits: [{ search: 'left = mid', replace: 'left = mid + 1' }] }) };
-      response.end(JSON.stringify({ choices: [{ finish_reason: call ? 'tool_calls' : 'stop', message: call ? { content: null, tool_calls: [{ id: `call_${bodies.length}`, type: 'function', function: call }] } : { content: '修改建议已准备好，查看完整差异并确认后才会保存。' } }] }));
+      response.end(JSON.stringify({ choices: [{ finish_reason: call ? 'tool_calls' : 'stop', message: call ? { content: null, tool_calls: [{ id: `call_${bodies.length}`, type: 'function', function: call }] } : { content: question.includes('分支') ? '规则建议已准备好，请查看差异后确认。' : '笔记已保存，可以查看变更或撤销。' } }] }));
     });
   });
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve)); const address = server.address(); if (!address || typeof address === 'string') throw new Error('mock server unavailable');
@@ -51,36 +50,26 @@ test('selected notes and prediction rules become proposals, save only after revi
     if (!pictures.ok) throw new Error(pictures.error);
     expect((await page.evaluate(({ id, imageId }) => window.snipvia.agent.workspaceStart(id, '整理这篇笔记中的边界错误', false, [imageId]), { id: noteId, imageId: pictures.value[0].id })).ok).toBe(true);
     const pending = () => page.locator('.editing-proposal[data-status="pending"]');
-    await expect(pending()).toContainText('二分.md'); expect(await readFile(join(root, '二分.md'), 'utf8')).toBe(original);
-    expect(bodies[0]).toContain('image_url');
-    expect(bodies.join('\n')).not.toContain('PRIVATE_OTHER_NOTE_DO_NOT_SEND');
-    await pending().getByRole('button', { name: '查看修改' }).click();
-    await expect(page.getByRole('dialog', { name: '修改预览' })).toContainText('+left = mid + 1');
-    await page.getByRole('button', { name: '修改前', exact: true }).click(); await expect(page.getByLabel('修改前内容')).toHaveText(original);
-    expect(await readFile(join(root, '二分.md'), 'utf8')).toBe(original);
-    await page.getByRole('button', { name: '取消修改', exact: true }).click(); await expect(page.locator('.editing-proposal[data-status="cancelled"]')).toBeVisible();
-    expect(await readFile(join(root, '二分.md'), 'utf8')).toBe(original);
-    await page.getByLabel('AI 对话输入').fill('重新提出边界修改'); await page.getByLabel('AI 对话输入').press('Enter'); await expect(pending()).toHaveCount(1);
-    await pending().getByRole('button', { name: '查看修改' }).click();
-    await mkdir('docs/ui/chat-workspace-phase3', { recursive: true });
+    await expect(page.locator('.editing-proposal[data-status="applied"]')).toContainText('二分.md');
+    await expect.poll(() => readFile(join(root, '二分.md'), 'utf8')).toBe('# 二分查找\n\nleft = mid + 1\n');
+    await expect(page.locator('.workspace-message.assistant').last()).toContainText('笔记已保存');
+    await expect(pending()).toHaveCount(0);
+    await expect(page.getByRole('group', { name: 'Agent 操作确认' })).toHaveCount(0);
+    expect(bodies[0]).toContain('image_url'); expect(bodies.join('\n')).not.toContain('PRIVATE_OTHER_NOTE_DO_NOT_SEND');
+    await page.getByRole('button', { name: '查看变更', exact: true }).click();
+    await expect(page.getByRole('dialog', { name: '笔记修改记录' })).toContainText('+left = mid + 1');
+    await mkdir('docs/ui/chat-controls', { recursive: true });
     for (const theme of ['light', 'dark'] as const) {
       expect((await page.evaluate(theme => window.snipvia.appearance.set(theme), theme)).ok).toBe(true);
-      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-      await page.mouse.move(0, 0);
-      const button = page.getByRole('button', { name: '确认并保存', exact: true });
-      await expect(button).toHaveCSS('background-color', await tokenColor(button, 'accent'));
-      await page.screenshot({ path: `docs/ui/chat-workspace-phase3/note-preview-${theme}.png` });
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme); await page.mouse.move(0, 0);
+      await page.screenshot({ path: 'docs/ui/chat-controls/note-saved-' + theme + '.png' });
     }
-    const bounds = await app.evaluate(({ BrowserWindow }) => { const main = BrowserWindow.getAllWindows().find(window => !window.webContents.getURL().includes('#'))!; const bounds = main.getBounds(); main.setSize(820, 600); return bounds; });
-    await expect(page.getByRole('button', { name: '确认并保存', exact: true })).toBeInViewport();
-    await expect(page.getByLabel('修改差异')).toBeInViewport();
-    expect(await page.getByRole('dialog', { name: '修改预览' }).evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
-    await page.screenshot({ path: 'docs/ui/chat-workspace-phase3/note-preview-compact-dark.png' });
-    await app.evaluate(({ BrowserWindow }, bounds) => { BrowserWindow.getAllWindows().find(window => !window.webContents.getURL().includes('#'))!.setBounds(bounds); }, bounds);
-    await page.getByRole('button', { name: '确认并保存', exact: true }).click();
-    await expect(page.locator('.editing-proposal[data-status="applied"]')).toContainText('修改已保存');
-    expect(await readFile(join(root, '二分.md'), 'utf8')).toBe('# 二分查找\n\nleft = mid + 1\n');
-    await page.getByRole('button', { name: '查看笔记', exact: true }).click(); await expect(page.locator('.cm-content')).toContainText('left = mid + 1');
+    await page.getByRole('button', { name: '关闭笔记修改记录', exact: true }).click();
+    await page.getByRole('button', { name: '撤销', exact: true }).click();
+    await page.getByRole('button', { name: '确认撤销', exact: true }).click();
+    await expect.poll(() => readFile(join(root, '二分.md'), 'utf8')).toBe(original);
+    await expect(page.getByText('已撤销，恢复了 1 篇笔记')).toBeVisible();
+    await page.getByRole('button', { name: '查看笔记', exact: true }).click(); await expect(page.locator('.cm-content')).toContainText('left = mid');
     await page.getByRole('button', { name: '模型与设置', exact: true }).click();
     await page.getByRole('button', { name: '编辑解释代码', exact: true }).click(); await page.getByRole('button', { name: '用 AI 编辑已保存分支', exact: true }).click();
     await expect(page.getByRole('button', { name: '预测分支 / 解释代码', exact: true })).toBeVisible();

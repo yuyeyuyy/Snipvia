@@ -1,5 +1,7 @@
 # AI 对话工作区 Phase 4：图片输入与历史附件
 
+> 2026-10-18 更新：本文保留当时的实现与验收记录。所选笔记已改为无需逐次审批的自动保存，预测规则仍需确认；当前行为见[操作优化](CHAT_CONTROLS_2026_10_18.md)。
+
 交付日期：2026-10-14。前置：[现状审计](AI_CHAT_WORKSPACE_PHASE1_AUDIT.md)、[Phase 2](AI_CHAT_WORKSPACE_PHASE2.md)、[Phase 3](AI_CHAT_WORKSPACE_PHASE3.md)。本轮增量实现主窗口 AI 对话的图片输入，复用现有模型、Agent、历史和确认编辑链路。
 
 ## 使用流程

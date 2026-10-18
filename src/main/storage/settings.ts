@@ -8,10 +8,10 @@ import { defaults, settingsSchema, type ModelProfile, type PublicSettings, type 
 import { assertApiKeyFormat } from '../../shared/api-key';
 import { credentialScope, inferProvider } from '../../shared/providers';
 import { z } from 'zod';
-import { themeModeSchema, type ThemeMode } from '../../shared/appearance';
+import { chatFontSizeSchema, defaultChatFontSize, themeModeSchema, type ThemeMode } from '../../shared/appearance';
 
-type Stored = { settings: Settings; encryptedKeys: Record<string, string>; profiles: Record<string, Settings>; appearance: { mode: ThemeMode } };
-let stored: Stored = { settings: defaults, encryptedKeys: {}, profiles: {}, appearance: { mode: 'system' } };
+type Stored = { settings: Settings; encryptedKeys: Record<string, string>; profiles: Record<string, Settings>; appearance: { mode: ThemeMode; chatFontSize: number } };
+let stored: Stored = { settings: defaults, encryptedKeys: {}, profiles: {}, appearance: { mode: 'system', chatFontSize: defaultChatFontSize } };
 const file = () => join(app.getPath('userData'), 'settings.json');
 const credentialsFile = () => join(app.getPath('userData'), 'credentials.json');
 const credentialsKeyFile = () => join(app.getPath('userData'), 'credentials.key');
@@ -89,7 +89,7 @@ export function loadSettings() {
     encryptedKey: z.string().optional(),
     encryptedKeys: z.record(z.string(), z.string()).default({}),
     profiles: z.record(z.string(), z.unknown()).default({}),
-    appearance: z.object({ mode: themeModeSchema }).catch({ mode: 'system' }).default({ mode: 'system' })
+    appearance: z.object({ mode: themeModeSchema, chatFontSize: chatFontSizeSchema.catch(defaultChatFontSize).default(defaultChatFontSize) }).catch({ mode: 'system', chatFontSize: defaultChatFontSize }).default({ mode: 'system', chatFontSize: defaultChatFontSize })
   }).parse(JSON.parse(readFileSync(file(), 'utf8'))) : undefined;
   const settings = value
     ? settingsSchema.parse(migrateEditorShortcut({ ...value.settings, provider: value.settings.provider ?? inferProvider(value.settings.endpoint) }))
@@ -116,7 +116,7 @@ export function loadSettings() {
     assertApiKeyFormat(key);
     encryptedKeys[scope] = safeStorage.encryptString(key).toString('base64');
   }
-  const next = { settings, encryptedKeys, profiles, appearance: value?.appearance ?? { mode: 'system' as const } };
+  const next = { settings, encryptedKeys, profiles, appearance: value?.appearance ?? { mode: 'system' as const, chatFontSize: defaultChatFontSize } };
   if (predictionsChanged || legacyCredentialsPresent || value?.encryptedKey) persistSettings(next);
   stored = next;
   if (legacyCredentialsPresent) {
@@ -164,9 +164,16 @@ export function saveSettings(settings: Settings, apiKey?: string) {
 }
 
 export function appearanceMode(): ThemeMode { return stored.appearance.mode; }
+export function chatFontSize(): number { return stored.appearance.chatFontSize; }
+
+export function saveChatFontSize(value: number) {
+  const next = { ...stored, appearance: { ...stored.appearance, chatFontSize: chatFontSizeSchema.parse(value) } };
+  persistSettings(next);
+  stored = next;
+}
 
 export function saveAppearanceMode(mode: ThemeMode) {
-  const next = { ...stored, appearance: { mode: themeModeSchema.parse(mode) } };
+  const next = { ...stored, appearance: { ...stored.appearance, mode: themeModeSchema.parse(mode) } };
   persistSettings(next);
   stored = next;
 }

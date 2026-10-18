@@ -5,13 +5,13 @@
 .settings-preferences .settings-page-heading p { margin-top: 5px; font-size: 12px; color: var(--text-secondary); }
 .settings-categories { position: sticky; top: -24px; z-index: 2; display: flex; flex-wrap: wrap; gap: 3px; padding: 8px 0; border-bottom: 1px solid var(--border-subtle); background: var(--bg-window); }
 .settings-categories .ui-button { font-size: 12px; padding: 5px 9px; }
-.settings-preferences .preference-section { margin-top: 24px; }
-.settings-preferences .preference-section h2 { margin: 0; padding: 0 0 7px; font-size: 13px; font-weight: 600; scroll-margin-top: 60px; }
+.settings-preferences .preference-section { margin-top: 32px; }
+.settings-preferences .preference-section h2 { margin: 0; padding: 0 0 12px; font-size: 16px; font-weight: 650; letter-spacing: -.01em; scroll-margin-top: 60px; }
 .settings-preferences .preference-card { overflow: visible; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .settings-preferences .preference-row { min-height: 60px; padding: 12px 0; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; }
 .settings-preferences .preference-row + .preference-row { border-top: 1px solid var(--border-subtle); }
 .settings-preferences .preference-copy { gap: 4px; }
-.settings-preferences .preference-copy strong { font-size: 13px; font-weight: 500; }
+.settings-preferences .preference-copy strong { font-size: 13px; font-weight: 500; line-height: 1.5; }
 .settings-preferences .preference-copy span { font-size: 12px; line-height: 1.6; color: var(--text-secondary); }
 .update-settings-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; }
 .settings-preferences .update-status { display: flex; align-items: center; gap: 6px; }
@@ -34,7 +34,7 @@
 .settings-preferences .shortcut-recorder kbd { font-size: 12px; font-weight: 500; }
 .settings-preferences .shortcut-recorder.recording { outline: 2px solid var(--focus); outline-offset: 2px; background: var(--bg-selected); }
 .settings-preferences .preference-subsection { margin-top: 10px; }
-.settings-preferences .preference-subsection h3 { margin: 0; padding: 12px 0 4px; border-top: 1px solid var(--border-subtle); font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+.settings-preferences .preference-subsection h3 { margin: 0; padding: 12px 0 4px; border-top: 1px solid var(--border-subtle); font-size: 13px; font-weight: 600; color: var(--text-primary); }
 .settings-preferences .prediction-add-row { padding: 6px 0 0; }
 .settings-preferences .prediction-add { padding-inline: 4px; font-size: 12px; }
 .settings-preferences .preference-status { position: sticky; bottom: 0; padding: 10px 12px; margin: 16px 0 0; border: 1px solid var(--border-subtle); border-radius: var(--radius-control); background: var(--bg-raised); font-size: 12px; }

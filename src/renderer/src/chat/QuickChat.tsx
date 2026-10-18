@@ -1,3 +1,4 @@
+import { ChatResizeHandle } from './ChatResizeHandle';
 import './quick-chat.css';
 import { Button, IconButton } from '../components/ui/Button';
 import { Dialog } from '../components/ui/Dialog';
@@ -340,6 +341,7 @@ export function QuickChat() {
     </form>
       </section>
     </div>
+    <ChatResizeHandle expanded={expanded} onError={setError} />
     {zoomed && capture && <Dialog label="截图放大预览" className="quick-image-dialog" onClose={() => setZoomed(false)}>
       <div className="quick-zoom-toolbar"><span>截图预览 · 原始比例</span><IconButton icon="close" label="关闭放大预览" data-initial-focus onClick={() => setZoomed(false)} /></div>
       <div className="quick-zoom-scroll"><img src={capture.dataUrl} alt="放大的截图" /></div>

@@ -6,9 +6,10 @@ import { join } from 'node:path';
 import { launchDesktop } from '../helpers/desktop';
 import type { WorkspaceService } from '../../src/main/agent/WorkspaceService';
 
-test('AI confirms each note change before writing and replying, folds directory work into status, and opens actual changes', async () => {
+test('AI writes scoped notes without approvals, waits for actual commits and preserves diff, undo and cancellation receipts', async () => {
   test.setTimeout(60_000);
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-note-writing-ui-')), root = join(directory, '算法 AI 笔记');
+  await mkdir('docs/ui/chat-controls', { recursive: true });
   await mkdir(root); await mkdir(join(root, 'assets')); await writeFile(join(root, '基础.md'), '# 基础\nleft = mid\n');
   let finalReplies = 0, cancelResponse: ServerResponse | undefined;
   const names: string[][] = [];
@@ -97,7 +98,7 @@ test('AI confirms each note change before writing and replying, folds directory 
     await expect(quick.locator('.agent-run-status')).toHaveText('正在查看目录');
     await expect(quick.locator('.agent-part')).toHaveCount(0);
     await expect(quick.locator('body')).not.toContainText('list_directory');
-    await quick.screenshot({ path: 'docs/ui/agent-directory-inline.png' });
+    await quick.screenshot({ path: 'docs/ui/chat-controls/agent-directory-inline.png' });
     // Simulate a local edit while the Agent is working. Main must flush this
     // draft before taking the note snapshot, and the AI edit must preserve it.
     await page.getByRole('button', { name: '基础', exact: true }).click();
@@ -107,31 +108,21 @@ test('AI confirms each note change before writing and replying, folds directory 
     await app.evaluate(() => (globalThis as typeof globalThis & { releaseDirectory(): void }).releaseDirectory());
     await expect(quick.locator('.agent-run-status')).toHaveText('正在搜索文件 二分');
     await expect(quick.locator('.agent-part')).toHaveCount(1); await expect(quick.locator('.agent-part').first()).toContainText('查看目录');
-    await quick.screenshot({ path: 'docs/ui/agent-file-search-inline.png' });
+    await quick.screenshot({ path: 'docs/ui/chat-controls/agent-file-search-inline.png' });
     await app.evaluate(() => (globalThis as typeof globalThis & { releaseSearch(): void }).releaseSearch());
     await expect(quick.locator('.agent-run-status')).toHaveText('正在读取文件 基础.md');
     await expect(quick.locator('.agent-part')).toHaveCount(2); await expect(quick.locator('.agent-part').nth(1)).toContainText('搜索文件二分');
     await app.evaluate(() => (globalThis as typeof globalThis & { releaseRead(): void }).releaseRead());
-    await expect(quick.locator('.agent-run-status')).toContainText('等待你确认：编辑笔记');
+    await expect(quick.locator('.agent-run-status')).toContainText('正在编辑');
     expect(finalReplies).toBe(0); await expect(quick.getByLabel('已编辑笔记')).toHaveCount(0);
-    await quick.screenshot({ path: 'docs/ui/agent-note-writing.png' });
-    const confirmNote = async () => {
-      const approval = quick.getByRole('group', { name: 'Agent 操作确认', exact: true });
-      await expect(approval).toBeVisible();
-      await expect(approval.getByRole('button', { name: '本次会话允许' })).toHaveCount(0);
-      await approval.getByRole('button', { name: '查看差异', exact: true }).click();
-      await expect(quick.getByRole('dialog', { name: '文件修改差异' })).toBeVisible();
-      await quick.getByRole('button', { name: '关闭差异', exact: true }).click();
-      await approval.getByRole('button', { name: '允许一次', exact: true }).click();
-    };
-    await expect(quick.getByRole('group', { name: 'Agent 操作确认' })).toBeVisible();
+    await quick.screenshot({ path: 'docs/ui/chat-controls/agent-note-writing.png' });
+    await expect(quick.getByRole('group', { name: 'Agent 操作确认' })).toHaveCount(0);
     expect(await readdir(root)).not.toContain('二分查找.md');
     expect(await readFile(join(root, '基础.md'), 'utf8')).not.toContain('mid + 1');
-    await confirmNote();
     // The status appears before the hooked commit is reached; wait for the hook itself.
     await expect.poll(() => app.evaluate(() => typeof (globalThis as typeof globalThis & { releaseWrite?: () => void }).releaseWrite)).toBe('function');
     await app.evaluate(() => (globalThis as typeof globalThis & { releaseWrite(): void }).releaseWrite());
-    await confirmNote();
+    await expect(quick.getByRole('group', { name: 'Agent 操作确认' })).toHaveCount(0);
     await expect(quick.locator('.agent-answer')).toContainText('更新两篇算法笔记');
     await expect(quick.getByLabel('已编辑笔记')).toContainText('已编辑 2 篇笔记');
     expect(await readFile(join(root, '基础.md'), 'utf8')).toContain('我自己的复习问题。');
@@ -140,7 +131,7 @@ test('AI confirms each note change before writing and replying, folds directory 
     await quick.getByRole('button', { name: '查看变更', exact: true }).click();
     await expect(quick.getByRole('dialog', { name: '笔记修改记录' })).toContainText('+left = mid + 1');
     await quick.getByRole('button', { name: '关闭笔记修改记录' }).click();
-    await quick.screenshot({ path: 'docs/ui/agent-note-changes.png' });
+    await quick.screenshot({ path: 'docs/ui/chat-controls/agent-note-changes.png' });
     await quick.getByRole('button', { name: '打开笔记 二分查找.md', exact: true }).click().catch(error => { if (!quick.isClosed()) throw error; });
     await expect(page.getByRole('button', { name: 'AI 笔记', exact: true })).toHaveAttribute('aria-current', 'page');
     await expect(page.locator('.cm-content')).toContainText('缩小区间');
@@ -154,7 +145,7 @@ test('AI confirms each note change before writing and replying, folds directory 
     const changes = page.getByLabel('已编辑笔记');
     await changes.getByRole('button', { name: '撤销', exact: true }).click();
     await expect(changes.getByRole('group', { name: '确认撤销笔记修改' })).toContainText('新建的笔记会被删除');
-    await page.screenshot({ path: 'docs/ui/agent-note-undo.png' });
+    await page.screenshot({ path: 'docs/ui/chat-controls/agent-note-undo.png' });
     await changes.getByRole('button', { name: '确认撤销', exact: true }).click();
     await expect(changes.getByRole('status')).toContainText('已撤销，恢复了 2 篇笔记');
     expect(await readdir(root)).not.toContain('二分查找.md');
@@ -171,7 +162,7 @@ test('AI confirms each note change before writing and replying, folds directory 
     await expect(quick.getByLabel('已编辑笔记')).toHaveCount(0);
     await quick.getByLabel('悬浮对话问题').fill('写入后等待取消');
     await quick.getByLabel('悬浮对话问题').press('Enter');
-    await confirmNote();
+    await expect(quick.getByRole('group', { name: 'Agent 操作确认' })).toHaveCount(0);
     await expect.poll(() => !!cancelResponse).toBe(true);
     await quick.getByRole('button', { name: '停止执行', exact: true }).click();
     await expect(quick.getByLabel('已编辑笔记')).toContainText('取消前的笔记.md');

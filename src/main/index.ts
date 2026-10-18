@@ -1,3 +1,4 @@
+import { chatWindowSizeSchema } from '../shared/chat-window';
 import { EditingProposals } from './agent/editing/EditingProposals';
 import { editingReferenceSchema, editingSelectionSchema, editingProposalSchema, editingApplySchema } from '../shared/agent/editing';
 import { app, BrowserWindow, clipboard, ClipboardItem, desktopCapturer, dialog, globalShortcut, ipcMain, Menu, nativeImage, Notification, powerMonitor, screen, shell, Tray, type IpcMainInvokeEvent, type NativeImage } from 'electron';
@@ -30,7 +31,7 @@ import { createMacCalendarEvent, createMacReminder, listMacCalendars, listMacRem
 import { screenshotPerformance } from './performance/screenshot-performance';
 import { CaptureOverlayWindow } from './windows/capture-overlay-window';
 import { ScreenshotToAllWindow } from './windows/screenshot-to-all-window';
-import { quickChatBounds, quickWorkspaceBounds } from './windows/quick-chat-placement';
+import { quickChatBounds, quickWorkspaceBounds, resizedQuickChatBounds } from './windows/quick-chat-placement';
 import { captureReadinessStrategies, type CaptureReadinessStrategy } from './capture/capture-readiness';
 import { CaptureEngine } from './capture/capture-engine';
 import { ElectronCaptureBackend } from './capture/electron-capture-backend';
@@ -79,6 +80,7 @@ let quickChatReady: { windowId: number; resolve: () => void } | null = null;
 const noteFlushRequests = new Map<string, (success: boolean) => void>();
 let quickChatExpanded = false;
 let quickChatCompactSize = { width: 440, height: 400 };
+let quickChatExpandedSize = { width: 1000, height: 680 };
 let quickChatUserSize: { width: number; height: number } | null = null;
 let positioningQuickChat = false;
 let resolveCaptureOverlayReady: (() => void) | null = null;
@@ -162,10 +164,6 @@ export const agentFileTools = createFileToolSystem({
     beforeWrite: async (_id, signal) => {
       await flushNotesForAgent(signal);
     },
-    review: async (preview, signal, options) => {
-      const receipt = await agentFileTools.permissions.request(preview, signal, { ...options, singleUse: true, toolName: 'edit_note' });
-      agentFileTools.permissions.consume(receipt, preview);
-    },
     changed: (id) => notebooks.notifyChanged(id)
   }),
   store: new FilePermissionGrantStore(join(agentPermissionDirectory, 'grants.json')),
@@ -204,13 +202,17 @@ export const editingProposals = new EditingProposals({
     if (quickChatWindow && !quickChatWindow.isDestroyed()) quickChatWindow.webContents.send('settings:changed', settings);
   },
   notify: (conversationId, snapshot) => { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('editing:changed', { conversationId, snapshot }); },
-  applied: async (conversationId, summary, change, sides) => {
-    const next = recordAppliedProposal(conversationId, summary, change ? [change] : undefined);
-    if (conversationId === currentConversationId) conversationMessages = next;
-    if (!mainWindow.isDestroyed()) mainWindow.webContents.send('history:changed');
+  applied: async (conversationId, summary, change, sides, duringRun) => {
+    // The current answer does not exist in history until the Agent finishes.
+    // Automatic writes retain their receipts through the tool output and checkpoints.
+    if (!duringRun) {
+      const next = recordAppliedProposal(conversationId, summary, change ? [change] : undefined);
+      if (conversationId === currentConversationId) conversationMessages = next;
+      if (!mainWindow.isDestroyed()) mainWindow.webContents.send('history:changed');
+    }
     if (sides && change) {
       notebooks.notifyChanged(change.notebookId);
-      await noteCheckpoints.save({ id: summary.id, conversationId, notebookId: sides.book.id, notebookDirectory: sides.book.directory,
+      await noteCheckpoints.save({ id: change.id, conversationId, notebookId: sides.book.id, notebookDirectory: sides.book.directory,
         files: [{ summary: change, before: { path: sides.before.path, content: sides.before.content, bom: sides.before.bom }, after: { path: sides.after.path, content: sides.after.content, bom: sides.after.bom }, restorable: true, diff: { path: sides.before.path, diff: sides.diff, truncated: false } }] });
     }
   }
@@ -596,7 +598,6 @@ function clearPinnedFlow(discardEmpty: boolean) {
   const chat = quickChatWindow;
   quickChatWindow = null;
   quickChatExpanded = false;
-  quickChatCompactSize = { width: 440, height: 400 };
   quickChatUserSize = null;
   if (chat && !chat.isDestroyed()) chat.destroy();
   if (discardEmpty) discardPinnedConversation();
@@ -663,7 +664,7 @@ async function ensureQuickChatWindow() {
   }
   const performanceSessionId = pinnedPerformanceSessionId ?? activeCapturePerformanceSessionId ?? startupPerformanceSessionId;
   screenshotPerformance.mark(performanceSessionId, 'quick_chat_window_create_start');
-  quickChatWindow = new BrowserWindow({ width: 440, height: 400, minWidth: 340, minHeight: 360, frame: false, transparent: true, show: false, resizable: true,
+  quickChatWindow = new BrowserWindow({ ...quickChatCompactSize, minWidth: 340, minHeight: 360, frame: false, transparent: true, show: false, resizable: true,
     maximizable: false, fullscreenable: false, alwaysOnTop: true, skipTaskbar: true, hasShadow: true,
     backgroundColor: '#00000000', webPreferences: webPreferencesFor(performanceSessionId) });
   screenshotPerformance.mark(performanceSessionId, 'quick_chat_window_create_end');
@@ -675,7 +676,10 @@ async function ensureQuickChatWindow() {
   const initialSize = chat.getBounds();
   quickChatUserSize = { width: initialSize.width, height: initialSize.height };
   chat.on('will-resize', (_event, newBounds) => {
-    if (quickChatWindow === chat && !positioningQuickChat) quickChatUserSize = { width: newBounds.width, height: newBounds.height };
+    if (quickChatWindow === chat && !positioningQuickChat) {
+      quickChatUserSize = { width: newBounds.width, height: newBounds.height };
+      if (quickChatExpanded) quickChatExpandedSize = quickChatUserSize; else quickChatCompactSize = quickChatUserSize;
+    }
   });
   chat.webContents.on('render-process-gone', () => {
     controller?.abort(new Error('对话窗口已关闭'));
@@ -1376,6 +1380,7 @@ function setupIPC() {
   handle('updates:download', 'main', value => { z.undefined().parse(value); return updates.download(); });
   handle('updates:restart-install', 'main', value => { z.undefined().parse(value); return updates.restartAndInstall(); });
   handle('appearance:set', 'main', (mode) => appearance.setMode(mode));
+  handle('appearance:set-chat-font-size', 'main', (value) => appearance.setChatFontSize(value));
   setupAgentIPC();
   registerNotesIPC((channel, action) => handle(channel, 'main', action), notebooks, () => mainWindow,
     (id) => { if (editingProposals.isApplying) throw new Error('请等待修改保存完成'); return agentExecution.unlinkNotebook(id, () => notebooks.unlink(id)); });
@@ -1734,12 +1739,30 @@ function setupIPC() {
     if (expanded) {
       const bounds = chat.getBounds();
       quickChatCompactSize = { width: bounds.width, height: bounds.height };
+    } else {
+      const bounds = chat.getBounds();
+      quickChatExpandedSize = { width: bounds.width, height: bounds.height };
     }
     quickChatExpanded = expanded;
-    quickChatUserSize = expanded ? { width: 1000, height: 680 } : quickChatCompactSize;
+    quickChatUserSize = expanded ? quickChatExpandedSize : quickChatCompactSize;
     positionQuickChat();
     if (expanded) pin.hide(); else pin.showInactive();
     chat.focus();
+  });
+  handle('chat:resize', 'quickChat', value => {
+    const size = chatWindowSizeSchema.parse(value);
+    const chat = quickChatWindow;
+    if (!chat || chat.isDestroyed() || !screenshotToAllWindow?.isActive()) throw new Error('截图对话已关闭');
+    const current = chat.getBounds();
+    const workArea = screen.getDisplayMatching(current).workArea;
+    const target = resizedQuickChatBounds(current, workArea, size);
+    positioningQuickChat = true;
+    try { chat.setBounds(target); } finally { positioningQuickChat = false; }
+    const actual = chat.getBounds();
+    // Preserve requested DIP dimensions: Windows can report inflated native bounds.
+    quickChatUserSize = { width: target.width, height: target.height };
+    if (quickChatExpanded) quickChatExpandedSize = quickChatUserSize; else quickChatCompactSize = quickChatUserSize;
+    return { width: actual.width, height: actual.height };
   });
   handle('chat:save-image', 'quickChat', async () => {
     const chat = quickChatWindow;

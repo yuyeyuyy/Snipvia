@@ -4,10 +4,12 @@ import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath, URL } from 'node:url';
+import { prepareReleaseBuild } from './prepare-release-build.mjs';
 import { verifyWindowsBuild } from './verify-windows-build.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 process.chdir(root);
+prepareReleaseBuild();
 const require = createRequire(import.meta.url);
 const { build, Platform, Arch } = require('electron-builder');
 const base = join(root, 'dist', 'windows-internal');

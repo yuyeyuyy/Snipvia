@@ -18,10 +18,16 @@
 .quick-chat-v2 .quick-chat-empty span { font-weight: 500; }
 .quick-chat-v2 .quick-workspace-row { padding: 2px 14px 6px; }
 .quick-chat-v2 .quick-composer { margin: 0 12px 12px; padding: 10px; border-color: var(--border-default); border-radius: 9px; background: var(--bg-input); }
-.quick-chat-v2 .quick-composer textarea { height: 46px; resize: none; font-size: 13px; }
+.quick-chat-v2 .quick-composer textarea { min-height: 46px; height: auto; resize: none; font-size: var(--chat-font-size, 15px); }
 .quick-chat-v2 .quick-model-picker select { font-size: 11px; }
 .quick-chat-v2 .quick-chat-error { font-size: 12px; }
-.quick-chat-v2 .quick-message { font-size: 13px; }
+.quick-chat-v2 .quick-message { font-size: var(--chat-font-size, 15px); }
+.quick-chat-v2 .quick-message .markdown-body { font-size: inherit; }
+.quick-chat-v2 .quick-message .markdown-body h1 { font-size: 1.5em; }
+.quick-chat-v2 .quick-message .markdown-body h2 { font-size: 1.3em; }
+.quick-chat-v2 .quick-message .markdown-body h3 { font-size: 1.15em; }
+.quick-chat-v2 .quick-message .markdown-body pre { font-size: inherit; }
+.quick-chat-v2 .quick-message .markdown-body code { font-size: .9em; }
 .quick-chat-v2.is-expanded .quick-chat-workspace { flex-direction: row; }
 .quick-chat-v2.is-expanded .quick-capture-preview { flex: 0 0 var(--preview-width); min-width: 0; padding: 18px; border: 0; flex-direction: column; align-items: stretch; animation: quick-appear 140ms ease-out; }
 .quick-chat-v2.is-expanded .quick-thumbnail { flex: 1; min-height: 0; width: 100%; border: 0; background: transparent; }
@@ -44,3 +50,6 @@
   .quick-chat.quick-chat-v2, .quick-chat-v2.is-expanded .quick-capture-preview { animation: none; }
   .quick-chat-v2 .quick-chat-messages { scroll-behavior: auto; }
 }
+
+.chat-resize-handle { position: absolute; right: 2px; bottom: 2px; z-index: 3; display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 4px; color: var(--text-muted); background: transparent; cursor: nwse-resize; touch-action: none; -webkit-app-region: no-drag; }
+.chat-resize-handle:hover, .chat-resize-handle:focus-visible { color: var(--text-primary); background: var(--bg-selected); outline: 1px solid var(--focus); outline-offset: -2px; }

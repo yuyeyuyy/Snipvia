@@ -17,7 +17,7 @@ async function fixture() {
   const book = await notebooks.open(root);
   const guard = vi.fn<(id: string, signal: AbortSignal) => Promise<void>>(async () => {}), changed = vi.fn();
   const system = createFileToolSystem({ readOnly: true, prompt: async () => { throw new Error('Automatic notes must not prompt'); },
-    notebookWriter: workspaces => new NotebookWriter({ workspaces, notebook: id => notebooks.authorizedNotebook(id), beforeWrite: guard, review: async () => {}, changed }) });
+    notebookWriter: workspaces => new NotebookWriter({ workspaces, notebook: id => notebooks.authorizedNotebook(id), beforeWrite: guard, changed }) });
   const grant = await system.workspaces.authorizeWorkspace(root), writer = system.noteWriter!, scope = writer.createScope(book, grant);
   cleanups.push(async () => { writer.closeScope(scope); notebooks.dispose(); await rm(directory, { recursive: true, force: true }); });
   return { directory, root, notebooks, book, system, grant, writer, scope, guard, changed, signal: new AbortController().signal };

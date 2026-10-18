@@ -245,6 +245,7 @@ export type SnipviaAPI = {
   appearance: {
     current(): ThemeSnapshot;
     set(mode: ThemeMode): Promise<Result<ThemeSnapshot>>;
+    setChatFontSize(size: number): Promise<Result<ThemeSnapshot>>;
     onChanged(callback: (theme: ThemeSnapshot) => void): () => void;
   };
   models: import('./models').ModelCatalogAPI;
@@ -289,6 +290,7 @@ export type SnipviaAPI = {
   chat: {
     state(): Promise<Result<ChatState>>;
     setExpanded(expanded: boolean): Promise<Result<void>>;
+    resize(size: { width: number; height: number }): Promise<Result<{ width: number; height: number }>>;
     saveImage(): Promise<Result<boolean>>;
     send(value: { captureId: string; question: string; performanceSessionId?: string }): Promise<Result<Message>>;
     stream(value: { captureId: string; question: string; performanceSessionId?: string }): Promise<Result<{ requestId: string }>>;

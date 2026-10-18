@@ -128,8 +128,12 @@ export class ToolExecutor {
       if (tool?.permission === 'conversation:propose') {
         if (!options.proposalScope || !options.propose) throw new ToolError('PERMISSION_DENIED', '没有本轮编辑授权');
         const intent = tool.prepare(input); armTimer(); options.onRunning?.();
-        value = { success: true, output: await Promise.race([options.propose(options.proposalScope, intent, controller.signal), interrupted]) };
-        throwIfAborted(controller.signal);
+        // Wait for actual note commit outcomes even if Stop arrives during a syscall.
+        if (intent.kind === 'note') value = { success: true, output: await options.propose(options.proposalScope, intent, controller.signal) };
+        else {
+          value = { success: true, output: await Promise.race([options.propose(options.proposalScope, intent, controller.signal), interrupted]) };
+          throwIfAborted(controller.signal);
+        }
       } else if (tool?.permission === 'workspace:execute') {
         const runner = this.options.commandRunner;
         if (!runner) throw new ToolError('PERMISSION_DENIED', '当前未开放命令执行');
@@ -153,7 +157,7 @@ export class ToolExecutor {
         armTimer(); try { options.onRunning?.(); } catch { /* UI cannot change commit authorization. */ }
         // Main's notebook capability authorizes this narrow path. Never race an
         // atomic commit against Stop or lose its actual successful outcome.
-        value = { success: true, output: await writer.apply(options.noteScope, intent, controller.signal, { ...options, toolCallId: id, beforeReview: () => { clearTimeout(timer); timer = undefined; }, afterReview: armTimer }) };
+        value = { success: true, output: await writer.apply(options.noteScope, intent, controller.signal) };
       } else if (tool?.permission === 'workspace:read' || tool?.permission === 'network:read' || tool?.permission === 'external:execute') {
         if (tool.permission === 'external:execute') tool.parseInput(input);
         await this.permissions.authorize({ toolCallId: id, toolName: name, input, permission: tool.permission,

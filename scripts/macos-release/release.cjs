@@ -42,22 +42,21 @@ try {
   // Read-only credential validation, only in this explicitly authorized release command.
   run('/usr/bin/xcrun', ['notarytool', 'history', ...credentials, '--output-format', 'json'], { env });
   console.log(`正式发布输出：${output}`);
-  run('pnpm', ['native:build'], { env, stdio: 'inherit' });
-  run('pnpm', ['build'], { env, stdio: 'inherit' });
+  run('node', ['scripts/prepare-release-build.mjs', '--native'], { env, stdio: 'inherit' });
   const report = { version, teamId: identity.team, identity: identity.name, updateRepository: repository,
     autoUpdateEnabled: true, architectures: [], artifacts: [] };
   for (const arch of ['arm64', 'x64']) {
     console.log(`构建、签名及公证 ${arch} APP。`);
     run('pnpm', ['exec', 'electron-builder', '--config', 'electron-builder.macos-release.cjs', '--mac', 'dmg', 'zip', `--${arch}`, '--publish', 'never'], { env, stdio: 'inherit' });
     const app = path.join(output, arch === 'arm64' ? 'mac-arm64' : 'mac', appName);
-    verifyApp(app, arch);
+    const appVerification = verifyApp(app, arch);
     const dmg = path.join(output, `Snipvia-${version}-${arch}.dmg`);
     const zip = path.join(output, `Snipvia-${version}-${arch}.zip`);
     console.log(`公证、Staple 并验收 ${arch} DMG 与 ZIP。`);
     const notarization = notarizeDmg(dmg, env);
     const dmgVerification = verifyDmg(dmg, arch);
     const zipVerification = verifyZip(zip, arch);
-    report.architectures.push({ arch, app: verifyApp(app, arch), dmg: dmgVerification, zip: zipVerification, notarization });
+    report.architectures.push({ arch, app: appVerification, dmg: dmgVerification, zip: zipVerification, notarization });
     for (const file of [dmg, zip]) report.artifacts.push({ name: path.basename(file), sha256: digest(file) });
   }
   // Stapling changes the DMG. Regenerate update hashes only after all files are frozen.

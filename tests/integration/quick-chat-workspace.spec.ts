@@ -55,6 +55,26 @@ test('floating workspace preserves capture, draft, theme and session across pres
     await expect(chat.locator('.quick-chat')).toHaveAttribute('data-mode', 'compact');
     const state = await chat.evaluate(() => window.snipvia.chat.state()); if (!state.ok) throw new Error(state.error);
     const captureId = state.value.capture.id;
+    expect((await main.evaluate(() => window.snipvia.appearance.setChatFontSize(20))).ok).toBe(true);
+    await expect(input).toHaveCSS('font-size', '20px');
+    expect((await chat.evaluate(() => window.snipvia.appearance.setChatFontSize(12))).ok).toBe(false);
+    expect((await main.evaluate(() => window.snipvia.chat.resize({ width: 500, height: 500 }))).ok).toBe(false);
+    expect((await pin.evaluate(() => window.snipvia.chat.resize({ width: 500, height: 500 }))).ok).toBe(false);
+    expect((await chat.evaluate(() => window.snipvia.chat.resize({ width: NaN, height: 500 }))).ok).toBe(false);
+    const size = () => app.evaluate(({ BrowserWindow }) => {
+      const window = BrowserWindow.getAllWindows().find(window => window.webContents.getURL().endsWith('#quick-chat'))!;
+      const bounds = window.getBounds(); return { width: bounds.width, height: bounds.height };
+    });
+    const resize = chat.getByRole('button', { name: '调整对话框大小', exact: true });
+    await resize.focus(); await resize.press('ArrowRight'); await expect.poll(size).toEqual({ width: 460, height: 400 });
+    await resize.press('ArrowDown'); await expect.poll(size).toEqual({ width: 460, height: 420 });
+    const grip = await resize.boundingBox(); if (!grip) throw new Error('missing resize handle');
+    await chat.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2); await chat.mouse.down();
+    await chat.mouse.move(grip.x + grip.width / 2 + 40, grip.y + grip.height / 2 + 40, { steps: 5 }); await chat.mouse.up();
+    await expect.poll(size).toEqual({ width: 500, height: 460 });
+    await resize.press('Home'); await expect.poll(size).toEqual({ width: 440, height: 400 });
+    await input.focus();
+
     await input.fill('解释这段算法，并帮我整理学习笔记');
     const visible = (hash: string) => app.evaluate(({ BrowserWindow }, hash) => BrowserWindow.getAllWindows().find(w => w.webContents.getURL().endsWith(hash))?.isVisible(), hash);
     const legacyState = await chat.evaluate(() => window.snipvia.chat.state());
@@ -90,6 +110,8 @@ test('floating workspace preserves capture, draft, theme and session across pres
     expect((await readFile(join(directory, 'capture.jpg'))).subarray(0, 2).toString('hex')).toBe('ffd8');
     await input.press('Enter');
     await expect(chat.locator('.quick-chat-messages')).toContainText('每次缩小一半搜索区间');
+    await expect(chat.locator('.quick-message .markdown-body').last()).toHaveCSS('font-size', '20px');
+    await expect(chat.locator('.quick-message .markdown-body pre code').last()).toHaveCSS('font-size', '18px');
     for (const theme of ['light', 'dark'] as const) {
       await main.evaluate(theme => window.snipvia.appearance.set(theme), theme);
       await expect(chat.locator('html')).toHaveAttribute('data-theme', theme);

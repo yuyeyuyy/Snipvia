@@ -16,6 +16,8 @@ function applyTheme(value: ThemeSnapshot) {
   if (document.documentElement) {
     document.documentElement.dataset.theme = value.resolved;
     document.documentElement.dataset.themeMode = value.mode;
+    const size = value.chatFontSize ?? 15;
+    if (Number.isInteger(size) && size >= 12 && size <= 24) document.documentElement.style.setProperty('--chat-font-size', `${size}px`);
     if (['#pin', '#quick-chat'].includes(location.hash)) document.documentElement.classList.add('floating-window');
     if (location.hash === '#capture') document.documentElement.classList.add('capture-window');
   }
@@ -65,6 +67,11 @@ const api: SnipviaAPI = {
   },
   appearance: {
     current: () => ({ ...theme }),
+    setChatFontSize: async (size) => {
+      const result = await ipcRenderer.invoke('appearance:set-chat-font-size', size);
+      if (result.ok) applyTheme(result.value);
+      return result;
+    },
     set: async (mode) => {
       const result = await ipcRenderer.invoke('appearance:set', mode);
       if (result.ok) applyTheme(result.value);
@@ -236,6 +243,7 @@ const api: SnipviaAPI = {
   chat: {
     state: () => ipcRenderer.invoke('chat:state'),
     setExpanded: (expanded) => ipcRenderer.invoke('chat:set-expanded', expanded),
+    resize: size => ipcRenderer.invoke('chat:resize', size),
     saveImage: () => ipcRenderer.invoke('chat:save-image'),
     send: (value) => ipcRenderer.invoke('chat:send', value),
     stream: (value) => ipcRenderer.invoke('chat:stream', value),

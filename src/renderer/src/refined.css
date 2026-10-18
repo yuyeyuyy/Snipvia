@@ -499,3 +499,8 @@ input:focus, select:focus, .composer:focus-within {
 .empty-visual { width: 67px; height: 67px; margin-bottom: 18px; border-radius: 18px; }
 .empty-state h1 { font-size: 25px; }
 }
+
+/* Shared conversation typography; interface controls and the note editor keep their own metrics. */
+.chat-panel .message, .chat-panel .message .markdown-body, .chat-panel .composer textarea, .history-panel .history-message { font-size: var(--chat-font-size, 15px); }
+
+.chat-panel .message .markdown-body code, .history-panel .history-message .markdown-body code { font-size: .9em; }

@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-18",
+  "timezone": "Asia/Taipei",
+  "branch": "codex/local-chat-controls",
+  "baseCommit": "7527c011579cb7d9144d8da3f0af02a46518a772",
+  "remoteOperationsPerformed": false,
+  "publishedArtifactsChanged": false,
+  "node": "24.15.0",
+  "pnpm": "11.1.3",
+  "lint": "passed",
+  "typecheck": "passed independently and in final build",
+  "build": "passed",
+  "unitTests": {
+    "files": 63,
+    "passed": 988
+  },
+  "electronIntegration": {
+    "distinctCasesPassed": 9,
+    "files": [
+      {
+        "file": "tests/integration/chat-controls.spec.ts",
+        "cases": 1
+      },
+      {
+        "file": "tests/integration/editing-workspace.spec.ts",
+        "cases": 1
+      },
+      {
+        "file": "tests/integration/quick-chat-workspace.spec.ts",
+        "cases": 1
+      },
+      {
+        "file": "tests/integration/agent-commands.spec.ts",
+        "cases": 1
+      },
+      {
+        "file": "tests/integration/agent-file-approval.spec.ts",
+        "cases": 1
+      },
+      {
+        "file": "tests/integration/agent-note-writing.spec.ts",
+        "cases": 1
+      },
+      {
+        "file": "tests/integration/chat-workspace.spec.ts",
+        "cases": 1
+      },
+      {
+        "file": "tests/integration/appearance.spec.ts",
+        "cases": 2
+      }
+    ],
+    "scope": "temporary userData, synthetic screenshots, local mock models; full Electron suite not rerun"
+  },
+  "platform": {
+    "macOS": "actual Electron windows verified",
+    "windows": "layout/bounds logic covered; no real Windows device verification"
+  },
+  "screenshots": [
+    {
+      "file": "docs/ui/chat-controls/agent-directory-inline.png",
+      "sha256": "4c99a22bd1c73ce7c488b7543ef4e3e861f873a6c74e043406a1fa4b7463bfb2"
+    },
+    {
+      "file": "docs/ui/chat-controls/agent-file-search-inline.png",
+      "sha256": "fee2f450bbdda17f26adb48991710887fce88a5dac9d06a904a24c36960588f6"
+    },
+    {
+      "file": "docs/ui/chat-controls/agent-note-changes.png",
+      "sha256": "0d4bfb5c486349aafb486a4a63fd28ed7fa249c40d9a93cdcdb3790cd3afd308"
+    },
+    {
+      "file": "docs/ui/chat-controls/agent-note-undo.png",
+      "sha256": "3c68322e9c74afa31c2441777003a9e453e5a817631caf5282216b12ebf1da13"
+    },
+    {
+      "file": "docs/ui/chat-controls/agent-note-writing.png",
+      "sha256": "c64bc87235982e694806884ab84da147982964b37a01708d19f2a13b08035cec"
+    },
+    {
+      "file": "docs/ui/chat-controls/note-saved-dark.png",
+      "sha256": "c9d64c88c4614bc1dc4af6e86307c9d2e95635e1363b52b5d955d0831f467c97"
+    },
+    {
+      "file": "docs/ui/chat-controls/note-saved-light.png",
+      "sha256": "b01f66cf498c3f923f64141a864b21c68e97c4e158571a850d6c858174e9c2ff"
+    },
+    {
+      "file": "docs/ui/chat-controls/quick-chat-dark.png",
+      "sha256": "aa20beb843bea95ecbad0c1835f9d4ca36bb5767feddf5b612e5f3ad2073b586"
+    },
+    {
+      "file": "docs/ui/chat-controls/quick-chat-light.png",
+      "sha256": "831c6367cd80c6b1976264a96e28aa657a82c988b6d09b86b4dcff3f5c2b0639"
+    },
+    {
+      "file": "docs/ui/chat-controls/settings-dark.png",
+      "sha256": "917c461fe97d38876962c08d5ca00bb8ebac04637170bdf30acf900533a3657b"
+    },
+    {
+      "file": "docs/ui/chat-controls/settings-light.png",
+      "sha256": "f66f3ca45f39f20b02bf8dd877bf56da802eda105fcc51198af8da5394542b44"
+    }
+  ]
+}

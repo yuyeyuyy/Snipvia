@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { quickChatBounds, quickWorkspaceBounds } from '../../src/main/windows/quick-chat-placement';
+import { quickChatBounds, quickWorkspaceBounds, resizedQuickChatBounds } from '../../src/main/windows/quick-chat-placement';
 
 describe('quickChatBounds', () => {
   const workArea = { x: 0, y: 0, width: 1536, height: 864 };
@@ -33,5 +33,18 @@ describe('expanded screenshot workspace', () => {
   it('clamps to a small work area without applying Retina scaling twice', () => {
     expect(quickWorkspaceBounds({ x: 0, y: 24, width: 800, height: 576 }, { width: 1000, height: 680 }))
       .toEqual({ x: 0, y: 24, width: 800, height: 576 });
+  });
+});
+
+describe('floating chat manual resizing', () => {
+  const area = { x: -1440, y: 24, width: 1440, height: 876 };
+  it('keeps the top-left when possible, clamps the minimum and fits large sizes to a negative-origin display', () => {
+    const current = { x: -1000, y: 100, width: 440, height: 400 };
+    expect(resizedQuickChatBounds(current, area, { width: 500, height: 550 })).toEqual({ ...current, width: 500, height: 550 });
+    expect(resizedQuickChatBounds(current, area, { width: 1, height: 1 })).toMatchObject({ width: 340, height: 360 });
+    expect(resizedQuickChatBounds(current, area, { width: 9000, height: 9000 })).toEqual(area);
+  });
+  it('repositions near display edges and retains DIP sizes without applying a scaling factor', () => {
+    expect(resizedQuickChatBounds({ x: -450, y: 700, width: 440, height: 400 }, area, { width: 600, height: 500 })).toEqual({ x: -600, y: 400, width: 600, height: 500 });
   });
 });

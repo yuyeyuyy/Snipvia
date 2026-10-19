@@ -7,9 +7,9 @@ import { Dialog } from '../components/ui/Dialog';
 import { groupConversations, filterConversations } from '../history/display';
 import './sidebar.css';
 
-export function ChatSidebar({ items, selected, blocked, activeId, onSelect, onDelete, onHistory, onSettings }: {
+export function ChatSidebar({ items, selected, blocked, activeId, onSelect, onDelete, onHistory }: {
   items: ConversationSummary[]; selected: string | null; blocked: boolean; activeId: string | null;
-  onSelect(id: string | null): void; onDelete(id: string): Promise<Result<void>>; onHistory(): void; onSettings(): void;
+  onSelect(id: string | null): void; onDelete(id: string): Promise<Result<void>>; onHistory(): void;
 }) {
   const [action, setAction] = useState<{ kind: 'menu' | 'rename' | 'delete'; item: ConversationSummary } | null>(null);
   const [title, setTitle] = useState(''); const [error, setError] = useState(''); const [acting, setActing] = useState(false);
@@ -32,7 +32,6 @@ export function ChatSidebar({ items, selected, blocked, activeId, onSelect, onDe
       <button type="button" disabled={blocked} className="chat-sidebar-select" aria-current={selected === item.id ? 'true' : undefined} title={item.title} onClick={() => onSelect(item.id)}><span>{item.title}</span>{activeId === item.id && <span className="ui-spinner" aria-label="正在生成" />}</button>
       <IconButton icon="more" label={`对话操作：${item.title}`} className="chat-sidebar-more" disabled={acting || blocked} onClick={() => open('menu', item)} />
     </div>)}</section>) : <p className="chat-sidebar-empty">对话会保存在这里</p>}</div>
-    <Button variant="quiet" className="chat-sidebar-settings" onClick={onSettings}><Icon name="settings" size={16} />设置</Button>
     {action && <Dialog label={action.kind === 'menu' ? '对话操作' : action.kind === 'rename' ? '重命名对话' : '删除对话'} className="chat-conversation-dialog" onClose={() => { if (!acting) setAction(null); }}>
       {action.kind === 'menu' ? <><h2 title={action.item.title}>{action.item.title}</h2><Button variant="quiet" onClick={() => open('rename', action.item)}><Icon name="edit" size={16} />重命名</Button><Button variant="quiet" onClick={() => open('delete', action.item)}><Icon name="close" size={16} />删除对话</Button><Button variant="quiet" onClick={() => setAction(null)}>关闭</Button></> : <form onSubmit={event => { event.preventDefault(); void commit(); }}>
         <h2>{action.kind === 'rename' ? '重命名对话' : '删除这条对话？'}</h2>

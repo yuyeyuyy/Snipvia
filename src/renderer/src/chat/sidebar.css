@@ -17,7 +17,6 @@
 .chat-sidebar-more.ui-button { position: absolute; right: 2px; width: 26px; height: 26px; opacity: 0; }
 .chat-sidebar-row:hover .chat-sidebar-more, .chat-sidebar-row:focus-within .chat-sidebar-more { opacity: 1; }
 .chat-sidebar-empty { color: var(--text-muted); font-size: var(--font-caption); padding: 8px; }
-.chat-sidebar-settings.ui-button { justify-content: flex-start; gap: 8px; margin-top: 8px; flex-shrink: 0; }
 .chat-conversation-dialog { width: min(360px, calc(100vw - 40px)); padding: 20px; }
 .chat-conversation-dialog h2 { font-size: 16px; margin: 0 0 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chat-conversation-dialog > .ui-button { width: 100%; justify-content: flex-start; margin-bottom: 4px; }

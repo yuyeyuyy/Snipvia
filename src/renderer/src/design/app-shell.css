@@ -53,3 +53,14 @@
 .command-footer { display: flex; gap: var(--space-4); padding: var(--space-2) var(--space-4); border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: var(--font-caption); }
 @media (max-width: 1050px) { .workspace-panel { padding: var(--space-3) var(--space-4); } }
 @media (prefers-reduced-motion: reduce) { .app-shell, .sidebar .nav span, .sidebar .nav b { transition: none; } }
+
+.titlebar-button.titlebar-feedback { width: auto; padding: 0 var(--space-3); }
+.feedback-dialog { width: min(360px, calc(100vw - 48px)); padding: 24px; }
+.feedback-dialog h2 { margin: 0; font-size: 16px; font-weight: 600; }
+.feedback-dialog > p { margin: 12px 0 20px; color: var(--text-secondary); line-height: 1.6; }
+.feedback-group { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 1px solid var(--border-subtle); border-radius: var(--radius-control); background: var(--bg-panel); }
+.feedback-group-label { color: var(--text-secondary); font-size: 12px; }
+.feedback-group strong { font-size: 24px; font-weight: 600; letter-spacing: .04em; font-variant-numeric: tabular-nums; user-select: text; cursor: text; }
+.feedback-number { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.feedback-number .ui-button { flex-shrink: 0; }
+.feedback-actions { display: flex; justify-content: flex-end; margin-top: 20px; }

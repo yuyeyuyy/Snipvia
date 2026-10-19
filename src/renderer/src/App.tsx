@@ -176,7 +176,7 @@ export function App() {
 
   function newChat() { setConversationId(null); setNewChatRequest(value => value + 1); setPage('chat'); }
 
-  return <AppShell sidebarContent={<ChatSidebar items={historyItems} selected={conversationId} blocked={chatStatus.blocked || switchingModel} activeId={chatStatus.activeId} onSelect={id => { if (id) { setConversationId(id); setPage('chat'); } else newChat(); }} onDelete={deleteHistory} onHistory={() => navigate('history')} onSettings={() => navigate('settings')} />} page={page} sidebarCollapsed={sidebarCollapsed} unreadScheduleCount={unreadScheduleCount} onNavigate={navigate} onToggleSidebar={() => {
+  return <AppShell sidebarContent={<ChatSidebar items={historyItems} selected={conversationId} blocked={chatStatus.blocked || switchingModel} activeId={chatStatus.activeId} onSelect={id => { if (id) { setConversationId(id); setPage('chat'); } else newChat(); }} onDelete={deleteHistory} onHistory={() => navigate('history')} />} page={page} sidebarCollapsed={sidebarCollapsed} unreadScheduleCount={unreadScheduleCount} onNavigate={navigate} onToggleSidebar={() => {
     const next = !sidebarCollapsed;
     setSidebarCollapsed(next);
     try { window.localStorage.setItem(sidebarCollapsedKey, String(next)); } catch { /* Keep the in-memory preference when storage is unavailable. */ }

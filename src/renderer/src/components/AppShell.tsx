@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AppTitleBar } from './AppTitleBar';
+import { FeedbackDialog } from './FeedbackDialog';
 import { Icon, type IconName } from './Icon';
 import { Dialog } from './ui/Dialog';
 import { IconButton, Input } from './ui/Button';
@@ -40,6 +41,7 @@ export function AppShell({ children, sidebarContent, page, sidebarCollapsed, unr
   onToggleSidebar: () => void; onNavigate: (page: AppPage) => void;
 }) {
   const [commandsOpen, setCommandsOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [compact, setCompact] = useState(() => matchMedia('(max-width: 1050px)').matches);
   const [compactExpanded, setCompactExpanded] = useState(false);
   const collapsed = sidebarCollapsed || (compact && !compactExpanded);
@@ -65,9 +67,10 @@ export function AppShell({ children, sidebarContent, page, sidebarCollapsed, unr
     else { onToggleSidebar(); if (compact) setCompactExpanded(true); }
   }
   return <div className={`app-shell${page === 'chat' ? ' chat-active' : ''}${collapsed ? ' sidebar-collapsed' : ''}`}>
-    <AppTitleBar settingsActive={page === 'settings'} sidebarCollapsed={collapsed} onSettings={() => onNavigate('settings')} onToggleSidebar={toggle} onSearch={() => setCommandsOpen(true)} />
+    <AppTitleBar settingsActive={page === 'settings'} sidebarCollapsed={collapsed} onSettings={() => onNavigate('settings')} onToggleSidebar={toggle} onSearch={() => setCommandsOpen(true)} onFeedback={() => setFeedbackOpen(true)} />
     <aside className="sidebar" id="app-sidebar" aria-label="菜单栏"><nav aria-label="主导航">{destinations.map((item) => <button type="button" key={item.page} className={page === item.page ? 'nav active' : 'nav'} aria-label={item.title} title={item.page === 'schedule' && unreadScheduleCount > 0 ? `${item.title} · ${unreadScheduleCount} 条未查看日程` : item.title} aria-current={page === item.page ? 'page' : undefined} onClick={() => onNavigate(item.page)}><Icon name={item.icon} /><span>{item.title}</span>{item.page === 'schedule' && unreadScheduleCount > 0 && <b aria-label={`${unreadScheduleCount} 条未查看日程`}>{unreadScheduleCount > 99 ? '99+' : unreadScheduleCount}</b>}</button>)}</nav>{page === 'chat' && sidebarContent}</aside>
     <main>{children}</main>
+    {feedbackOpen && <FeedbackDialog onClose={() => setFeedbackOpen(false)} />}
     {commandsOpen && <CommandPalette onClose={() => setCommandsOpen(false)} onNavigate={onNavigate} />}
   </div>;
 }

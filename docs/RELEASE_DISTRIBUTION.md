@@ -1,10 +1,10 @@
 # 源码与安装包分发
 
-## 0.3.1 当前分发方式
+## 0.3.2 当前分发方式
 
 客户端源码及新安装包统一使用 [yuyeyuyy/Snipvia](https://github.com/yuyeyuyy/Snipvia)。服务端、管理后台和官网不在此仓库内。源码采用 Apache License 2.0，安装包及依赖保留各自声明。历史记录中“源码私有”和 `Snipvia-releases` 描述的是旧账号版分发阶段。
 
-0.3.1 的联合发行白名单为：Apple Silicon / Intel 两种架构的四个 DMG / ZIP、一个 Windows x64 EXE、`latest-mac.yml`、`SHA256SUMS.txt`、`WINDOWS_INSTALL_GUIDE.md`。Windows 明确标记未签名预览，不能借 macOS 公证宣称 Windows 已签名或真机验收通过。
+0.3.2 的联合发行白名单为：Apple Silicon / Intel 两种架构的四个 DMG / ZIP、一个 Windows x64 EXE、`latest-mac.yml`、`SHA256SUMS.txt`、`WINDOWS_INSTALL_GUIDE.md`。Windows 明确标记未签名预览，不能借 macOS 公证宣称 Windows 已签名或真机验收通过。
 
 五个二进制、更新元数据与安装说明的 SHA-256 汇入公开校验文件，Mac 更新清单仍只引用四个经过签名公证的 Mac 文件。源 `verified/` 及已冻结二进制保持原样。不得上传内部 verification.json、BUILD_METADATA.json、构建日志、源码备份、证书容器或用户资料作为 Release 附件；GitHub 自带源码归档对应本版源码提交。
 
@@ -12,9 +12,9 @@
 
 `scripts/macos-release/publish.cjs` 仍是 Mac 专用六文件发布器，保持原白名单保护。不能用它覆盖含 Windows 附件的同版本联合 Release；联合发行按上述八文件清单显式操作，并保存本地发布计划和校验结果。
 
-旧账号版仍使用旧更新源，本次不修改旧仓库或追溯替换旧二进制；旧版用户先手动安装 0.3.1。Windows 继续检查版本并手动安装，不启用尚未配置签名验证的自动更新。
+旧账号版仍使用旧更新源，本次不修改旧仓库或追溯替换旧二进制；旧版用户先手动安装 0.3.2。Windows 继续检查版本并手动安装，不启用尚未配置签名验证的自动更新。
 
-详细平台和安全边界见 [0.3.1 说明](RELEASE_NOTES_0_3_1.md)、[打包记录](RELEASE_0_3_1.md)和[发布记录](RELEASE_0_3_1_PUBLICATION.md)。0.3.0 历史包继续保留。
+详细平台和安全边界见 [0.3.2 说明](RELEASE_NOTES_0_3_2.md)、[打包记录](RELEASE_0_3_2.md)。0.3.0 / 0.3.1 历史包继续保留。
 
 ## 以下为旧账号版分发历史
 

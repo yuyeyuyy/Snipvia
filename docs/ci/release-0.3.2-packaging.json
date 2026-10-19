@@ -1,0 +1,86 @@
+{
+  "version": "0.3.2",
+  "sourceCommit": "bdcf296553996d7e60829a886bb1d5d6a2b540a4",
+  "fullMacVerification": "dist/macos-release/0.3.2-2026-10-19T10-04-15-976Z-e8a6cb5d/verified/verification.json",
+  "macOS": {
+    "signed": true,
+    "notarization": "Accepted",
+    "architectures": [
+      "arm64",
+      "x64"
+    ]
+  },
+  "windows": {
+    "version": "0.3.2",
+    "architecture": "x64",
+    "installer": "/Users/macbook/IdeaProjects/Snipvia-public-baseline/dist/windows-internal/internal-TvNRgg/Snipvia-Setup-0.3.2-x64.exe",
+    "filename": "Snipvia-Setup-0.3.2-x64.exe",
+    "bytes": 118389659,
+    "sha256": "f91504c0b2abe22322a3305186af8b13028b99f72471d288faa284887c5f913e",
+    "signed": false,
+    "verification": "Static PE, ASAR, NSIS payload and uninstaller checks passed; Windows runtime not verified",
+    "iconSource": "UI/Snipvia-Win-transparent.ico",
+    "iconSha256": "6fe028ad2e05c2b0166ba48bee390e0b84760de093b3395cca83ae04efe08bd0",
+    "embeddedApplicationIconsMatch": true,
+    "embeddedInstallerIconsMatch": true,
+    "nativeNodeModules": 0,
+    "appIconSizes": 7
+  },
+  "newFeatureChecks": {
+    "passed": true,
+    "version": "0.3.2",
+    "packaged": true,
+    "arch": "arm64",
+    "groupDisplayed": "643251313",
+    "copyThroughIPC": true,
+    "sidebarSettingsRemoved": true,
+    "topRightSettingsRetained": true,
+    "isolatedUserData": true,
+    "actualClipboardTouched": false,
+    "scope": "Only requested new feature presence in the real signed package; no regression suite, AI requests or update installation."
+  },
+  "functionalSuitesRerun": false,
+  "nativeRebuilt": false,
+  "assets": [
+    {
+      "name": "Snipvia-0.3.2-arm64.dmg",
+      "bytes": 141558834,
+      "sha256": "cdbb071f1ea81c143156b1823c5f3c07925a537e741c2cac8db8e995ec219f4f"
+    },
+    {
+      "name": "Snipvia-0.3.2-arm64.zip",
+      "bytes": 141959045,
+      "sha256": "945a1a06f13668add6ecb9e3e474930887de86e09efafe647e14030d52c2ff66"
+    },
+    {
+      "name": "Snipvia-0.3.2-x64.dmg",
+      "bytes": 148323128,
+      "sha256": "bf090e4bb287e7a1411176d26ba820ec6f7f8b771c8bbea8b3c66945dd8efc35"
+    },
+    {
+      "name": "Snipvia-0.3.2-x64.zip",
+      "bytes": 148762194,
+      "sha256": "5eb4949729682ec54cdc4cf67fa265ce87c8df8f5b96d894df5c12969ae9c505"
+    },
+    {
+      "name": "Snipvia-Setup-0.3.2-x64.exe",
+      "bytes": 118389659,
+      "sha256": "f91504c0b2abe22322a3305186af8b13028b99f72471d288faa284887c5f913e"
+    },
+    {
+      "name": "latest-mac.yml",
+      "bytes": 964,
+      "sha256": "fdc54d6a1dd9af67247ddde7b1ef872a5d928bc15e81c8c92bbb18ebb170fc31"
+    },
+    {
+      "name": "WINDOWS_INSTALL_GUIDE.md",
+      "bytes": 1381,
+      "sha256": "dd85dd3b80c96815ecb05cf2f49e6cdcd7c9e2bd258d2ca363d70f5cd5f04d88"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 622,
+      "sha256": "2acedcaee9cf01711da23b44bf87bb83d69b7010e0b6e67f30b768d14febfdd9"
+    }
+  ]
+}

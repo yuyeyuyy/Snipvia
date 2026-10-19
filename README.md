@@ -6,25 +6,25 @@
 
 ## 当前状态
 
-文档更新：2026-10-18。当前免费客户端版本为 **0.3.1**，源码采用 [Apache License 2.0](LICENSE)。客户端不需要 Snipvia 账号、会员或后台数据库；截图预测使用用户配置的视觉模型，也可选配自己的 Jev 图片预测 Key。服务端、管理后台和官网已从本仓库分离，当前仓库使用独立客户端历史。
+文档更新：2026-10-19。当前免费客户端版本为 **0.3.2**，源码采用 [Apache License 2.0](LICENSE)。客户端不需要 Snipvia 账号、会员或后台数据库；截图预测使用用户配置的视觉模型，也可选配自己的 Jev 图片预测 Key。服务端、管理后台和官网已从本仓库分离，当前仓库使用独立客户端历史。
 
-## 下载 0.3.1
+## 下载 0.3.2
 
-Windows 安装包已换用透明图标，版本仍为 0.3.1，见[本次重包记录](docs/WINDOWS_ICON_REFRESH_0_3_1.md)。
+本版新增右上角反馈入口和 QQ 群号一键复制，移除左下角重复设置入口；Windows 保留透明应用图标。
 
-安装包和更新源统一使用 [本仓库的 GitHub Releases](https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.1)。Windows 明确作为未签名预览包提供；下载前可与 Release 中的 `SHA256SUMS.txt` 核对。
+安装包和更新源统一使用 [本仓库的 GitHub Releases](https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.2)。Windows 明确作为未签名预览包提供；下载前可与 Release 中的 `SHA256SUMS.txt` 核对。
 
 | 平台 | 安装包 | 验收边界 |
 | --- | --- | --- |
-| macOS 14+ Apple Silicon | [DMG](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/Snipvia-0.3.1-arm64.dmg) | Developer ID 签名、Apple 公证、Staple、Gatekeeper 通过 |
-| macOS 14+ Intel | [DMG](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/Snipvia-0.3.1-x64.dmg) | 签名和公证通过；Intel 真机仍待验收 |
-| Windows x64 预览 | [EXE](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.1/Snipvia-Setup-0.3.1-x64.exe) | 未签名；静态内容检查通过；安装、DPAPI、真实截图仍待 Windows 真机验收 |
+| macOS 14+ Apple Silicon | [DMG](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.2/Snipvia-0.3.2-arm64.dmg) | Developer ID 签名、Apple 公证、Staple、Gatekeeper 通过 |
+| macOS 14+ Intel | [DMG](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.2/Snipvia-0.3.2-x64.dmg) | 签名和公证通过；Intel 真机仍待验收 |
+| Windows x64 预览 | [EXE](https://github.com/yuyeyuyy/Snipvia/releases/download/v0.3.2/Snipvia-Setup-0.3.2-x64.exe) | 未签名；静态内容检查通过；安装、DPAPI、真实截图仍待 Windows 真机验收 |
 
 免费表示桌面核心功能不收费，不包含模型厂商的 API Key 或额度。没有 Key 时可使用本地截图、编辑、历史与笔记；AI 需要自行配置模型服务。
 
-0.3.1 的变化见[发布说明](docs/RELEASE_NOTES_0_3_1.md)，本次打包、验收复用和平台限制见[打包记录](docs/RELEASE_0_3_1.md)及[发布记录](docs/RELEASE_0_3_1_PUBLICATION.md)。既有依赖告警仍见[依赖安全记录](docs/opensource/dependency-security.json)，不把本次发布当作漏洞已修复或全部平台已验收。
+0.3.2 的变化见[发布说明](docs/RELEASE_NOTES_0_3_2.md)，本次打包、验收复用和平台限制见[打包记录](docs/RELEASE_0_3_2.md)。既有依赖告警仍见[依赖安全记录](docs/opensource/dependency-security.json)，不把本次发布当作漏洞已修复或全部平台已验收。
 
-旧账号版 v0.2.3 及更早版本仍使用旧分发源，**需手动安装 0.3.1 才切换到本仓库更新渠道**；不会追溯修改旧安装包或停止旧服务。卸载或升级前请备份重要数据和笔记。历史隔离、分离与各阶段审计见 [开源文档](docs/opensource/REPOSITORY_ISOLATION_REPORT.md)及[分发说明](docs/RELEASE_DISTRIBUTION.md)，报告中的日期与结论保留其当时范围。
+旧账号版 v0.2.3 及更早版本仍使用旧分发源，**需手动安装 0.3.2 才切换到本仓库更新渠道**；不会追溯修改旧安装包或停止旧服务。卸载或升级前请备份重要数据和笔记。历史隔离、分离与各阶段审计见 [开源文档](docs/opensource/REPOSITORY_ISOLATION_REPORT.md)及[分发说明](docs/RELEASE_DISTRIBUTION.md)，报告中的日期与结论保留其当时范围。
 
 | 模块 | 当前源码已实现 | 边界 |
 | --- | --- | --- |

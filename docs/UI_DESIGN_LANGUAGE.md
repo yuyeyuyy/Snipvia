@@ -383,3 +383,5 @@ AI 笔记复用 `workspace-panel` 与 `WorkspaceHeader`，移除内层卡片外�
 ![反馈弹窗 · Light](ui/feedback/light.png)
 
 ![反馈弹窗 · Dark](ui/feedback/dark.png)
+
+2026-10-19：上述反馈、复制群号与侧栏精简已随 0.3.2 发布，见[本次打包发布记录](RELEASE_0_3_2.md)。此前功能验收继续复用，发布仅确认新包中已加入这些功能。

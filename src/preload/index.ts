@@ -34,6 +34,8 @@ if (initialPerformanceSessionId) {
 
 const api: SnipviaAPI = {
   collection: {
+    rendered: value => ipcRenderer.invoke('collection:rendered', value),
+    reducedMotion: value => ipcRenderer.invoke('collection:reduced-motion', value),
     current: () => ipcRenderer.invoke('collection:current'),
     toggle: () => ipcRenderer.invoke('collection:toggle'),
     collapse: () => ipcRenderer.invoke('collection:collapse'),

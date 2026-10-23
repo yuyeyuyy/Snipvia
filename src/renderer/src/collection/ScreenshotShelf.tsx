@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import type { ShelfState } from '../../../shared/collection';
 import type { Result } from '../../../shared/contracts';
 import { WorkspaceHeader } from '../components/WorkspaceHeader';
@@ -18,13 +18,25 @@ export function ScreenshotShelf() {
   useEffect(() => {
     const off = window.snipvia.collection.onChanged(setState);
     void window.snipvia.collection.current().then(r => { if (r.ok) setState(r.value); });
-    window.snipvia.window.ready('shelf'); return off;
+    const motion = matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => { void window.snipvia.collection.reducedMotion(motion.matches); };
+    update(); motion.addEventListener('change', update);
+    window.snipvia.window.ready('shelf'); return () => { off(); motion.removeEventListener('change', update); };
   }, []);
   useEffect(() => {
-    if (!state?.performanceSessionId) return;
-    const id = state.performanceSessionId;
-    const a = requestAnimationFrame(() => requestAnimationFrame(() => window.snipvia.performance.mark(id, state.expanded ? 'shelf_interactive' : 'shelf_feedback_visible')));
-    return () => cancelAnimationFrame(a);
+    if (!state) return;
+    let cancelled = false, second = 0, third = 0;
+    const first = requestAnimationFrame(() => { second = requestAnimationFrame(() => {
+      if (cancelled) return;
+      void window.snipvia.collection.rendered(state.presentation).then(result => {
+        if (!result.ok || !result.value || cancelled || !state.performanceSessionId) return;
+        if (state.feedback?.kind === 'fly') for (const animation of document.getAnimations()) { animation.currentTime = 0; animation.play(); }
+        third = requestAnimationFrame(() => {
+          if (!cancelled) window.snipvia.performance.mark(state.performanceSessionId, state.expanded && !state.feedback ? 'shelf_interactive' : 'shelf_feedback_visible');
+        });
+      });
+    }); });
+    return () => { cancelled = true; cancelAnimationFrame(first); cancelAnimationFrame(second); cancelAnimationFrame(third); };
   }, [state]);
   useEffect(() => {
     const key = (e: KeyboardEvent) => { if (e.key === 'Escape') { void window.snipvia.collection.collapse(); } };
@@ -33,6 +45,16 @@ export function ScreenshotShelf() {
   function result<T>(r: Result<T>) { if (!r.ok) setError(r.error); }
   if (!state) return null;
   const items = state.collection.items;
+  if (state.feedback?.kind === 'count') return <main className="shelf count-feedback" role="status"><strong>+1</strong><span>已收集 {items.length} 张</span></main>;
+  if (state.feedback?.kind === 'fly' && state.feedback.source && state.feedback.target) {
+    const { source, target, thumbnail, duration } = state.feedback;
+    const style = { left: source.x, top: source.y, width: source.width, height: source.height,
+      '--fly-x': (target.x - source.x) + 'px', '--fly-y': (target.y - source.y) + 'px',
+      '--fly-sx': String(target.width / source.width), '--fly-sy': String(target.height / source.height),
+      animationDuration: duration + 'ms' } as CSSProperties;
+    return <><img className="shelf-fly" src={thumbnail} alt="" style={style} /><main className="shelf fly-destination" style={{ left: target.x, top: target.y, width: target.width, height: target.height }}><span>▧ 截图收纳</span><strong>{String(items.length).padStart(2, '0')}</strong></main></>;
+  }
+  if (state.hidden) return null;
   async function move(id: string, target: number) {
     if (!state || sorting) return;
     const ids = items.map(item => item.id), from = ids.indexOf(id);

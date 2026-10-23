@@ -3,9 +3,12 @@ import type { ScreenshotItem } from './screenshot';
 import type { Result } from './contracts';
 export const collectionOrderSchema = z.strictObject({ ids: z.array(z.string().uuid()).max(32), revision: z.number().int().nonnegative() });
 export type CollectionSnapshot = { id: string; createdAt: number; updatedAt: number; revision: number; items: ScreenshotItem[]; count: number };
-export type ShelfState = { collection: CollectionSnapshot; expanded: boolean; hidden: boolean; performanceSessionId?: string };
+export type ShelfFeedback = { kind: 'fly' | 'count'; duration: number; thumbnail?: string; source?: { x: number; y: number; width: number; height: number }; target?: { x: number; y: number; width: number; height: number } };
+export type ShelfState = { presentation: number; feedback?: ShelfFeedback; collection: CollectionSnapshot; expanded: boolean; hidden: boolean; performanceSessionId?: string };
 export type CollectionAPI = {
   current(): Promise<Result<ShelfState>>;
+  rendered(presentation: number): Promise<Result<boolean>>;
+  reducedMotion(value: boolean): Promise<Result<void>>;
   toggle(): Promise<Result<void>>;
   collapse(): Promise<Result<void>>;
   hide(): Promise<Result<void>>;

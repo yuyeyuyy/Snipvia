@@ -101,3 +101,52 @@ test('Collect keeps ten ordered thumbnails, reuses Shelf, and safely previews, s
     await mkdir('test-results', { recursive: true }); await writeFile('test-results/v2-collect.json', JSON.stringify(samples, null, 2));
   } finally { await app.close(); await rm(dir, { recursive: true, force: true }); }
 });
+
+test('Shelf animations cancel for new captures, hidden feedback expires, and append never focuses Shelf', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'snipvia-v2-feedback-'));
+  const app = await launchDesktop({ args: ['.', '--user-data-dir=' + dir], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  try {
+    await synthetic(app);
+    const page = await app.firstWindow(), overlay = app.windows().find(p => p.url().endsWith('#capture'))!;
+    await select(page, overlay, 'collect');
+    const shelf = await expect.poll(() => app.windows().some(p => p.url().endsWith('#shelf'))).toBe(true).then(() => app.windows().find(p => p.url().endsWith('#shelf'))!);
+    await shelf.locator('.shelf-open').waitFor();
+    await shelf.evaluate(() => {
+      const events: string[] = []; (window as typeof window & { feedbackEvents: string[] }).feedbackEvents = events;
+      window.snipvia.collection.onChanged(state => { if (state.feedback) events.push(state.feedback.kind); });
+      return window.snipvia.collection.reducedMotion(false);
+    });
+    await app.evaluate(({ BrowserWindow }) => {
+      const shelf = BrowserWindow.getAllWindows().find(w => w.webContents.getURL().endsWith('#shelf'))!;
+      const focus = shelf.focus.bind(shelf);
+      (globalThis as typeof globalThis & { shelfFocusCalls: number }).shelfFocusCalls = 0;
+      shelf.focus = () => { (globalThis as typeof globalThis & { shelfFocusCalls: number }).shelfFocusCalls++; focus(); };
+    });
+    await select(page, overlay, 'collect');
+    await expect.poll(() => shelf.evaluate(() => (window as typeof window & { feedbackEvents: string[] }).feedbackEvents.includes('fly'))).toBe(true);
+    expect((await page.evaluate(() => window.snipvia.capture.start('quick'))).ok).toBe(true);
+    const during = await page.evaluate(() => window.snipvia.collection.current());
+    expect(during.ok && during.value.feedback).toBeUndefined();
+    await overlay.keyboard.press('Escape');
+    await expect(shelf.locator('.shelf-open')).toBeVisible();
+    expect(await app.evaluate(() => (globalThis as typeof globalThis & { shelfFocusCalls: number }).shelfFocusCalls)).toBe(0);
+    await shelf.getByRole('button', { name: '隐藏收纳区' }).click();
+    await select(page, overlay, 'collect');
+    await expect(shelf.getByRole('status')).toContainText('已收集 3 张');
+    await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().find(w => w.webContents.getURL().endsWith('#shelf'))!.isVisible())).toBe(false);
+    expect((await page.evaluate(() => window.snipvia.collection.toggle())).ok).toBe(true);
+    await expect(shelf.getByRole('heading', { name: '截图收纳' })).toBeVisible();
+    await expect(shelf.locator('.shelf-grid article')).toHaveCount(3);
+    await shelf.evaluate(() => window.snipvia.collection.reducedMotion(true));
+    await select(page, overlay, 'collect');
+    await expect(shelf.getByRole('status')).toContainText('已收集 4 张');
+    await expect(shelf.locator('.shelf-fly')).toHaveCount(0);
+    await expect(shelf.getByRole('heading', { name: '截图收纳' })).toBeVisible();
+    await mkdir('docs/ui/v2', { recursive: true });
+    for (const mode of ['light', 'dark'] as const) {
+      await page.evaluate(mode => window.snipvia.appearance.set(mode), mode);
+      await expect(shelf.locator('html')).toHaveAttribute('data-theme', mode);
+      await shelf.screenshot({ path: 'docs/ui/v2/shelf-' + mode + '.png' });
+    }
+  } finally { await app.close(); await rm(dir, { recursive: true, force: true }); }
+});

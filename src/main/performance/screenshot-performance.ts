@@ -24,6 +24,10 @@ type MeasureDefinition = Omit<ScreenshotPerformanceMeasure, 'durationMs' | 'warn
 };
 
 const measureDefinitions: MeasureDefinition[] = [
+  { id: 'selection-collection', label: 'Selection → Collection Updated', start: 'selection_end', end: 'collection_updated', category: 'local' },
+  { id: 'selection-shelf', label: 'Selection → Shelf Feedback Visible', start: 'selection_end', end: 'shelf_feedback_visible', category: 'local' },
+  { id: 'shelf-expand', label: 'Shelf Expand → Interactive', start: 'shelf_expand_start', end: 'shelf_interactive', category: 'local' },
+  { id: 'shelf-reorder', label: 'Shelf Reorder → Updated', start: 'shelf_reorder_start', end: 'shelf_reorder_updated', category: 'local' },
   { id: 'selection-clipboard', label: 'Selection → Clipboard Committed', start: 'selection_end', end: 'clipboard_committed', category: 'local' },
   { id: 'selection-chat-visible', label: 'Selection → Quick Chat Visible', start: 'selection_end', end: 'quick_chat_visible', category: 'local' },
   { id: 'capture-overlay-preload', label: 'CaptureOverlay Startup Preload', start: 'window_preload_start', startMetadata: { window: 'capture-overlay' }, end: 'window_preload_ready', endMetadata: { window: 'capture-overlay' }, category: 'local' },

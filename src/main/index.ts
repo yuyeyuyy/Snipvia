@@ -95,13 +95,13 @@ const modeRouter = new CaptureModeRouter<RoutedImage>({
   },
   collect: async (result, session) => {
     session.signal.throwIfAborted();
-    const { image, display } = result.value;
+    const { image, display, selection } = result.value;
     const item = screenshots.create(image.toPNG(), { ...image.getSize(), mimeType: 'image/png' });
     try { collection.append(item.id); } catch (error) { screenshots.release(item.id); throw error; }
     screenshotPerformance.mark(session.id, 'collection_updated');
     cleanupOverlay(false);
     const completedGeneration = generation;
-    setImmediate(() => { if (generation === completedGeneration) shelfWindow?.collected(display.workArea, session.id); else shelfWindow?.publish(); });
+    setImmediate(() => { if (generation === completedGeneration) shelfWindow?.collected(display, selection, item.id, session.id); else shelfWindow?.publish(); });
   },
   edit: async (result, session) => {
     const { image, selection, display, action } = result.value;
@@ -631,6 +631,8 @@ async function confirmClearCollection() {
   shelfWindow?.publish(); return shelfWindow!.current();
 }
 function setupIPC() {
+  handle('collection:rendered', 'shelf', value => shelfWindow!.rendered(z.number().int().nonnegative().parse(value)));
+  handle('collection:reduced-motion', 'shelf', value => shelfWindow!.setReducedMotion(z.boolean().parse(value)));
   handle('collection:current', ['main', 'shelf'], () => shelfWindow!.current());
   handle('collection:toggle', ['main', 'shelf'], () => shelfWindow!.toggle());
   handle('collection:collapse', 'shelf', () => shelfWindow!.collapse());
@@ -937,7 +939,7 @@ else {
     writePackagedTestResult({ stage: 'main-window-handlers-ready' });
     captureOverlayWindow = new CaptureOverlayWindow(webPreferencesFor(startupPerformanceSessionId), loadWindow, startupPerformanceSessionId, () => cleanupOverlay());
     screenshotToAllWindow = new ScreenshotToAllWindow(webPreferencesFor(startupPerformanceSessionId), loadWindow, startupPerformanceSessionId, () => {}, () => closePinnedFlow());
-    shelfWindow = new ShelfWindow(webPreferences, loadWindow, () => collection.snapshot());
+    shelfWindow = new ShelfWindow(webPreferences, loadWindow, () => collection.snapshot(), id => { const image = nativeImage.createFromBuffer(screenshots.image(id).bytes); return image.resize({ width: Math.min(320, image.getSize().width) }).toDataURL(); });
     writePackagedTestResult({ stage: 'window-managers-ready' });
     updates = new UpdateCheckService({
       currentVersion: app.isPackaged ? app.getVersion() : sourceVersion,

@@ -23,3 +23,10 @@ html, body, #root { background: transparent; }
 .shelf footer span { margin-left: auto; font-size: 10px; color: var(--text-secondary); }
 .shelf [role=alert] { padding: 8px 12px; margin: 0; background: var(--bg-selected); }
 .shelf-empty { grid-column: 1 / -1; color: var(--text-secondary); text-align: center; padding: 40px 0; }
+
+.shelf-fly { position: absolute; object-fit: fill; transform-origin: 0 0; border-radius: 8px; pointer-events: none; animation: shelf-fly 220ms cubic-bezier(.22,.7,.3,1) both; will-change: transform, opacity; animation-play-state: paused; }
+.fly-destination { position: absolute; display: flex; align-items: center; justify-content: space-evenly; pointer-events: none; }
+.count-feedback { display: flex; align-items: center; justify-content: center; gap: 12px; pointer-events: none; }
+.count-feedback strong { font-size: 20px; }
+@keyframes shelf-fly { from { transform: translate(0,0) scale(1); opacity: .95; } to { transform: translate(var(--fly-x),var(--fly-y)) scale(var(--fly-sx),var(--fly-sy)); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .shelf-fly { animation: none; opacity: 0; } }

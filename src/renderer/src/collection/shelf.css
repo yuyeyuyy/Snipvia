@@ -30,3 +30,9 @@ html, body, #root { background: transparent; }
 .count-feedback strong { font-size: 20px; }
 @keyframes shelf-fly { from { transform: translate(0,0) scale(1); opacity: .95; } to { transform: translate(var(--fly-x),var(--fly-y)) scale(var(--fly-sx),var(--fly-sy)); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .shelf-fly { animation: none; opacity: 0; } }
+
+.shelf-output-options { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-top: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 11px; }
+.shelf-output-options select { color: var(--text-primary); background: var(--bg-input); padding: 3px; border-radius: 5px; font-size: 11px; }
+.shelf-output-options span { margin-left: auto; }
+.shelf-item-tools input { margin: 0 3px 0 0; width: 12px; height: 12px; accent-color: var(--accent); }
+.shelf footer .button { padding: 6px 9px; }

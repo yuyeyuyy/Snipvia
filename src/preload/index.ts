@@ -34,6 +34,9 @@ if (initialPerformanceSessionId) {
 
 const api: SnipviaAPI = {
   collection: {
+    image: id => ipcRenderer.invoke('collection:image', id),
+    copyMerged: value => ipcRenderer.invoke('collection:copy-merged', value),
+    export: value => ipcRenderer.invoke('collection:export', value),
     rendered: value => ipcRenderer.invoke('collection:rendered', value),
     reducedMotion: value => ipcRenderer.invoke('collection:reduced-motion', value),
     current: () => ipcRenderer.invoke('collection:current'),

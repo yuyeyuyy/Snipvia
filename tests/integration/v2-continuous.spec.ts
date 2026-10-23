@@ -1,5 +1,5 @@
 import { expect, test, type ElectronApplication, type Page } from '@playwright/test';
-import { mkdtemp, rm, mkdir, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, mkdir, writeFile, readdir, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { launchDesktop } from '../helpers/desktop';
@@ -148,5 +148,55 @@ test('Shelf animations cancel for new captures, hidden feedback expires, and app
       await expect(shelf.locator('html')).toHaveAttribute('data-theme', mode);
       await shelf.screenshot({ path: 'docs/ui/v2/shelf-' + mode + '.png' });
     }
+  } finally { await app.close(); await rm(dir, { recursive: true, force: true }); }
+});
+
+test('Collection produces a real merged PNG and ordered selected files; cancellation and export failures preserve sources', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'snipvia-v2-output-'));
+  const app = await launchDesktop({ args: ['.', '--user-data-dir=' + join(dir, 'data')], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  try {
+    await app.evaluate(({ clipboard }) => { (globalThis as typeof globalThis & { originalClipboardWrite: typeof clipboard.write }).originalClipboardWrite = clipboard.write.bind(clipboard); });
+    await synthetic(app);
+    const page = await app.firstWindow(), overlay = app.windows().find(p => p.url().endsWith('#capture'))!;
+    for (let i = 0; i < 3; i++) await select(page, overlay, 'collect', i * 30);
+    const shelf = app.windows().find(p => p.url().endsWith('#shelf'))!;
+    await expect(shelf.locator('.shelf-open')).toBeVisible();
+    await shelf.locator('.shelf-open').click();
+    await expect(shelf.locator('.shelf-preview img')).toHaveCount(3);
+    const state = await page.evaluate(() => window.snipvia.collection.current()); if (!state.ok) throw new Error(state.error);
+    await app.evaluate(({ clipboard }) => { clipboard.write = (globalThis as typeof globalThis & { originalClipboardWrite: typeof clipboard.write }).originalClipboardWrite; });
+    await shelf.getByRole('button', { name: '合并复制' }).click();
+    await expect(shelf.getByRole('alert')).toContainText('已合并复制');
+    const size = await app.evaluate(async ({ clipboard, nativeImage }) => {
+      const items = await clipboard.read(), png = items.find(item => item.types.includes('image/png'));
+      if (!png) throw new Error('missing PNG');
+      const blob = await png.getType('image/png'); if (!(blob instanceof Blob)) throw new Error('PNG blob missing');
+      return nativeImage.createFromBuffer(Buffer.from(await blob.arrayBuffer())).getSize();
+    });
+    expect(size.width).toBe(Math.max(...state.value.collection.items.map(item => item.width)));
+    expect(size.height).toBe(state.value.collection.items.reduce((sum, item) => sum + item.height, 24));
+    await shelf.getByLabel('选择截图 1', { exact: true }).check();
+    await shelf.getByLabel('选择截图 3', { exact: true }).check();
+    await app.evaluate(({ dialog }, dir) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [dir] }); }, dir);
+    await shelf.getByRole('button', { name: '导出 PNG' }).click();
+    await expect(shelf.getByRole('alert')).toContainText('已导出 2 张');
+    const folders = (await readdir(dir)).filter(name => name.startsWith('Snipvia-'));
+    expect(folders).toHaveLength(1);
+    const names = await readdir(join(dir, folders[0]));
+    expect(names).toEqual(['001-' + state.value.collection.items[0].id + '.png', '002-' + state.value.collection.items[2].id + '.png']);
+    for (const name of names) expect((await readFile(join(dir, folders[0], name))).subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))).toBe(true);
+    await app.evaluate(({ dialog }) => { dialog.showOpenDialog = async () => ({ canceled: true, filePaths: [] }); });
+    expect((await shelf.evaluate(value => window.snipvia.collection.export(value), { ids: state.value.collection.items.map(item => item.id), revision: state.value.collection.revision }))).toEqual({ ok: true, value: null });
+    const bad = join(dir, 'preserve-file'); await writeFile(bad, 'keep');
+    await app.evaluate(({ dialog }, bad) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [bad] }); }, bad);
+    await shelf.getByRole('button', { name: '导出 PNG' }).click();
+    await expect(shelf.getByRole('alert')).toContainText('原图已保留');
+    expect(await readFile(bad, 'utf8')).toBe('keep');
+    const after = await page.evaluate(() => window.snipvia.collection.current());
+    expect(after.ok && after.value.collection).toEqual(state.value.collection);
+    const denied = await page.evaluate(value => window.snipvia.collection.export(value), { ids: state.value.collection.items.map(item => item.id), revision: state.value.collection.revision });
+    expect(denied.ok).toBe(false);
+    const malformed = await shelf.evaluate(value => window.snipvia.collection.copyMerged({ ...value, options: { width: 1600, gap: 12 }, png: new Uint8Array([1,2,3]) }), { ids: state.value.collection.items.map(item => item.id), revision: state.value.collection.revision });
+    expect(malformed.ok).toBe(false);
   } finally { await app.close(); await rm(dir, { recursive: true, force: true }); }
 });

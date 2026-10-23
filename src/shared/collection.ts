@@ -17,6 +17,9 @@ export type CollectionAPI = {
   clear(): Promise<Result<ShelfState>>;
   thumbnail(id: string): Promise<Result<string>>;
   preview(id: string): Promise<Result<void>>;
+  image(id: string): Promise<Result<{ bytes: Uint8Array; mimeType: string }>>;
+  copyMerged(value: { ids: string[]; revision: number; options: import('./collection-output').MergeOptions; png: Uint8Array }): Promise<Result<void>>;
+  export(value: { ids: string[]; revision: number }): Promise<Result<{ count: number; directory: string } | null>>;
   onChanged(callback: (value: ShelfState) => void): () => void;
 };
 export function shelfBounds(workArea: { x: number; y: number; width: number; height: number }, expanded: boolean) {

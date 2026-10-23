@@ -16,6 +16,8 @@ import { CapturePreferencesStore } from './storage/CapturePreferencesStore';
 import { capturePreferencesSchema } from '../shared/capture-preferences';
 import { ScreenshotCollection } from './storage/ScreenshotCollection';
 import { ShelfWindow } from './windows/ShelfWindow';
+import { collectionOutputSchema, mergeOptionsSchema, mergeLayout, orderedOutputIds } from '../shared/collection-output';
+import { exportCollectionPng } from './storage/CollectionExporter';
 import { collectionOrderSchema } from '../shared/collection';
 import { ScreenshotStore } from './storage/ScreenshotStore';
 import { LegacyDataService } from './legacy/LegacyDataService';
@@ -630,7 +632,33 @@ async function confirmClearCollection() {
   if (result.response === 1) collection.clear(true, revision);
   shelfWindow?.publish(); return shelfWindow!.current();
 }
+function selectedCollection(value: unknown) {
+  const request = collectionOutputSchema.parse(value), snapshot = collection.snapshot();
+  if (request.revision !== snapshot.revision) throw new Error('收纳区已变化，请重试输出');
+  return { ids: orderedOutputIds(snapshot.items.map(item => item.id), request.ids), revision: snapshot.revision };
+}
 function setupIPC() {
+  handle('collection:image', 'shelf', value => {
+    const id = z.string().uuid().parse(value); collection.getItem(id);
+    const image = screenshots.image(id); return { bytes: new Uint8Array(image.bytes), mimeType: image.item.mimeType };
+  });
+  handle('collection:copy-merged', 'shelf', async value => {
+    const request = z.strictObject({ ids: z.array(z.string().uuid()).min(1).max(32), revision: z.number().int().nonnegative(), options: mergeOptionsSchema,
+      png: z.instanceof(Uint8Array).refine(bytes => bytes.length > 0 && bytes.length <= 64 * 1024 * 1024, '合并图片过大') }).parse(value);
+    const { ids } = selectedCollection({ ids: request.ids, revision: request.revision });
+    const layout = mergeLayout(ids.map(id => collection.getItem(id)), request.options);
+    validateEditorPng(request.png, layout);
+    const image = nativeImage.createFromBuffer(Buffer.from(request.png));
+    if (image.isEmpty() || image.getSize().width !== layout.width || image.getSize().height !== layout.height) throw new Error('合并图片无效');
+    await clipboard.write([new ClipboardItem({ 'image/png': new Blob([new Uint8Array(request.png)], { type: 'image/png' }) })]);
+  });
+  handle('collection:export', 'shelf', async value => {
+    const request = selectedCollection(value);
+    const result = await dialog.showOpenDialog({ title: '选择导出位置（会新建独立文件夹）', properties: ['openDirectory', 'createDirectory'] });
+    if (result.canceled || !result.filePaths[0]) return null;
+    const fresh = selectedCollection(request);
+    return exportCollectionPng(screenshots, fresh.ids, result.filePaths[0]);
+  });
   handle('collection:rendered', 'shelf', value => shelfWindow!.rendered(z.number().int().nonnegative().parse(value)));
   handle('collection:reduced-motion', 'shelf', value => shelfWindow!.setReducedMotion(z.boolean().parse(value)));
   handle('collection:current', ['main', 'shelf'], () => shelfWindow!.current());
@@ -649,7 +677,8 @@ function setupIPC() {
     const id = z.string().uuid().parse(value); collection.getItem(id);
     const image = nativeImage.createFromBuffer(screenshots.image(id).bytes);
     if (image.isEmpty()) throw new Error('截图无法预览');
-    return image.resize({ width: Math.min(240, image.getSize().width) }).toDataURL();
+    const size = image.getSize(), scale = Math.min(1, 240 / size.width, 160 / size.height);
+    return image.resize({ width: Math.max(1, Math.round(size.width * scale)), height: Math.max(1, Math.round(size.height * scale)) }).toDataURL();
   });
   handle('collection:preview', 'shelf', async value => {
     const item = collection.getItem(z.string().uuid().parse(value));

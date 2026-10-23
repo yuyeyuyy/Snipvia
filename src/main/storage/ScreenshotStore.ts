@@ -12,6 +12,7 @@ export class ScreenshotStore {
   private runtime = new Map<string, RuntimeScreenshot>();
   private persisted: ScreenshotItem[] | null = null;
   private runtimeBytes = 0;
+  private owners = new Map<string, Set<string>>();
   constructor(private readonly root: string) {}
   private get index() { return join(this.root, 'index.json'); }
   private load() {
@@ -31,9 +32,29 @@ export class ScreenshotStore {
     if (bytes.length === 0 || bytes.length > 64 * 1024 * 1024) throw new Error('截图文件大小无效');
     const item = screenshotItemSchema.parse({ ...metadata, ...identity, id: identity?.id ?? randomUUID(), createdAt: identity?.createdAt ?? new Date().toISOString(), status: 'temporary' });
     if (this.runtime.has(item.id)) return { ...this.runtime.get(item.id)!.item };
-    while (this.runtime.size && (this.runtime.size >= 32 || this.runtimeBytes + bytes.length > 256 * 1024 * 1024)) this.release(this.runtime.keys().next().value!);
+    const candidates = [...this.runtime.keys()].filter(id => !this.owners.get(id)?.size);
+    const releasableBytes = candidates.reduce((total, id) => total + this.runtime.get(id)!.bytes.length, 0);
+    if (this.runtime.size - candidates.length >= 32 || this.runtimeBytes - releasableBytes + bytes.length > 256 * 1024 * 1024) throw new Error('收纳空间已满（最多 32 张 / 256 MiB），请先导出或移除图片；已有图片已保留');
+    while (this.runtime.size >= 32 || this.runtimeBytes + bytes.length > 256 * 1024 * 1024) this.release(candidates.shift()!);
     this.runtime.set(item.id, { item, bytes: Buffer.from(bytes) }); this.runtimeBytes += bytes.length;
     return { ...item };
+  }
+  metadata(id: string): ScreenshotItem {
+    z.string().uuid().parse(id);
+    const runtime = this.runtime.get(id);
+    if (runtime) return { ...runtime.item };
+    this.load();
+    const item = this.persisted!.find(item => item.id === id);
+    if (!item) throw new Error('截图已失效或不存在');
+    return { ...item };
+  }
+  retain(id: string, owner: string) {
+    this.metadata(id);
+    const refs = this.owners.get(id) ?? new Set<string>(); refs.add(owner); this.owners.set(id, refs);
+  }
+  unretain(id: string, owner: string) {
+    const refs = this.owners.get(id); refs?.delete(owner);
+    if (!refs?.size) { this.owners.delete(id); this.release(id); }
   }
   list() { this.load(); return this.persisted!.map(item => ({ ...item })); }
   image(id: string) {
@@ -70,7 +91,9 @@ export class ScreenshotStore {
     return { ...item };
   }
   delete(id: string) {
-    z.string().uuid().parse(id); this.load();
+    z.string().uuid().parse(id);
+    if (this.owners.get(id)?.size) throw new Error('截图仍被使用，请先从收纳区移除');
+    this.load();
     const saved = this.persisted!.find(item => item.id === id);
     if (saved) {
       // Commit first. A failed file removal leaves an orphan, never a broken index.
@@ -80,9 +103,10 @@ export class ScreenshotStore {
     this.release(id);
   }
   release(id: string) {
+    if (this.owners.get(id)?.size) return;
     const item = this.runtime.get(id);
     if (item) { this.runtimeBytes -= item.bytes.length; this.runtime.delete(id); }
   }
   runtimeUsage() { return { items: this.runtime.size, bytes: this.runtimeBytes }; }
-  dispose() { this.runtime.clear(); this.runtimeBytes = 0; }
+  dispose() { this.owners.clear(); this.runtime.clear(); this.runtimeBytes = 0; }
 }

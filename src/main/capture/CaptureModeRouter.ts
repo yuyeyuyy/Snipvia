@@ -3,9 +3,9 @@ import type { CaptureMode, CaptureResult, CaptureSession } from '../../shared/ca
 /** Owns mode dispatch and invalidation, never capture pixels or global window state. */
 export class CaptureModeRouter<T> {
   private active: { session: CaptureSession; controller: AbortController; finishing: boolean } | null = null;
-  constructor(private readonly handlers: { quick(result: CaptureResult<T>, session: CaptureSession): Promise<void | boolean>; edit(result: CaptureResult<T>, session: CaptureSession): Promise<void | boolean> }) {}
+  constructor(private readonly handlers: { collect?(result: CaptureResult<T>, session: CaptureSession): Promise<void | boolean>; quick(result: CaptureResult<T>, session: CaptureSession): Promise<void | boolean>; edit(result: CaptureResult<T>, session: CaptureSession): Promise<void | boolean> }) {}
   begin(id: string, mode: CaptureMode): CaptureSession {
-    if (mode === 'collect') throw new Error('连续收纳尚未实现');
+    if (mode === 'collect' && !this.handlers.collect) throw new Error('连续收纳尚未实现');
     this.cancel();
     const controller = new AbortController();
     const session = Object.freeze({ id, mode, signal: controller.signal });
@@ -24,7 +24,9 @@ export class CaptureModeRouter<T> {
     if (active.finishing) throw new Error('正在完成截图');
     active.finishing = true;
     try {
-      const completed = await this.handlers[active.session.mode as 'quick' | 'edit'](result, active.session);
+      const handler = this.handlers[active.session.mode];
+      if (!handler) throw new Error('截图模式不可用');
+      const completed = await handler(result, active.session);
       if (completed === false && this.active === active) { active.finishing = false; return false; }
       active.session.signal.throwIfAborted();
       if (this.active === active) this.active = null;

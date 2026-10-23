@@ -57,6 +57,7 @@ export const screenshotPerformanceEvents = [
   'capture_overlay_visible',
   'selection_start',
   'selection_end',
+  'clipboard_committed',
   'capture_finish_ipc_start',
   'capture_finish_main_received',
   'selection_validation_start',

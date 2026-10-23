@@ -24,6 +24,7 @@ type MeasureDefinition = Omit<ScreenshotPerformanceMeasure, 'durationMs' | 'warn
 };
 
 const measureDefinitions: MeasureDefinition[] = [
+  { id: 'selection-clipboard', label: 'Selection → Clipboard Committed', start: 'selection_end', end: 'clipboard_committed', category: 'local' },
   { id: 'selection-chat-visible', label: 'Selection → Quick Chat Visible', start: 'selection_end', end: 'quick_chat_visible', category: 'local' },
   { id: 'capture-overlay-preload', label: 'CaptureOverlay Startup Preload', start: 'window_preload_start', startMetadata: { window: 'capture-overlay' }, end: 'window_preload_ready', endMetadata: { window: 'capture-overlay' }, category: 'local' },
   { id: 'screenshot-window-preload', label: 'ScreenshotToAll Startup Preload', start: 'window_preload_start', startMetadata: { window: 'screenshot-to-all' }, end: 'window_preload_ready', endMetadata: { window: 'screenshot-to-all' }, category: 'local' },

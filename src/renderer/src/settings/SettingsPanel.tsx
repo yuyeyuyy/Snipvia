@@ -38,7 +38,7 @@ export function SettingsPanel({ settings, onSaved }: { settings: CapturePreferen
     </section>
     <section className="preference-section" aria-labelledby="shortcuts-settings-title">
       <h2 id="shortcuts-settings-title">快捷键</h2><div className="preference-card">
-        <div className="preference-row"><div className="preference-copy"><strong>快速截图</strong><span>框选后复制到剪贴板并显示本地贴图；沿用旧截图快捷键</span></div><ShortcutRecorder label="设置截图快捷键" value={settings.shortcut} disabled={saving} onCommit={value => saveShortcut('shortcut', value)} onInvalid={setStatus} /></div>
+        <div className="preference-row"><div className="preference-copy"><strong>快速截图</strong><span>框选后立即复制到剪贴板，不弹出窗口；沿用旧截图快捷键</span></div><ShortcutRecorder label="设置截图快捷键" value={settings.shortcut} disabled={saving} onCommit={value => saveShortcut('shortcut', value)} onInvalid={setStatus} /></div>
         <div className="preference-row"><div className="preference-copy"><strong>截图与标注</strong><span>框选后标注、复制、保存或贴图；沿用原普通截图快捷键</span></div><ShortcutRecorder label="设置普通截图快捷键" value={settings.editorShortcut} disabled={saving} onCommit={value => saveShortcut('editorShortcut', value)} onInvalid={setStatus} /></div>
       </div><p className="notice">快捷键占用时会提示并保留原配置。连续收纳及外部目标尚未启用；原续聊快捷键只保留配置，不再注册。</p>
     </section>

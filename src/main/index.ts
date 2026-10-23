@@ -82,14 +82,11 @@ export const legacyData = new LegacyDataService(app.getPath('userData'));
 type RoutedImage = { image: NativeImage; selection: Selection; display: CaptureDisplay; action?: 'copy' | 'save' | 'pin' };
 const modeRouter = new CaptureModeRouter<RoutedImage>({
   quick: async (result, session) => {
-    const { image, selection, display } = result.value;
-    const png = image.toPNG();
-    const item = screenshots.create(png, { ...image.getSize(), mimeType: 'image/png' });
-    try {
-      await copyScreenshot(item.id);
-      session.signal.throwIfAborted();
-      await presentLocalPin(item, selection, display, session.id);
-    } catch (error) { screenshots.release(item.id); throw error; }
+    const png = result.value.image.toPNG();
+    await clipboard.write([new ClipboardItem({ 'image/png': new Blob([new Uint8Array(png)], { type: 'image/png' }) })]);
+    screenshotPerformance.mark(session.id, 'clipboard_committed');
+    session.signal.throwIfAborted();
+    if (modeRouter.current(session.id)) cleanupOverlay(false);
   },
   edit: async (result, session) => {
     const { image, selection, display, action } = result.value;

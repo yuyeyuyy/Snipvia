@@ -8,9 +8,19 @@ const legacy = { shortcut: 'Control+1', editorShortcut: 'Control+3' };
 beforeEach(() => { directory = mkdtempSync(join(tmpdir(), 'snipvia-v2-preferences-')); });
 afterEach(() => rmSync(directory, { recursive: true, force: true }));
 describe('V2 capture preferences', () => {
+  it('keeps custom old shortcuts when new defaults collide and preserves added bindings on reload', () => {
+    const file = join(directory, 'capture-preferences.json');
+    writeFileSync(file, JSON.stringify({ shortcut: 'Control+2', editorShortcut: 'Control+3' }));
+    const store = new CapturePreferencesStore(file, legacy); store.load();
+    expect(store.current().shortcut).toBe('Control+2');
+    expect(store.current().collectShortcut).toBe('Control+Alt+2');
+    store.save(store.current());
+    const reload = new CapturePreferencesStore(file, legacy); reload.load();
+    expect(reload.current()).toEqual(store.current());
+  });
   it('inherits legacy shortcuts without writing or retaining other fields, then persists independently', () => {
     const file = join(directory, 'capture-preferences.json'), store = new CapturePreferencesStore(file, { ...legacy, apiKey: 'not retained' } as typeof legacy);
-    store.load(); expect(store.current()).toEqual(legacy);
+    store.load(); expect(store.current()).toMatchObject(legacy);
     writeFileSync(join(directory, 'settings.json'), 'preserve-old-settings');
     store.save({ shortcut: 'Control+Shift+Enter', editorShortcut: 'Control+3' });
     const reload = new CapturePreferencesStore(file, legacy); reload.load();
@@ -21,7 +31,7 @@ describe('V2 capture preferences', () => {
   it('preserves a damaged V2 file and retains valid legacy defaults without overwriting it', () => {
     const file = join(directory, 'capture-preferences.json'); writeFileSync(file, '{broken');
     const store = new CapturePreferencesStore(file, legacy);
-    expect(() => store.load()).toThrow(); expect(store.current()).toEqual(legacy);
+    expect(() => store.load()).toThrow(); expect(store.current()).toMatchObject(legacy);
     expect(() => store.save(legacy)).toThrow('原文件已保留');
     expect(readFileSync(file, 'utf8')).toBe('{broken');
   });
@@ -31,6 +41,6 @@ describe('V2 capture preferences', () => {
     expect(() => store.save({ ...legacy, reservedMode: 'collect' })).toThrow();
     mkdirSync(file);
     expect(() => store.save({ shortcut: 'Control+8', editorShortcut: 'Control+9' })).toThrow();
-    expect(store.current()).toEqual(legacy);
+    expect(store.current()).toMatchObject(legacy);
   });
 });

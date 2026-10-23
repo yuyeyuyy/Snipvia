@@ -6,6 +6,10 @@
 
 多文件导出：选择目标目录后新建 Snipvia-随机后缀私有目录，001-稳定ID.png 起按 Collection 顺序命名；选择顺序不覆盖收纳顺序。新建目录避免覆盖已有文件；失败只清理本次目录，保留收纳与原图。取消原生选择框不写文件。清空发生在导出中时，export 引用保护尚在读取的图片。
 
+## 原生命名剪贴板实验
+
+本机 Command Line Tools 执行 scripts/research-pasteboard.swift 通过：privateNamedPasteboard=true、writeSucceeded=true、nativeItemCount=2、targetApplicationPasteTested=false。生成两张 16×16 合成图，只写独立命名 NSPasteboard，不读取或覆盖用户通用剪贴板。系统可容纳多个图片对象已验证；未把此结果扩展为其他应用粘贴支持。
+
 ## 系统契约与应用差异
 
 Apple 的 NSPasteboard.writeObjects 接受实现 NSPasteboardWriting 的对象数组，NSImage / NSPasteboardItem 可表示多个原生对象；这不保证接收软件接受多个独立图片。来源：[Apple writeObjects](https://developer.apple.com/documentation/appkit/nspasteboard/writeobjects(_:))、[NSPasteboardWriting](https://developer.apple.com/documentation/appkit/nspasteboardwriting)。

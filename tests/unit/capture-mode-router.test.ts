@@ -18,7 +18,7 @@ describe('CaptureModeRouter', () => {
     expect(() => router.begin('two', 'collect')).toThrow('尚未实现');
     expect(session.signal.aborted).toBe(false);
     expect(router.current('one')).toBe(session);
-    expect(reservedCaptureShortcuts.filter(item => item.available).map(item => item.id)).toEqual(['quick', 'edit']);
+    expect(reservedCaptureShortcuts.filter(item => item.available).map(item => item.id)).toEqual(['quick', 'collect', 'open-collection', 'clear-collection', 'edit']);
     expect(normalizeCaptureMode('ai')).toBe('quick'); expect(normalizeCaptureMode('standard')).toBe('edit');
     expect(() => normalizeCaptureMode('invalid')).toThrow();
   });

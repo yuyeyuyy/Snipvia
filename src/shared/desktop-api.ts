@@ -11,7 +11,7 @@ export type DesktopAPI = {
   window: { ready(role: 'capture' | 'pin' | 'shelf'): void };
   settings: {
     get(): Promise<Result<CapturePreferences>>;
-    saveShortcuts(value: { shortcut: string; editorShortcut: string }): Promise<Result<CapturePreferences>>;
+    saveShortcuts(value: import('./capture-preferences').CapturePreferencesInput): Promise<Result<CapturePreferences>>;
     loginItem(): Promise<Result<LoginItemState>>;
     setLoginItem(enabled: boolean): Promise<Result<LoginItemState>>;
     onChanged(callback: (settings: CapturePreferences) => void): () => void;

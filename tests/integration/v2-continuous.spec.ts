@@ -200,3 +200,30 @@ test('Collection produces a real merged PNG and ordered selected files; cancella
     expect(malformed.ok).toBe(false);
   } finally { await app.close(); await rm(dir, { recursive: true, force: true }); }
 });
+
+test('shortcuts register all five actions, preserve custom bindings and roll back conflicts without changing disk', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'snipvia-v2-shortcuts-'));
+  const app = await launchDesktop({ args: ['.', '--user-data-dir=' + dir], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  try {
+    const page = await app.firstWindow();
+    const current = await page.evaluate(() => window.snipvia.settings.get()); if (!current.ok) throw new Error(current.error);
+    expect(current.value).toEqual({ shortcut: 'Control+1', editorShortcut: 'Control+3', collectShortcut: 'Control+2', collectionShortcut: 'Control+Shift+2', clearCollectionShortcut: 'Alt+2' });
+    expect(await app.evaluate(({ globalShortcut }) => ['Control+1', 'Control+2', 'Control+3', 'Control+Shift+2', 'Alt+2'].map(key => globalShortcut.isRegistered(key)))).toEqual([true, true, true, true, true]);
+    expect(await app.evaluate(({ globalShortcut }) => globalShortcut.isRegistered('Control+Shift+1'))).toBe(false);
+    const custom = { ...current.value, collectShortcut: 'Control+Alt+F9' };
+    expect((await page.evaluate(value => window.snipvia.settings.saveShortcuts(value), custom)).ok).toBe(true);
+    const bytes = await readFile(join(dir, 'capture-preferences.json'), 'utf8');
+    const duplicate = await page.evaluate(value => window.snipvia.settings.saveShortcuts({ ...value, collectShortcut: 'Ctrl+1' }), custom);
+    expect(duplicate.ok).toBe(false);
+    await app.evaluate(({ globalShortcut }) => { const register = globalShortcut.register.bind(globalShortcut); globalShortcut.register = (key, callback) => key === 'Control+Alt+F10' ? false : register(key, callback); });
+    const failed = await page.evaluate(value => window.snipvia.settings.saveShortcuts({ ...value, collectionShortcut: 'Control+Alt+F10' }), custom);
+    expect(failed.ok).toBe(false);
+    expect(await readFile(join(dir, 'capture-preferences.json'), 'utf8')).toBe(bytes);
+    expect(await page.evaluate(() => window.snipvia.settings.get())).toEqual({ ok: true, value: custom });
+    expect(await app.evaluate(({ globalShortcut }) => globalShortcut.isRegistered('Control+Alt+F9'))).toBe(true);
+    expect((await page.evaluate(value => window.snipvia.settings.saveShortcuts({ shortcut: value.shortcut, editorShortcut: value.editorShortcut }), custom)).ok).toBe(true);
+    expect(await page.evaluate(() => window.snipvia.settings.get())).toEqual({ ok: true, value: custom });
+    await page.getByRole('navigation', { name: '设置分类' }).getByRole('button', { name: '快捷键', exact: true }).click();
+    await expect(page.getByRole('button', { name: '设置收集截图快捷键', exact: true })).toBeVisible();
+  } finally { await app.close(); await rm(dir, { recursive: true, force: true }); }
+});

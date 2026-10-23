@@ -1,11 +1,11 @@
 import { app, BrowserWindow, clipboard, ClipboardItem, desktopCapturer, dialog, globalShortcut, ipcMain, Menu, nativeImage, powerMonitor, screen, shell, Tray, type IpcMainInvokeEvent, type NativeImage } from 'electron';
 import { randomUUID } from 'node:crypto';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { writeFile, rename, unlink } from 'node:fs/promises';
 import { cpus, release } from 'node:os';
 import { join } from 'node:path';
 import { z } from 'zod';
-import { captureFinishSchema, type Selection, type CaptureFramePayload, type CaptureFrameQuality, type CaptureFrameTransport, type Result, type Settings } from '../shared/contracts';
+import { captureFinishSchema, type Selection, type CaptureFramePayload, type CaptureFrameQuality, type CaptureFrameTransport, type Result } from '../shared/contracts';
 import { normalizeCaptureMode, type CaptureMode } from '../shared/capture-mode';
 import { type ScreenshotItem } from '../shared/screenshot';
 import { performanceMarkSchema, performanceSessionIdSchema } from '../shared/performance';
@@ -13,7 +13,7 @@ import { editorFinishSchema, validateEditorPng } from '../shared/screenshot-edit
 import { cropRectangle } from '../shared/geometry';
 import { loadSettings, publicSettings } from './storage/settings';
 import { CapturePreferencesStore } from './storage/CapturePreferencesStore';
-import { capturePreferencesSchema } from '../shared/capture-preferences';
+import { capturePreferencesSchema, captureShortcutKeys, acceleratorIdentity, type CapturePreferences } from '../shared/capture-preferences';
 import { ScreenshotCollection } from './storage/ScreenshotCollection';
 import { ShelfWindow } from './windows/ShelfWindow';
 import { collectionOutputSchema, mergeOptionsSchema, mergeLayout, orderedOutputIds } from '../shared/collection-output';
@@ -60,8 +60,7 @@ let generation = 0;
 let captureController: AbortController | null = null;
 let capturePermissionGranted = false;
 let quitting = false;
-let shortcut = '';
-let editorShortcut = '';
+let activeShortcuts: CapturePreferences | null = null;
 let localPin: { item: ScreenshotItem; performanceSessionId: string } | null = null;
 const editorFinishing = new Set<string>();
 let desktopCaptureWarmupPromise: Promise<void> | null = null;
@@ -550,29 +549,32 @@ async function startCapture(trigger: CaptureTrigger = 'main', mode: CaptureMode 
   }
 }
 
-type ShortcutSettings = Pick<Settings, 'shortcut' | 'editorShortcut'>;
-function registerShortcuts(settings: ShortcutSettings) {
-  const previous = { shortcut, editorShortcut };
-  const keys = ['shortcut', 'editorShortcut'] as const;
-  if (keys.every(key => settings[key] === previous[key])) return;
-  if (settings.shortcut === settings.editorShortcut) throw new Error('截图快捷键不能相同');
+function registerShortcuts(settings: CapturePreferences) {
+  const previous = activeShortcuts, keys = captureShortcutKeys;
+  if (previous && keys.every(key => settings[key] === previous[key])) return;
+  if (new Set(keys.map(key => acceleratorIdentity(settings[key], process.platform))).size !== keys.length) throw new Error('快捷键不能相同（包含 Ctrl / Control 等别名）');
   const callbacks = {
     shortcut: () => { void startCapture('hotkey', 'quick').catch(announceError); },
-    editorShortcut: () => { void startCapture('hotkey', 'edit').catch(announceError); }
+    editorShortcut: () => { void startCapture('hotkey', 'edit').catch(announceError); },
+    collectShortcut: () => { void startCapture('hotkey', 'collect').catch(announceError); },
+    collectionShortcut: () => { void shelfWindow?.toggle().catch(error => mainWindow.webContents.send('capture:error', String(error))); },
+    clearCollectionShortcut: () => { void confirmClearCollection().catch(error => mainWindow.webContents.send('capture:error', String(error))); }
   };
-  for (const key of keys) if (previous[key]) globalShortcut.unregister(previous[key]);
+  for (const key of keys) if (previous?.[key]) globalShortcut.unregister(previous[key]);
   const registered: string[] = [];
   try {
     for (const key of keys) {
-      if (!globalShortcut.register(settings[key], callbacks[key])) throw new Error('快捷键注册失败，请选择其他组合');
+      if (!globalShortcut.register(settings[key], callbacks[key])) throw new Error('快捷键 ' + settings[key] + ' 注册失败，请选择其他组合');
       registered.push(settings[key]);
     }
   } catch (error) {
     for (const accelerator of registered) globalShortcut.unregister(accelerator);
-    for (const key of keys) if (previous[key]) globalShortcut.register(previous[key], callbacks[key]);
+    let restored = true;
+    for (const key of keys) if (previous?.[key] && !globalShortcut.register(previous[key], callbacks[key])) restored = false;
+    if (!restored) { activeShortcuts = null; throw new Error('快捷键恢复失败，请使用菜单截图并重新设置快捷键'); }
     throw error;
   }
-  ({ shortcut, editorShortcut } = settings);
+  activeShortcuts = { ...settings };
 }
 function editorSource(value: unknown) {
   const request = captureFinishSchema.parse(value);
@@ -700,7 +702,7 @@ function setupIPC() {
   handle('appearance:set', 'main', value => appearance.setMode(value));
   handle('settings:get', 'main', () => capturePreferences.current());
   handle('settings:save-shortcuts', 'main', value => {
-    const request = capturePreferencesSchema.parse(value);
+    const request = capturePreferencesSchema.parse({ ...capturePreferences.current(), ...z.record(z.string(), z.unknown()).parse(value) });
     const previous = capturePreferences.current();
     registerShortcuts(request);
     try {
@@ -939,7 +941,7 @@ else {
     restoreDock();
     let startupError = '';
     try { loadSettings({ migrateCredentials: false }); } catch { startupError = '设置文件读取失败，已使用默认值；原文件未修改。'; }
-    capturePreferences = new CapturePreferencesStore(join(app.getPath('userData'), 'capture-preferences.json'), publicSettings());
+    capturePreferences = new CapturePreferencesStore(join(app.getPath('userData'), 'capture-preferences.json'), existsSync(join(app.getPath('userData'), 'settings.json')) ? publicSettings() : { shortcut: 'Control+1', editorShortcut: 'Control+3' });
     try { capturePreferences.load(); } catch { startupError += 'V2 快捷键配置读取失败，使用旧快捷键；原文件未修改。'; }
     appearance.start();
     writePackagedTestResult({ stage: 'storage-loaded' });
@@ -998,6 +1000,8 @@ else {
     writePackagedTestResult({ stage: 'ipc-ready' });
     const captureMenu = [
       { label: '快速截图', click: () => { void startCapture('menu', 'quick').catch(announceError); } },
+      { label: '收集截图', click: () => { void startCapture('menu', 'collect').catch(announceError); } },
+      { label: '截图收纳区', click: () => { void shelfWindow?.toggle(); } },
       { label: '截图与标注', click: () => { void startCapture('menu', 'edit').catch(announceError); } }
     ];
     Menu.setApplicationMenu(Menu.buildFromTemplate([

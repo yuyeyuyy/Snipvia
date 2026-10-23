@@ -13,7 +13,7 @@ type Scenario = {
   report: ScreenshotPerformanceReport;
 };
 
-test('collects startup preload and warm ScreenshotToAll reuse performance', async () => {
+test('collects startup preload and direct Quick capture performance', async () => {
   const realScreen = process.env.SNIPVIA_REAL_SCREEN === '1';
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-performance-'));
   const launchStartedAt = performance.now();
@@ -89,18 +89,17 @@ test('collects startup preload and warm ScreenshotToAll reuse performance', asyn
         x: Math.min(viewport.width - 12, start.x + requested.width),
         y: Math.min(viewport.height - 12, start.y + requested.height)
       };
+      const sessionId = await overlay.locator('.capture-overlay').getAttribute('data-performance-session');
+      if (!sessionId) throw new Error('missing session ID');
       await overlay.mouse.move(start.x, start.y);
       await overlay.mouse.down();
       await overlay.mouse.move(end.x, end.y);
       await overlay.mouse.up();
-      await expect(pinned.getByAltText('置顶截图')).toBeVisible();
-      const state = await pinned.evaluate(() => window.snipvia.pin.current());
-      if (!state.ok) throw new Error(state.error);
-      await expect.poll(async () => pinned.evaluate(async (sessionId) => {
+      await expect.poll(async () => page.evaluate(async sessionId => {
         const result = await window.snipvia.performance.report(sessionId);
-        return result.ok ? result.value?.metrics.selectionToScreenshotVisibleMs : undefined;
-      }, state.value.performanceSessionId)).toBeGreaterThan(0);
-      const result = await pinned.evaluate((sessionId) => window.snipvia.performance.report(sessionId), state.value.performanceSessionId);
+        return result.ok ? result.value?.measures.find(m => m.id === 'selection-clipboard')?.durationMs : undefined;
+      }, sessionId)).toBeGreaterThan(0);
+      const result = await page.evaluate(sessionId => window.snipvia.performance.report(sessionId), sessionId);
       if (!result.ok || !result.value) throw new Error(result.ok ? 'performance report missing' : result.error);
       scenarios.push({ name, captureIndex: scenarios.length + 1, round, requestedDip: { width: end.x - start.x, height: end.y - start.y }, report: result.value });
     };
@@ -123,10 +122,9 @@ test('collects startup preload and warm ScreenshotToAll reuse performance', asyn
     expect(scenarios).toHaveLength(9);
     for (const scenario of scenarios) {
       expect(scenario.report.metrics.captureStartToOverlayVisibleMs).toBeGreaterThan(0);
-      expect(scenario.report.metrics.selectionToScreenshotVisibleMs).toBeGreaterThan(0);
+      expect(scenario.report.measures.find(m => m.id === 'selection-clipboard')?.durationMs).toBeGreaterThan(0);
       expect(scenario.report.marks.map((mark) => mark.event)).toEqual(expect.arrayContaining([
-        'capture_overlay_reuse_start', 'capture_overlay_reuse_visible',
-        'screenshot_window_reuse_start', 'screenshot_window_reuse_visible'
+        'capture_overlay_reuse_start', 'capture_overlay_reuse_visible', 'clipboard_committed'
       ]));
       expect(scenario.report.marks.some((mark) => mark.event === 'overlay_window_create_start')).toBe(false);
       expect(scenario.report.marks.some((mark) => mark.event === 'pin_window_create_start')).toBe(false);
@@ -144,7 +142,7 @@ test('collects startup preload and warm ScreenshotToAll reuse performance', asyn
     const completedStartupResult = await page.evaluate(() => window.snipvia.performance.startupReport());
     if (!completedStartupResult.ok || !completedStartupResult.value) throw new Error(completedStartupResult.ok ? 'completed startup performance report missing' : completedStartupResult.error);
     await mkdir('test-results', { recursive: true });
-    const output = realScreen ? 'test-results/screenshot-performance-real-phase4.json' : 'test-results/screenshot-performance-phase4.json';
+    const output = realScreen ? 'test-results/screenshot-performance-real-phase2.json' : 'test-results/screenshot-performance-phase2.json';
     await writeFile(output, JSON.stringify({
       collectedAt: new Date().toISOString(),
       environment,

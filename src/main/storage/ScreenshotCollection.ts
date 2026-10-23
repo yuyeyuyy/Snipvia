@@ -10,6 +10,7 @@ export class ScreenshotCollection {
   private ids: string[] = [];
   constructor(private readonly store: ScreenshotStore) {}
   append(id: string) {
+    if (this.ids.length >= 32) throw new Error('收纳空间已满（最多 32 张），请先导出或移除图片');
     if (this.ids.includes(id)) throw new Error('截图已在收纳区');
     this.store.retain(id, this.id);
     this.ids.push(id); this.changed(); return this.snapshot();

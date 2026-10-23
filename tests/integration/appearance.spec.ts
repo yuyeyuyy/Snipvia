@@ -83,10 +83,11 @@ test('saved Dark applies to the reused local pin window without changing screens
         return [{ id: 'screen:synthetic', name: 'Synthetic screen', display_id: String(display.id), appIcon: nativeImage.createEmpty(), thumbnail: nativeImage.createFromBuffer(Buffer.alloc(size.width * size.height * 4, 255), size) }];
       };
     });
-    expect((await page.evaluate(() => window.snipvia.capture.start())).ok).toBe(true);
+    expect((await page.evaluate(() => window.snipvia.capture.start('edit'))).ok).toBe(true);
     const overlay = app.windows().find((window) => window.url().endsWith('#capture'))!;
     await expect(overlay.locator('.screen-frame')).toBeVisible();
     await overlay.mouse.move(100, 100); await overlay.mouse.down(); await overlay.mouse.move(250, 200); await overlay.mouse.up();
+    await overlay.getByRole('button', { name: '定住截图', exact: true }).click();
     const chat = app.windows().find(window => window.url().endsWith('#pin'))!;
     await expect(chat.getByAltText('置顶截图')).toBeVisible();
     expect(app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(false);

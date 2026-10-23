@@ -7,12 +7,13 @@ import { launchDesktop } from '../helpers/desktop';
 async function synthetic(app: ElectronApplication) {
   await app.evaluate(({ clipboard, desktopCapturer, nativeImage, screen, systemPreferences }) => {
     systemPreferences.getMediaAccessStatus = () => 'granted';
-    const probe = { copies: 0, fail: false };
+    const probe = { copies: 0, fail: false, frames: 0 };
     (globalThis as typeof globalThis & { continuousProbe: typeof probe }).continuousProbe = probe;
     clipboard.write = async () => { if (probe.fail) throw new Error('synthetic clipboard denied'); probe.copies++; };
     desktopCapturer.getSources = async options => {
       const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()), size = options.thumbnailSize!;
-      const frame = nativeImage.createFromBitmap(Buffer.alloc(size.width * size.height * 4, 255), size);
+      const shade = 32 + (++probe.frames * 23) % 192;
+      const frame = nativeImage.createFromBitmap(Buffer.alloc(size.width * size.height * 4, Buffer.from([shade, shade, shade, 255])), size);
       return [{ id: 'screen:continuous', name: 'Synthetic', display_id: String(display.id), appIcon: nativeImage.createEmpty(), thumbnail: frame }];
     };
   });
@@ -60,28 +61,63 @@ test('Collect keeps ten ordered thumbnails, reuses Shelf, and safely previews, s
     await synthetic(app);
     const page = await app.firstWindow(), overlay = app.windows().find(p => p.url().endsWith('#capture'))!, pin = app.windows().find(p => p.url().endsWith('#pin'))!;
     expect(app.windows().some(p => p.url().endsWith('#shelf'))).toBe(false);
+    const resourcesBefore = await page.evaluate(() => window.snipvia.performance.captureBackendStatus());
     const samples = [];
     for (let i = 0; i < 10; i++) {
       const id = await select(page, overlay, 'collect', i);
       await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.count; }).toBe(i + 1);
+      await expect.poll(async () => { const r = await page.evaluate(id => window.snipvia.performance.report(id), id); return r.ok && r.value?.marks.some(mark => mark.event === 'shelf_feedback_visible'); }).toBe(true);
       const report = await page.evaluate(id => window.snipvia.performance.report(id), id); samples.push(report);
     }
+    const resourcesCollected = await page.evaluate(() => window.snipvia.performance.captureBackendStatus());
+    expect((await page.evaluate(() => window.snipvia.capture.start('collect'))).ok).toBe(true);
+    await overlay.keyboard.press('Escape');
+    const quickId = await select(page, overlay, 'quick');
+    await expect.poll(async () => { const r = await page.evaluate(id => window.snipvia.performance.report(id), quickId); return r.ok && r.value?.marks.some(mark => mark.event === 'clipboard_committed'); }).toBe(true);
+    const unchanged = await page.evaluate(() => window.snipvia.collection.current()); expect(unchanged.ok && unchanged.value.collection.count).toBe(10);
     const shelf = app.windows().find(p => p.url().endsWith('#shelf'))!;
     await expect(shelf.getByRole('button', { name: '展开截图收纳区' })).toBeVisible();
     const windows = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map(w => w.id));
     await shelf.getByRole('button', { name: '展开截图收纳区' }).click();
     await expect(shelf.getByRole('heading', { name: '截图收纳', exact: true })).toBeVisible();
     await expect(shelf.locator('.shelf-preview img')).toHaveCount(10);
+    const interactions: unknown[] = [];
+    async function recordInteraction(measure: string) {
+      await expect.poll(async () => {
+        const state = await page.evaluate(() => window.snipvia.collection.current());
+        if (!state.ok || !state.value.performanceSessionId) return false;
+        const r = await page.evaluate(id => window.snipvia.performance.report(id), state.value.performanceSessionId);
+        return r.ok && r.value?.measures.some(m => m.id === measure);
+      }).toBe(true);
+      const state = await page.evaluate(() => window.snipvia.collection.current());
+      if (state.ok && state.value.performanceSessionId) interactions.push(await page.evaluate(id => window.snipvia.performance.report(id), state.value.performanceSessionId));
+    }
+    await recordInteraction('shelf-expand');
+    const thumbnails = await shelf.locator('.shelf-preview img').evaluateAll(images => images.map(node => {
+      const img = node as HTMLImageElement, canvas = document.createElement('canvas'); canvas.width = 1; canvas.height = 1;
+      const ctx = canvas.getContext('2d')!; ctx.drawImage(img, 0, 0, 1, 1); return ctx.getImageData(0, 0, 1, 1).data[0];
+    }));
+    expect(new Set(thumbnails).size).toBe(10);
     const before = await page.evaluate(() => window.snipvia.collection.current());
     if (!before.ok) throw new Error(before.error);
     const ids = before.value.collection.items.map(item => item.id);
     expect(new Set(ids).size).toBe(10);
     await shelf.getByRole('button', { name: '下移截图 1', exact: true }).click();
     await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.items[0].id; }).toBe(ids[1]);
+    await recordInteraction('shelf-reorder');
+    const articles = shelf.locator('.shelf-grid article');
+    await articles.nth(0).dragTo(articles.nth(2));
+    await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.items[2].id; }).toBe(ids[1]);
+    await recordInteraction('shelf-reorder');
+    // Restore the tested order with a second drag, using the updated revision.
+    await articles.nth(2).dragTo(articles.nth(0));
+    await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.items[0].id; }).toBe(ids[1]);
+    await recordInteraction('shelf-reorder');
     const stale = await shelf.evaluate(value => window.snipvia.collection.reorder(value), { ids, revision: before.value.collection.revision });
     expect(stale.ok).toBe(false);
     await shelf.getByRole('button', { name: '收起收纳区' }).click();
     await shelf.getByRole('button', { name: '展开截图收纳区' }).click();
+    await recordInteraction('shelf-expand');
     expect(await shelf.locator('.shelf-grid article').first().getAttribute('data-id')).toBe(ids[1]);
     await shelf.getByRole('button', { name: '预览截图 1', exact: true }).click();
     await expect(pin.getByAltText('置顶截图')).toBeVisible();
@@ -98,7 +134,7 @@ test('Collect keeps ten ordered thumbnails, reuses Shelf, and safely previews, s
     expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map(w => w.id))).toEqual(windows);
     expect((await overlay.evaluate(() => window.snipvia.collection.current())).ok).toBe(false);
     const usage = await page.evaluate(() => window.snipvia.performance.captureBackendStatus()); expect(usage.ok && usage.value.runtimeScreenshots).toEqual({ items: 0, bytes: 0 });
-    await mkdir('test-results', { recursive: true }); await writeFile('test-results/v2-collect.json', JSON.stringify(samples, null, 2));
+    await mkdir('test-results', { recursive: true }); await writeFile('test-results/v2-collect.json', JSON.stringify({ resourcesBefore, resourcesCollected, resourcesAfter: usage, interactions, samples }, null, 2));
   } finally { await app.close(); await rm(dir, { recursive: true, force: true }); }
 });
 
@@ -210,6 +246,12 @@ test('shortcuts register all five actions, preserve custom bindings and roll bac
     expect(current.value).toEqual({ shortcut: 'Control+1', editorShortcut: 'Control+3', collectShortcut: 'Control+2', collectionShortcut: 'Control+Shift+2', clearCollectionShortcut: 'Alt+2' });
     expect(await app.evaluate(({ globalShortcut }) => ['Control+1', 'Control+2', 'Control+3', 'Control+Shift+2', 'Alt+2'].map(key => globalShortcut.isRegistered(key)))).toEqual([true, true, true, true, true]);
     expect(await app.evaluate(({ globalShortcut }) => globalShortcut.isRegistered('Control+Shift+1'))).toBe(false);
+    await synthetic(app);
+    await app.evaluate(({ globalShortcut }) => {
+      const register = globalShortcut.register.bind(globalShortcut), callbacks: Record<string, () => void> = {};
+      (globalThis as typeof globalThis & { v2ShortcutCallbacks: typeof callbacks }).v2ShortcutCallbacks = callbacks;
+      globalShortcut.register = (key, callback) => { callbacks[key] = callback; return register(key, callback); };
+    });
     const custom = { ...current.value, collectShortcut: 'Control+Alt+F9' };
     expect((await page.evaluate(value => window.snipvia.settings.saveShortcuts(value), custom)).ok).toBe(true);
     const bytes = await readFile(join(dir, 'capture-preferences.json'), 'utf8');
@@ -223,6 +265,21 @@ test('shortcuts register all five actions, preserve custom bindings and roll bac
     expect(await app.evaluate(({ globalShortcut }) => globalShortcut.isRegistered('Control+Alt+F9'))).toBe(true);
     expect((await page.evaluate(value => window.snipvia.settings.saveShortcuts({ shortcut: value.shortcut, editorShortcut: value.editorShortcut }), custom)).ok).toBe(true);
     expect(await page.evaluate(() => window.snipvia.settings.get())).toEqual({ ok: true, value: custom });
+    await app.evaluate((_electron, key) => { (globalThis as typeof globalThis & { v2ShortcutCallbacks: Record<string, () => void> }).v2ShortcutCallbacks[key](); }, custom.collectShortcut);
+    const overlay = app.windows().find(p => p.url().endsWith('#capture'))!;
+    await expect(overlay.locator('.screen-frame')).toBeVisible();
+    await overlay.mouse.move(70, 70); await overlay.mouse.down(); await overlay.mouse.move(230, 170); await overlay.mouse.up();
+    await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.count; }).toBe(1);
+    await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 0, checkboxChecked: false }); });
+    await app.evaluate((_electron, key) => { (globalThis as typeof globalThis & { v2ShortcutCallbacks: Record<string, () => void> }).v2ShortcutCallbacks[key](); }, custom.clearCollectionShortcut);
+    const collection = await page.evaluate(() => window.snipvia.collection.current()); expect(collection.ok && collection.value.collection.count).toBe(1);
+    await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); });
+    await app.evaluate((_electron, key) => { (globalThis as typeof globalThis & { v2ShortcutCallbacks: Record<string, () => void> }).v2ShortcutCallbacks[key](); }, custom.clearCollectionShortcut);
+    await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.count; }).toBe(0);
+    await app.evaluate((_electron, key) => { (globalThis as typeof globalThis & { v2ShortcutCallbacks: Record<string, () => void> }).v2ShortcutCallbacks[key](); }, custom.collectionShortcut);
+    const shelf = app.windows().find(p => p.url().endsWith('#shelf'))!;
+    await expect(shelf.getByRole('heading', { name: '截图收纳' })).toBeVisible();
+    await app.evaluate(({ app }) => app.emit('activate'));
     await page.getByRole('navigation', { name: '设置分类' }).getByRole('button', { name: '快捷键', exact: true }).click();
     await expect(page.getByRole('button', { name: '设置收集截图快捷键', exact: true })).toBeVisible();
   } finally { await app.close(); await rm(dir, { recursive: true, force: true }); }

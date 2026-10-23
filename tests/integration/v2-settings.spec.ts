@@ -48,7 +48,7 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
       const handlers = (ipcMain as unknown as { _invokeHandlers: Map<string, unknown> })._invokeHandlers;
       return [...handlers.keys()].filter(key => /^(chat|agent|notes|history|prediction-settings|auto-action|editing|chat-images):/.test(key));
     })).toEqual([]);
-    expect(await app.evaluate(({ globalShortcut }) => [globalShortcut.isRegistered('CommandOrControl+Alt+F7'), globalShortcut.isRegistered('CommandOrControl+Alt+F8'), globalShortcut.isRegistered('CommandOrControl+Shift+Enter'), globalShortcut.isRegistered('Control+2')])).toEqual([true, true, false, false]);
+    expect(await app.evaluate(({ globalShortcut }) => [globalShortcut.isRegistered('CommandOrControl+Alt+F7'), globalShortcut.isRegistered('CommandOrControl+Alt+F8'), globalShortcut.isRegistered('CommandOrControl+Shift+Enter'), globalShortcut.isRegistered('Control+2')])).toEqual([true, true, false, true]);
     await expect(page.getByRole('button', { name: 'AI 对话', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'AI 笔记', exact: true })).toHaveCount(0);
     await page.getByRole('button', { name: '查看旧记录', exact: true }).click();
@@ -60,12 +60,12 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
 
     const overlay = app.windows().find(window => window.url().endsWith('#capture'))!, pin = app.windows().find(window => window.url().endsWith('#pin'))!;
     const windowIds = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map(window => window.id));
-    expect((await page.evaluate(() => window.snipvia.capture.start('collect'))).ok).toBe(false);
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().find(window => !new URL(window.webContents.getURL()).hash)!.close());
     for (let index = 0; index < 3; index++) {
-      expect((await page.evaluate(() => window.snipvia.capture.start('quick'))).ok).toBe(true);
+      expect((await page.evaluate(() => window.snipvia.capture.start('edit'))).ok).toBe(true);
       await expect(overlay.locator('.screen-frame')).toBeVisible();
       await overlay.mouse.move(80, 80); await overlay.mouse.down(); await overlay.mouse.move(280, 200); await overlay.mouse.up();
+      await overlay.getByRole('button', { name: '定住截图', exact: true }).click();
       await expect(pin.getByAltText('置顶截图')).toBeVisible();
       const current = await pin.evaluate(() => window.snipvia.pin.current());
       expect(current.ok && current.value.capture).not.toHaveProperty('conversationId');
@@ -76,7 +76,7 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
         expect((await pin.evaluate(id => window.snipvia.screenshots.save(id), current.value.capture.id)).ok).toBe(true);
         await expect(pin.getByAltText('置顶截图')).toBeVisible();
       }
-      await pin.keyboard.press('Escape');
+      await pin.keyboard.press('Control+C');
     }
     expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map(window => window.id))).toEqual(windowIds);
     expect(app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(false);
@@ -91,7 +91,7 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
     for (const theme of ['light', 'dark'] as const) {
       await page.getByLabel('外观主题').selectOption(theme);
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-      await page.screenshot({ path: 'docs/ui/v2/settings-' + theme + '.png', animations: 'disabled' });
+      await page.screenshot({ path: 'docs/ui/v2/settings-phase2-' + theme + '.png', animations: 'disabled' });
     }
     await app.close(); closed = true;
     const restart = await launchDesktop(options);

@@ -234,13 +234,14 @@ test('runs the real macOS Phase 3 capture experiment', async () => {
   let hiddenMainResult: { markerCounts: number[]; selfWindowCaptured: boolean; metricB: number } | null = null;
   try {
     await setMarker(stateValidation.main, mainMarker, 'main');
-    const initial = await stateValidation.main.evaluate(() => window.snipvia.capture.start());
+    const initial = await stateValidation.main.evaluate(() => window.snipvia.capture.start('edit'));
     if (!initial.ok) throw new Error(initial.error);
     await expect(stateValidation.overlay.locator('.screen-frame')).toBeVisible();
     await stateValidation.overlay.mouse.move(40, 40);
     await stateValidation.overlay.mouse.down();
     await stateValidation.overlay.mouse.move(540, 340);
     await stateValidation.overlay.mouse.up();
+    await stateValidation.overlay.getByRole('button', { name: '定住截图', exact: true }).click();
     await expect(stateValidation.pin.getByAltText('置顶截图')).toBeVisible();
     await setMarker(stateValidation.pin, pinMarker, 'pin');
     expect(stateValidation.app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(false);

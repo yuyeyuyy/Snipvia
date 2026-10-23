@@ -44,18 +44,14 @@ for (const fallback of [false, true]) {
       await expect(overlay.locator('.selection')).toBeVisible();
       const sessionId = await overlay.locator('.capture-overlay').getAttribute('data-performance-session');
       await app.evaluate(() => (globalThis as typeof globalThis & {releasePixels:()=>void}).releasePixels());
-      const pin = app.windows().find(window => window.url().endsWith('#pin'))!;
-      await expect(pin.getByAltText('置顶截图')).toBeVisible();
+      await expect.poll(async () => { const r = await main.evaluate(id => window.snipvia.performance.report(id!), sessionId); return r.ok && r.value?.marks.some(mark => mark.event === 'clipboard_committed'); }).toBe(true);
       expect(app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(false);
-      await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getFocusedWindow()?.webContents.getURL().endsWith('#pin') ?? false)).toBe(true);
-      const state = await pin.evaluate(() => window.snipvia.pin.current());
-      expect(state.ok && state.value.performanceSessionId).toBe(sessionId);
-      // Synthetic pixels are uniform. The queued selection must retain its exact dimensions.
-      const report = await pin.evaluate(id => window.snipvia.performance.report(id!), sessionId);
+      expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().find(window => window.webContents.getURL().endsWith('#pin'))!.isVisible())).toBe(false);
+      // Queued selection still retains exact DIP dimensions after delayed pixels.
+      const report = await main.evaluate(id => window.snipvia.performance.report(id!), sessionId);
       expect(report.ok && report.value?.metadata.selectionWidthDip).toBe(250);
       expect(report.ok && report.value?.metadata.selectionHeightDip).toBe(150);
-      await expect.poll(async () => { const value = await pin.evaluate(id => window.snipvia.performance.report(id!), sessionId); return value.ok ? value.value?.metrics.selectionToScreenshotVisibleMs : undefined; }).toBeGreaterThan(0);
-      await pin.evaluate(() => window.snipvia.pin.close());
+      expect(report.ok && report.value?.measures.find(m => m.id === 'selection-clipboard')?.durationMs).toBeGreaterThan(0);
       await expect.poll(() => app.evaluate(({BrowserWindow}) => BrowserWindow.getAllWindows().some(window => ['#capture','#pin','#quick-chat'].some(hash => window.webContents.getURL().endsWith(hash)) && window.isVisible()))).toBe(false);
     } finally { await app.close(); await rm(directory, {recursive:true,force:true}); }
   });

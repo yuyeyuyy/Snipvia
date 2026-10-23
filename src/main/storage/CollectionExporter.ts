@@ -7,9 +7,10 @@ import type { ScreenshotStore } from './ScreenshotStore';
 /** Caller holds stable IDs; owns only the newly created output directory. */
 export async function exportCollectionPng(store: ScreenshotStore, ids: string[], destination: string) {
   const owner = 'export:' + randomUUID();
-  for (const id of ids) store.retain(id, owner);
+  const retained: string[] = [];
   let folder: string | undefined;
   try {
+    for (const id of ids) { store.retain(id, owner); retained.push(id); }
     folder = await mkdtemp(join(destination, 'Snipvia-'));
     for (const [index, id] of ids.entries()) {
       const { item, bytes } = store.image(id);
@@ -20,5 +21,5 @@ export async function exportCollectionPng(store: ScreenshotStore, ids: string[],
   } catch (error) {
     if (folder) await rm(folder, { recursive: true, force: true }).catch(() => {});
     throw new Error('导出失败，原图已保留：' + (error instanceof Error ? error.message : '无法写入'));
-  } finally { for (const id of ids) store.unretain(id, owner); }
+  } finally { for (const id of retained) store.unretain(id, owner); }
 }

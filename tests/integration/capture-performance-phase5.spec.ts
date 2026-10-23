@@ -88,9 +88,9 @@ async function countMarkers(overlay: Page, colors: ReadonlyArray<readonly [numbe
   }, colors);
 }
 
-async function capture(launched: Launched, colors: ReadonlyArray<readonly [number, number, number]> = []) {
+async function capture(launched: Launched, colors: ReadonlyArray<readonly [number, number, number]> = [], mode: 'quick' | 'edit' = 'quick') {
   await launched.main.bringToFront();
-  const started = await launched.main.evaluate(() => window.snipvia.capture.start());
+  const started = await launched.main.evaluate(mode => window.snipvia.capture.start(mode), mode);
   if (!started.ok) throw new Error(started.error);
   await expect(launched.overlay.locator('.screen-frame')).toBeVisible();
   const sessionId = await launched.overlay.locator('.capture-overlay').getAttribute('data-performance-session');
@@ -199,12 +199,13 @@ test.describe.serial('ScreenCaptureKit native bridge', () => {
 
       // Create ScreenshotToAll and QuickChat, then keep all three app surfaces visible
       // until ScreenCaptureKit has captured the next frame.
-      const setup = await capture(launched);
+      const setup = await capture(launched, [], 'edit');
       console.info('[Phase 5] setup capture visible');
       await launched.overlay.mouse.move(40, 40);
       await launched.overlay.mouse.down();
       await launched.overlay.mouse.move(540, 340);
       await launched.overlay.mouse.up();
+      await launched.overlay.getByRole('button', { name: '定住截图', exact: true }).click();
       await expect(launched.pin.getByAltText('置顶截图')).toBeVisible();
       console.info('[Phase 5] pin visible');
       await setMarker(launched.pin, pinMarker, 'phase5-pin-marker');

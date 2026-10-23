@@ -102,7 +102,7 @@ for (const backend of ['electron', 'screen-capture-kit'] as const) {
         expect(result.after.mainVisible, JSON.stringify(result)).toBe(true);
         await expect.poll(() => visible()).toBe(true);
       };
-      const start = async (mode: 'ai' | 'standard' = 'ai') => {
+      const start = async (mode: 'ai' | 'standard' = 'standard') => {
         const result = await main.evaluate(mode => window.snipvia.capture.start(mode), mode);
         expect(result.ok).toBe(true);
         await expect(overlay.locator('.screen-frame')).toBeVisible();
@@ -119,6 +119,7 @@ for (const backend of ['electron', 'screen-capture-kit'] as const) {
         await overlay.mouse.move(100, 100); await overlay.mouse.down(); await overlay.mouse.move(360, 260); await overlay.mouse.up();
       };
       const quick = async () => {
+        if (await overlay.getByRole('button', { name: '定住截图', exact: true }).count()) await overlay.getByRole('button', { name: '定住截图', exact: true }).click();
         await expect.poll(() => visible('#pin')).toBe(true);
         expect(instance.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(false);
         return pin;
@@ -137,7 +138,7 @@ for (const backend of ['electron', 'screen-capture-kit'] as const) {
       await pin.keyboard.press('Control+C');
       await expect.poll(() => visible('#pin')).toBe(false);
       await expectHidden();
-      expect(await instance.evaluate(() => (globalThis as typeof globalThis & { syntheticCopies: number }).syntheticCopies)).toBe(2);
+      expect(await instance.evaluate(() => (globalThis as typeof globalThis & { syntheticCopies: number }).syntheticCopies)).toBe(1);
 
       await openMain(); await start(); await select(); await quick();
       await (await quick()).keyboard.press('Escape');

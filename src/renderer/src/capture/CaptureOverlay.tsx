@@ -193,6 +193,6 @@ export function CaptureOverlay() {
     <div className="capture-shade" />
     {rect && !editing && <div className="selection" style={{ left: rect.x, top: rect.y, width: rect.width, height: rect.height, backgroundImage: frame ? `url(${frame})` : 'none', backgroundSize: `${innerWidth}px ${innerHeight}px`, backgroundPosition: `-${rect.x}px -${rect.y}px` }}><span>{Math.round(rect.width)} × {Math.round(rect.height)}</span></div>}
     {editing && rect && performanceSessionId && <ScreenshotEditor key={performanceSessionId} frame={frame} initialSelection={rect} sessionId={performanceSessionId} />}
-    {!editing && <div className="capture-hint">{error || (busy ? '正在固定截图…' : frame ? mode === 'edit' ? `拖动选择截图区域 · 松开标注${window.snipvia.platform === 'win32' ? ' · Enter 全屏' : ''} · Esc 取消` : `拖动选择截图区域 · 松开完成${window.snipvia.platform === 'win32' ? ' · Enter 全屏' : ''} · Esc 取消` : '正在准备截图… · Esc 取消')}</div>}
+    {!editing && <div className="capture-hint">{error || (busy ? mode === 'collect' ? '正在收集截图…' : '正在复制截图…' : frame ? mode === 'edit' ? `拖动选择截图区域 · 松开标注${window.snipvia.platform === 'win32' ? ' · Enter 全屏' : ''} · Esc 取消` : `拖动选择截图区域 · 松开完成${window.snipvia.platform === 'win32' ? ' · Enter 全屏' : ''} · Esc 取消` : '正在准备截图… · Esc 取消')}</div>}
   </div>;
 }

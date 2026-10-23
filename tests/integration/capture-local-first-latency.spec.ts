@@ -56,13 +56,12 @@ test('registered local screenshot shortcut presents the overlay without waiting 
     await mkdir('test-results', { recursive: true });
     await writeFile('test-results/capture-local-first-latency.json', JSON.stringify({ scenario: 'all fetches blocked; local capture remains responsive without Chat', visibleAfterMs, report: report.ok ? report.value : null }, null, 2));
 
-    // Selection and local pin remain local even while all fetches would stall.
+    // Quick remains local even while all fetches would stall.
     await overlay.mouse.move(100, 100); await overlay.mouse.down(); await overlay.mouse.move(400, 300); await overlay.mouse.up();
-    await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().some(window => window.webContents.getURL().endsWith('#pin') && window.isVisible()))).toBe(true);
-    const pin = app.windows().find(window => window.url().endsWith('#pin'))!;
-    await expect(pin.getByAltText('置顶截图')).toBeVisible();
+    await expect.poll(async () => { const r = await mainReport(); return r?.marks.some(mark => mark.event === 'clipboard_committed'); }).toBe(true);
+    async function mainReport() { const r = await page.evaluate(id => window.snipvia.performance.report(id!), sessionId); return r.ok ? r.value : null; }
+    expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().some(window => window.webContents.getURL().endsWith('#pin') && window.isVisible()))).toBe(false);
     expect(await app.evaluate(() => (globalThis as typeof globalThis & { captureProbe: CaptureProbe }).captureProbe.calls)).toBe(0);
-    expect((await pin.evaluate(() => window.snipvia.pin.close())).ok).toBe(true);
     await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().some(window => ['#capture', '#quick-chat'].some(hash => window.webContents.getURL().endsWith(hash)) && window.isVisible()))).toBe(false);
 
   } finally {

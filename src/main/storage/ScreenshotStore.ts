@@ -87,6 +87,7 @@ export class ScreenshotStore {
       if (!existed) writeFileSync(target, runtime.bytes, { flag: 'wx', mode: 0o600 });
       this.commit([item, ...this.persisted!]);
     } catch (error) { if (!existed && existsSync(target)) unlinkSync(target); throw error; }
+    const entry = this.runtime.get(id); if (entry) entry.item = item;
     this.release(id);
     return { ...item };
   }

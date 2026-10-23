@@ -44,7 +44,9 @@ describe('ScreenshotCollection ownership and ordering', () => {
     try {
       const store = new ScreenshotStore(dir), collection = new ScreenshotCollection(store);
       const id = store.create(Buffer.from([1]), { width: 1, height: 1, mimeType: 'image/png' }).id;
-      store.save(id); collection.append(id); collection.clear(true, collection.snapshot().revision);
+      collection.append(id); store.save(id);
+      expect(collection.getItem(id).status).toBe('saved');
+      collection.clear(true, collection.snapshot().revision);
       expect(store.list()).toHaveLength(1); expect(store.image(id).bytes).toEqual(Buffer.from([1]));
     } finally { rmSync(dir, { recursive: true, force: true }); }
   });

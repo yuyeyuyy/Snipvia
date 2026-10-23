@@ -433,7 +433,6 @@ function pinnedBounds(selection: { x: number; y: number; width: number; height: 
 type CaptureTrigger = 'hotkey' | 'menu' | 'tray' | 'main';
 
 async function startCapture(trigger: CaptureTrigger = 'main', mode: CaptureMode = 'quick') {
-  shelfWindow?.suspend();
   if (mode === 'collect') void shelfWindow?.prepare();
   const performanceSessionId = screenshotPerformance.startSession({
     trigger,
@@ -453,6 +452,7 @@ async function startCapture(trigger: CaptureTrigger = 'main', mode: CaptureMode 
     screenshotPerformance.mark(activeCapturePerformanceSessionId, 'capture_cancelled', 'main', { reason: 'superseded' });
     cleanupOverlay();
   }
+  shelfWindow?.suspend();
   modeRouter.begin(performanceSessionId, mode);
   activeCapturePerformanceSessionId = performanceSessionId;
   await captureOverlayReady;
@@ -495,9 +495,9 @@ async function startCapture(trigger: CaptureTrigger = 'main', mode: CaptureMode 
   captureDisplay = { bounds: display.bounds, workArea: display.workArea };
   const mainWindowWasVisible = mainWindow.isVisible();
   try {
-    // Native capture excludes our pixels but used to leave this window visible.
-    // Both backends now keep it hidden until the user explicitly returns or opens it.
-    mainWindow.hide();
+    // Electron's unchanged readiness backend owns its hide + paint barrier.
+    // Native exclusion still hides settings here, once, before the early shell.
+    if (captureBackendPreference() !== 'electron' && process.platform === 'darwin' && mainWindowWasVisible) mainWindow.hide();
     if (!captureEngine) throw new Error('截图引擎尚未初始化');
     if (!captureOverlayWindow) throw new Error('CaptureOverlay 尚未预加载');
     const canPresentImmediately = captureBackendPreference() !== 'electron'
@@ -663,18 +663,18 @@ function setupIPC() {
   });
   handle('collection:rendered', 'shelf', value => shelfWindow!.rendered(z.number().int().nonnegative().parse(value)));
   handle('collection:reduced-motion', 'shelf', value => shelfWindow!.setReducedMotion(z.boolean().parse(value)));
-  handle('collection:current', ['main', 'shelf'], () => shelfWindow!.current());
-  handle('collection:toggle', ['main', 'shelf'], () => shelfWindow!.toggle());
-  handle('collection:collapse', 'shelf', () => shelfWindow!.collapse());
-  handle('collection:hide', 'shelf', () => shelfWindow!.hide());
+  handle('collection:current', ['main', 'shelf'], value => { z.undefined().parse(value); return shelfWindow!.current(); });
+  handle('collection:toggle', ['main', 'shelf'], value => { z.undefined().parse(value); return shelfWindow!.toggle(); });
+  handle('collection:collapse', 'shelf', value => { z.undefined().parse(value); return shelfWindow!.collapse(); });
+  handle('collection:hide', 'shelf', value => { z.undefined().parse(value); return shelfWindow!.hide(); });
   handle('collection:remove', 'shelf', value => { collection.remove(z.string().uuid().parse(value)); shelfWindow?.publish(); return shelfWindow!.current(); });
   handle('collection:reorder', 'shelf', value => {
     const request = collectionOrderSchema.parse(value);
     const id = screenshotPerformance.startSession({ trigger: 'shelf-reorder' });
     screenshotPerformance.mark(id, 'shelf_reorder_start'); collection.reorder(request.ids, request.revision); screenshotPerformance.mark(id, 'shelf_reorder_updated');
-    shelfWindow?.publish(); return shelfWindow!.current();
+    shelfWindow?.recordInteraction(id); shelfWindow?.publish(); return shelfWindow!.current();
   });
-  handle('collection:clear', ['main', 'shelf'], () => confirmClearCollection());
+  handle('collection:clear', ['main', 'shelf'], value => { z.undefined().parse(value); return confirmClearCollection(); });
   handle('collection:thumbnail', 'shelf', value => {
     const id = z.string().uuid().parse(value); collection.getItem(id);
     const image = nativeImage.createFromBuffer(screenshots.image(id).bytes);
@@ -983,6 +983,7 @@ else {
           // windows after the user confirms installation.
           captureOverlayWindow?.destroy();
           screenshotToAllWindow?.destroy();
+          shelfWindow?.destroy();
         },
         onInstallError: () => {
           if (!mainWindow.isDestroyed()) { quitting = false; }
@@ -1022,15 +1023,18 @@ else {
     }
     writePackagedTestResult({ stage: 'shortcut-ready' });
     screen.on('display-added', () => {
+      shelfWindow?.relocate();
       void captureEngine?.invalidateDisplays();
       if (preparing || captureOverlayWindow?.isActive()) cleanupOverlay();
     });
     screen.on('display-removed', () => {
+      shelfWindow?.relocate();
       void captureEngine?.invalidateDisplays();
       if (preparing || captureOverlayWindow?.isActive()) cleanupOverlay();
     });
     screen.on('display-metrics-changed', (_event, _display, metrics) => {
       if (!metrics.some((metric) => ['bounds', 'scaleFactor', 'rotation'].includes(metric))) return;
+      shelfWindow?.relocate();
       void captureEngine?.invalidateDisplays();
       if (preparing || captureOverlayWindow?.isActive()) cleanupOverlay();
     });
@@ -1038,6 +1042,7 @@ else {
     powerMonitor.on('unlock-screen', () => { void captureEngine?.invalidateDisplays(); });
     writePackagedTestResult({ stage: 'before-main-window-load' });
     await loadWindow(mainWindow);
+    if (quitting) return; // A settings-only restart can quit before reusable windows begin loading.
     updates.scheduleStartup(app.isPackaged && !packagedTestInstance);
     writePackagedTestResult({ stage: 'main-window-loaded' });
     const memoryBefore = processMemorySnapshot();
@@ -1126,6 +1131,7 @@ else {
       showMain();
     });
   }).catch((error: unknown) => {
+    if (quitting) return;
     const message = error instanceof Error ? error.message : '未知错误';
     writePackagedTestResult({ stage: 'startup-failed', error: message });
     dialog.showErrorBox('截然启动失败', message);

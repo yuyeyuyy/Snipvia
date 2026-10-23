@@ -1,0 +1,642 @@
+{
+  "sourceBaseline": "d1673f08bc2875be4218ddea86105d28611d8b0d",
+  "removedSource": [
+    "src/main/agent/AgentError.ts",
+    "src/main/agent/AgentLoop.ts",
+    "src/main/agent/AgentRuntime.ts",
+    "src/main/agent/AgentSessionStore.ts",
+    "src/main/agent/ContextManager.ts",
+    "src/main/agent/FileChangeService.ts",
+    "src/main/agent/PermissionManager.ts",
+    "src/main/agent/ProviderTurn.ts",
+    "src/main/agent/ToolError.ts",
+    "src/main/agent/ToolExecutor.ts",
+    "src/main/agent/ToolRegistry.ts",
+    "src/main/agent/WorkspaceService.ts",
+    "src/main/agent/approval/createPermissionPrompt.ts",
+    "src/main/agent/commands/CommandFiles.ts",
+    "src/main/agent/commands/CommandRunner.ts",
+    "src/main/agent/commands/ProcessSandbox.ts",
+    "src/main/agent/commands/registerCommandTools.ts",
+    "src/main/agent/createFileToolSystem.ts",
+    "src/main/agent/editing/EditingProposals.ts",
+    "src/main/agent/editing/branches.ts",
+    "src/main/agent/editing/registerEditingTools.ts",
+    "src/main/agent/fileChanges/textPatch.ts",
+    "src/main/agent/mcp/BoundedStdioTransport.ts",
+    "src/main/agent/mcp/MCPClient.ts",
+    "src/main/agent/mcp/MCPManager.ts",
+    "src/main/agent/mcp/MCPToolAdapter.ts",
+    "src/main/agent/mcp/config.ts",
+    "src/main/agent/notes/NoteCheckpoints.ts",
+    "src/main/agent/notes/NotebookWriter.ts",
+    "src/main/agent/notes/registerNotebookTools.ts",
+    "src/main/agent/permissions/CommandRiskAnalyzer.ts",
+    "src/main/agent/permissions/NotebookCommandPolicy.ts",
+    "src/main/agent/permissions/PermissionGrantStore.ts",
+    "src/main/agent/permissions/PermissionPolicy.ts",
+    "src/main/agent/policies/pathPolicy.ts",
+    "src/main/agent/registerFileTools.ts",
+    "src/main/agent/registerReadOnlyTools.ts",
+    "src/main/agent/registerWebTools.ts",
+    "src/main/agent/tools/file/editFile.ts",
+    "src/main/agent/tools/file/listDirectory.ts",
+    "src/main/agent/tools/file/readFile.ts",
+    "src/main/agent/tools/file/searchFiles.ts",
+    "src/main/agent/tools/file/writeFile.ts",
+    "src/main/agent/tools/web/fetchUrl.ts",
+    "src/main/agent/tools/web/readWebChunk.ts",
+    "src/main/agent/tools/web/webSearch.ts",
+    "src/main/agent/types/agent.ts",
+    "src/main/agent/types/tool.ts",
+    "src/main/agent/ui/AgentExecutionService.ts",
+    "src/main/agent/ui/ExecutionPresenter.ts",
+    "src/main/agent/ui/WebSourceCollector.ts",
+    "src/main/agent/web/BraveWebSearchProvider.ts",
+    "src/main/agent/web/DuckDuckGoWebSearchProvider.ts",
+    "src/main/agent/web/ExaWebSearchProvider.ts",
+    "src/main/agent/web/NetworkPolicy.ts",
+    "src/main/agent/web/PublicHttpClient.ts",
+    "src/main/agent/web/SystemWebDnsResolver.ts",
+    "src/main/agent/web/WebContentStore.ts",
+    "src/main/agent/web/WebIconService.ts",
+    "src/main/agent/web/WebPageService.ts",
+    "src/main/agent/web/WebSearchProvider.ts",
+    "src/main/agent/web/WebSearchService.ts",
+    "src/main/agent/web/defaultSearchProvider.ts",
+    "src/main/agent/web/htmlText.ts",
+    "src/main/agent/web/operation.ts",
+    "src/main/agent/web/relevantExcerpt.ts",
+    "src/main/agent/web/researchPrompt.ts",
+    "src/main/ai/chat-completion-options.ts",
+    "src/main/ai/jev/JevPredictionClient.ts",
+    "src/main/ai/jev/image.ts",
+    "src/main/ai/json-request.ts",
+    "src/main/ai/llm/ChatCompletionsAgentProvider.ts",
+    "src/main/ai/llm/LLMProvider.ts",
+    "src/main/ai/llm/VisibleTextStream.ts",
+    "src/main/ai/llm/contextWindow.ts",
+    "src/main/ai/model-configuration.ts",
+    "src/main/ai/models/ModelCatalog.ts",
+    "src/main/ai/models/adapters.ts",
+    "src/main/ai/models/catalogue-mapping.ts",
+    "src/main/ai/models/http.ts",
+    "src/main/ai/models/vision-test.ts",
+    "src/main/ai/provider.ts",
+    "src/main/analysis/PredictionError.ts",
+    "src/main/analysis/PredictionService.ts",
+    "src/main/analysis/auto-action-router.ts",
+    "src/main/analysis/screenshot-analyzer.ts",
+    "src/main/calendar/mac-calendar.ts",
+    "src/main/chat/ChatImages.ts",
+    "src/main/chat/image-validation.ts",
+    "src/main/chat/provider-images.ts",
+    "src/main/notes/NotebookService.ts",
+    "src/main/notes/registerNotesIPC.ts",
+    "src/main/storage/chat-images.ts",
+    "src/main/storage/history.ts",
+    "src/main/storage/prediction-settings.ts",
+    "src/main/storage/schedule.ts",
+    "src/main/windows/quick-chat-placement.ts",
+    "src/renderer/src/agent/AgentExecution.tsx",
+    "src/renderer/src/agent/AgentNotebook.tsx",
+    "src/renderer/src/agent/AgentPermissionPanel.tsx",
+    "src/renderer/src/agent/NoteChanges.tsx",
+    "src/renderer/src/agent/SourceReferences.tsx",
+    "src/renderer/src/agent/activity.ts",
+    "src/renderer/src/agent/execution.css",
+    "src/renderer/src/agent/file-approval.css",
+    "src/renderer/src/agent/sources.css",
+    "src/renderer/src/agent/useAgentExecution.ts",
+    "src/renderer/src/chat/ChatComposer.tsx",
+    "src/renderer/src/chat/ChatMessages.tsx",
+    "src/renderer/src/chat/ChatResizeHandle.tsx",
+    "src/renderer/src/chat/ChatSidebar.tsx",
+    "src/renderer/src/chat/ChatWorkspace.tsx",
+    "src/renderer/src/chat/EditingPanel.tsx",
+    "src/renderer/src/chat/ImageAttachments.tsx",
+    "src/renderer/src/chat/MarkdownMessage.tsx",
+    "src/renderer/src/chat/QuickChat.tsx",
+    "src/renderer/src/chat/editing.css",
+    "src/renderer/src/chat/image-attachments.css",
+    "src/renderer/src/chat/model-choice.ts",
+    "src/renderer/src/chat/quick-chat.css",
+    "src/renderer/src/chat/sidebar.css",
+    "src/renderer/src/chat/useChatScroll.ts",
+    "src/renderer/src/chat/useConversationModel.ts",
+    "src/renderer/src/chat/workspace.css",
+    "src/renderer/src/components/AppTitleBar.tsx",
+    "src/renderer/src/components/WorkspaceHeader.tsx",
+    "src/renderer/src/components/ui/EmptyState.tsx",
+    "src/renderer/src/history/HistoryPanel.tsx",
+    "src/renderer/src/history/display.ts",
+    "src/renderer/src/history/history.css",
+    "src/renderer/src/notes/NoteCodeBlock.tsx",
+    "src/renderer/src/notes/NoteIcon.tsx",
+    "src/renderer/src/notes/NotePreview.tsx",
+    "src/renderer/src/notes/NotesEditor.tsx",
+    "src/renderer/src/notes/NotesOutline.tsx",
+    "src/renderer/src/notes/NotesPanel.tsx",
+    "src/renderer/src/notes/NotesTree.tsx",
+    "src/renderer/src/notes/code-language.ts",
+    "src/renderer/src/notes/live-preview.tsx",
+    "src/renderer/src/notes/note-drag.ts",
+    "src/renderer/src/notes/notes.css",
+    "src/renderer/src/notes/useNoteDocument.ts",
+    "src/renderer/src/refined.css",
+    "src/renderer/src/schedule/SchedulePanel.tsx",
+    "src/renderer/src/schedule/display.ts",
+    "src/renderer/src/schedule/schedule.css",
+    "src/renderer/src/settings/ModelSelectRow.tsx",
+    "src/renderer/src/settings/PredictionSettings.tsx",
+    "src/renderer/src/style.css",
+    "src/shared/agent-file-change.ts",
+    "src/shared/agent/editing.ts",
+    "src/shared/agent/execution.ts",
+    "src/shared/agent/message.ts",
+    "src/shared/agent/note-writing.ts",
+    "src/shared/agent/permission.ts",
+    "src/shared/agent/source-schema.ts",
+    "src/shared/agent/sources.ts",
+    "src/shared/chat-images.ts",
+    "src/shared/chat-window.ts",
+    "src/shared/history.ts",
+    "src/shared/models.ts",
+    "src/shared/note-markdown.ts",
+    "src/shared/notes.ts",
+    "src/shared/prediction-failure.ts",
+    "src/shared/prediction-settings.ts"
+  ],
+  "retiredTests": {
+    "tests/unit/agent-execution-ui.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/ui/ExecutionPresenter",
+        "../../src/main/agent/ui/AgentExecutionService",
+        "../../src/main/agent/createFileToolSystem",
+        "../../src/main/agent/types/agent",
+        "../../src/main/ai/llm/LLMProvider"
+      ]
+    },
+    "tests/unit/agent-chat-provider.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/ai/llm/ChatCompletionsAgentProvider",
+        "../../src/main/ai/llm/LLMProvider",
+        "../../src/main/agent/ProviderTurn",
+        "../../src/main/ai/llm/VisibleTextStream"
+      ]
+    },
+    "tests/unit/provider.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/ai/provider"
+      ]
+    },
+    "tests/unit/schedule.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/storage/schedule",
+        "../../src/main/storage/schedule",
+        "../../src/main/storage/schedule",
+        "../../src/main/storage/schedule"
+      ]
+    },
+    "tests/unit/prediction-settings.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/storage/prediction-settings"
+      ]
+    },
+    "tests/unit/model-catalog.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/ai/models/ModelCatalog",
+        "../../src/main/ai/models/adapters",
+        "../../src/main/ai/models/http",
+        "../../src/main/ai/models/catalogue-mapping",
+        "../../src/main/ai/models/vision-test"
+      ]
+    },
+    "tests/unit/workspace-browsing.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/renderer/src/schedule/display",
+        "../../src/renderer/src/history/display"
+      ]
+    },
+    "tests/unit/agent-web-research.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/web/WebSearchService",
+        "../../src/main/agent/web/WebPageService",
+        "../../src/main/agent/ui/WebSourceCollector",
+        "../../src/main/agent/web/WebIconService",
+        "../../src/main/agent/ContextManager",
+        "../../src/main/agent/ToolError",
+        "../../src/main/agent/web/htmlText"
+      ]
+    },
+    "tests/unit/note-code-language.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/renderer/src/notes/code-language"
+      ]
+    },
+    "tests/unit/agent-web-transport.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/web/PublicHttpClient"
+      ]
+    },
+    "tests/unit/agent-note-writing.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/notes/NotebookService",
+        "../../src/main/agent/notes/NotebookWriter",
+        "../../src/main/agent/createFileToolSystem",
+        "../../src/main/agent/AgentLoop",
+        "../../src/main/ai/llm/LLMProvider"
+      ]
+    },
+    "tests/unit/agent-activity.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/renderer/src/agent/activity"
+      ]
+    },
+    "tests/unit/history.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/storage/history",
+        "../../src/main/storage/history",
+        "../../src/main/storage/history",
+        "../../src/main/storage/history",
+        "../../src/main/storage/history",
+        "../../src/main/storage/history",
+        "../../src/main/storage/history",
+        "../../src/main/storage/history",
+        "../../src/main/storage/history",
+        "../../src/main/storage/history",
+        "../../src/main/storage/history"
+      ]
+    },
+    "tests/unit/agent-file-changes.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/createFileToolSystem",
+        "../../src/main/agent/FileChangeService",
+        "../../src/main/agent/PermissionManager",
+        "../../src/main/agent/ToolExecutor",
+        "../../src/main/agent/fileChanges/textPatch",
+        "../../src/main/agent/WorkspaceService",
+        "../../src/main/agent/types/tool"
+      ]
+    },
+    "tests/unit/agent-session-store.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/AgentSessionStore",
+        "../../src/main/agent/ui/AgentExecutionService",
+        "../../src/main/agent/createFileToolSystem",
+        "../../src/main/ai/llm/LLMProvider"
+      ]
+    },
+    "tests/unit/note-drag.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/renderer/src/notes/note-drag"
+      ]
+    },
+    "tests/unit/agent-context-window.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/ai/llm/contextWindow"
+      ]
+    },
+    "tests/unit/agent-commands.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/notes/NotebookService",
+        "../../src/main/agent/notes/NotebookWriter",
+        "../../src/main/agent/createFileToolSystem",
+        "../../src/main/agent/commands/ProcessSandbox",
+        "../../src/main/agent/ToolError",
+        "../../src/main/agent/AgentLoop",
+        "../../src/main/ai/llm/LLMProvider",
+        "../../src/main/agent/ContextManager"
+      ]
+    },
+    "tests/unit/jev-prediction.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/ai/jev/JevPredictionClient",
+        "../../src/main/ai/jev/image",
+        "../../src/main/analysis/PredictionService",
+        "../../src/main/analysis/PredictionError",
+        "../../src/main/analysis/auto-action-router"
+      ]
+    },
+    "tests/unit/agent-web-network.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/web/NetworkPolicy",
+        "../../src/main/agent/web/PublicHttpClient"
+      ]
+    },
+    "tests/unit/agent-readonly-web.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/createFileToolSystem",
+        "../../src/main/agent/registerWebTools",
+        "../../src/main/agent/web/DuckDuckGoWebSearchProvider",
+        "../../src/main/agent/web/WebSearchService",
+        "../../src/main/agent/web/SystemWebDnsResolver",
+        "../../src/main/agent/web/NetworkPolicy"
+      ]
+    },
+    "tests/unit/agent-note-checkpoints.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/notes/NotebookService",
+        "../../src/main/agent/notes/NotebookWriter",
+        "../../src/main/agent/notes/NoteCheckpoints",
+        "../../src/main/agent/createFileToolSystem"
+      ]
+    },
+    "tests/unit/agent-tools.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/ToolExecutor",
+        "../../src/main/agent/ToolRegistry",
+        "../../src/main/agent/registerReadOnlyTools",
+        "../../src/main/agent/WorkspaceService",
+        "../../src/main/agent/tools/file/searchFiles",
+        "../../src/main/agent/types/tool"
+      ]
+    },
+    "tests/unit/chat-images.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/chat/ChatImages",
+        "../../src/main/chat/image-validation",
+        "../../src/main/chat/provider-images",
+        "../../src/main/storage/chat-images",
+        "../../src/main/agent/ContextManager",
+        "../../src/main/ai/models/vision-test",
+        "../../src/main/storage/history",
+        "../../src/main/storage/history"
+      ]
+    },
+    "tests/unit/mac-calendar.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/calendar/mac-calendar"
+      ]
+    },
+    "tests/unit/agent-loop.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/AgentLoop",
+        "../../src/main/agent/AgentRuntime",
+        "../../src/main/agent/ContextManager",
+        "../../src/main/agent/createFileToolSystem",
+        "../../src/main/agent/ToolRegistry",
+        "../../src/main/agent/ToolExecutor",
+        "../../src/main/agent/ToolError",
+        "../../src/main/agent/WorkspaceService",
+        "../../src/main/ai/llm/LLMProvider",
+        "../../src/main/agent/types/agent"
+      ]
+    },
+    "tests/unit/chat-workspace.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/ui/AgentExecutionService",
+        "../../src/main/agent/createFileToolSystem",
+        "../../src/main/ai/llm/LLMProvider"
+      ]
+    },
+    "tests/unit/agent-mcp.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/ToolRegistry",
+        "../../src/main/agent/ToolExecutor",
+        "../../src/main/agent/WorkspaceService",
+        "../../src/main/agent/PermissionManager",
+        "../../src/main/agent/mcp/MCPToolAdapter",
+        "../../src/main/agent/mcp/MCPManager",
+        "../../src/main/agent/mcp/config",
+        "../../src/main/agent/mcp/MCPClient"
+      ]
+    },
+    "tests/unit/screenshot-analyzer.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/analysis/screenshot-analyzer",
+        "../../src/main/analysis/auto-action-router",
+        "../../src/main/analysis/PredictionError"
+      ]
+    },
+    "tests/unit/agent-web-exa.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/web/ExaWebSearchProvider",
+        "../../src/main/agent/web/WebSearchService",
+        "../../src/main/agent/web/defaultSearchProvider"
+      ]
+    },
+    "tests/unit/chat-model-choice.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/renderer/src/chat/model-choice"
+      ]
+    },
+    "tests/unit/agent-web-tools.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/ToolRegistry",
+        "../../src/main/agent/ToolExecutor",
+        "../../src/main/agent/WorkspaceService",
+        "../../src/main/agent/registerWebTools",
+        "../../src/main/agent/web/WebContentStore",
+        "../../src/main/agent/web/WebPageService",
+        "../../src/main/agent/web/WebSearchService",
+        "../../src/main/agent/web/BraveWebSearchProvider",
+        "../../src/main/agent/web/WebSearchProvider",
+        "../../src/main/agent/web/htmlText",
+        "../../src/main/agent/web/operation",
+        "../../src/main/agent/ContextManager",
+        "../../src/main/agent/AgentLoop",
+        "../../src/main/ai/llm/LLMProvider"
+      ]
+    },
+    "tests/unit/editing-proposals.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/notes/NotebookService",
+        "../../src/main/agent/WorkspaceService",
+        "../../src/main/agent/editing/EditingProposals",
+        "../../src/main/agent/editing/branches",
+        "../../src/main/agent/notes/NotebookWriter"
+      ]
+    },
+    "tests/unit/agent-tool-executor.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/ToolError",
+        "../../src/main/agent/ToolExecutor",
+        "../../src/main/agent/ToolRegistry",
+        "../../src/main/agent/registerReadOnlyTools",
+        "../../src/main/agent/WorkspaceService",
+        "../../src/main/agent/types/tool"
+      ]
+    },
+    "tests/unit/agent-permissions.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/PermissionManager",
+        "../../src/main/agent/permissions/PermissionPolicy",
+        "../../src/main/agent/permissions/PermissionGrantStore",
+        "../../src/main/agent/permissions/CommandRiskAnalyzer",
+        "../../src/main/agent/createFileToolSystem"
+      ]
+    },
+    "tests/unit/prediction-service.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/analysis/PredictionService",
+        "../../src/main/ai/json-request",
+        "../../src/main/analysis/auto-action-router"
+      ]
+    },
+    "tests/unit/agent-mcp-stdio.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/agent/mcp/MCPClient",
+        "../../src/main/agent/mcp/config",
+        "../../src/main/agent/mcp/MCPManager",
+        "../../src/main/agent/ToolRegistry",
+        "../../src/main/agent/ToolExecutor",
+        "../../src/main/agent/WorkspaceService",
+        "../../src/main/agent/PermissionManager",
+        "../../src/main/agent/AgentLoop",
+        "../../src/main/ai/llm/LLMProvider"
+      ]
+    },
+    "tests/unit/notes.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/notes/NotebookService"
+      ]
+    },
+    "tests/unit/quick-chat-placement.test.ts": {
+      "reason": "已删除的 AI/Agent/笔记业务实现专属单测；不属于截图底座回归",
+      "removedImports": [
+        "../../src/main/windows/quick-chat-placement"
+      ]
+    },
+    "tests/integration/agent-file-approval.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/agent-execution.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/agent-notebooks.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/agent-note-writing.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/agent-commands.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/chat-controls.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/chat-workspace.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/notes-markdown.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/monochrome.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/chat-redesign.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/editing-workspace.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/provider-settings.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/desktop.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/jev-prediction.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/notes-drag.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/model-transport.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/chat-images.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/notes-navigation.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/notes-preferences.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/prediction-errors.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/prediction-criteria.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/local-first-compatibility.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/notes.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/model-catalog.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/workspace-browsing.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/quick-chat-workspace.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/visual-acceptance.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/windows-release.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/integration/local-first.spec.ts": {
+      "reason": "V1 已退役产品工作台/AI 调用验收。可用 V2 设置、只读旧数据、无网络、权限与截图测试替代；原版本保存在基线提交与源码归档。"
+    },
+    "tests/unit/helpers/web.ts": {
+      "reason": "退役 Web/Agent 单测的专属辅助文件，已无引用。"
+    }
+  },
+  "preservedCaptureTests": [
+    "tests/integration/capture-early-selection.spec.ts",
+    "tests/integration/capture-latency-real.spec.ts",
+    "tests/integration/capture-local-first-latency.spec.ts",
+    "tests/integration/capture-performance-phase3.spec.ts",
+    "tests/integration/capture-performance-phase4.spec.ts",
+    "tests/integration/capture-performance-phase5.spec.ts",
+    "tests/integration/capture-performance-phase6.spec.ts",
+    "tests/integration/capture-window-visibility.spec.ts",
+    "tests/integration/packaged-screen-capture-kit.spec.ts",
+    "tests/integration/windows-capture-ui.spec.ts"
+  ]
+}

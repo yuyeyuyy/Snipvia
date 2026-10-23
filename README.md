@@ -1,5 +1,7 @@
 # Snipvia（截然）
 
+当前本地开发分支 **refactor/snipvia-v2** 正在实施 V2 Phase 1：主窗口改为设置中心，移除 AI 对话和笔记产品，保留既有截图引擎、标注、复制、保存、贴图、权限与更新。旧对话、日程和笔记通过只读兼容与导出保护；Collect 与外部目标尚未开放。本阶段不发布新版本，以下 0.3.2 下载仍对应已发布的 V1 产品。见 [V2 审计](docs/v2/PHASE1_AUDIT.md)与[重构报告](docs/v2/PHASE1_REFACTORING_REPORT.md)。
+
 **Snip. Ask. Act.**
 
 面向 macOS 和 Windows 的截图 AI 助手：快捷键框选屏幕，在截图旁提问、解释代码和错误，或把图片中的安排整理成待确认日程。桌面核心完全免费、本地优先、无需登录；用户自行配置模型与 API Key。项目保留本地 Markdown 笔记和 Agent 工具调用。

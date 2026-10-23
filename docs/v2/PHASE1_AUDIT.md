@@ -56,3 +56,4 @@ flowchart TD
 新增 shared/screenshot.ts、shared/capture-mode.ts、main/storage/ScreenshotStore.ts、main/capture/CaptureModeRouter.ts、main/legacy/LegacyDataService.ts、renderer/settings/LegacyDataPanel.tsx；改 Main/Preload/主设置/贴图/Overlay/编辑器和对应测试。先审计和安全分支，再业务与设置，再模型/路由及回归，按逻辑分批提交。旧业务专属 UI 测试需随产品删除明确退役，不能用 skip 隐藏；截图、原生、回退、生命周期、权限、安全、更新测试保留并按新输出适配。不开启 500/1000 次高负载测试。
 
 最终报告记录实际命令、退出码、截图测量和未测平台边界，不以历史报告充当本轮实测。
+\n实施细化：V2 活跃快捷键改用 capture-preferences.json，仅继承旧值，不回写旧模型配置；设置桥接只返回两个有效快捷键。旧设置的外观字段继续由原主题服务保存，启动不迁移/删除旧凭据。\n

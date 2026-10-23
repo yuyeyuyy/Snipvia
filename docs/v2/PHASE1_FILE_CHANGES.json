@@ -1,0 +1,1758 @@
+{
+  "baseline": "d1673f08bc2875be4218ddea86105d28611d8b0d",
+  "codeCommit": "20f2088f1942dc63c48051c6ca4ebc11b8dc086f",
+  "changes": [
+    {
+      "status": "A",
+      "paths": [
+        "docs/v2/PHASE1_AUDIT.md"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "electron-builder.windows.yml"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "package.json"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "pnpm-lock.yaml"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/AgentError.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/AgentLoop.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/AgentRuntime.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/AgentSessionStore.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/ContextManager.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/FileChangeService.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/PermissionManager.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/ProviderTurn.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/ToolError.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/ToolExecutor.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/ToolRegistry.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/WorkspaceService.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/approval/createPermissionPrompt.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/commands/CommandFiles.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/commands/CommandRunner.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/commands/ProcessSandbox.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/commands/registerCommandTools.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/createFileToolSystem.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/editing/EditingProposals.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/editing/branches.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/editing/registerEditingTools.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/fileChanges/textPatch.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/mcp/BoundedStdioTransport.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/mcp/MCPClient.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/mcp/MCPManager.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/mcp/MCPToolAdapter.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/mcp/config.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/notes/NoteCheckpoints.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/notes/NotebookWriter.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/notes/registerNotebookTools.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/permissions/CommandRiskAnalyzer.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/permissions/NotebookCommandPolicy.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/permissions/PermissionGrantStore.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/permissions/PermissionPolicy.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/policies/pathPolicy.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/registerFileTools.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/registerReadOnlyTools.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/registerWebTools.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/tools/file/editFile.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/tools/file/listDirectory.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/tools/file/readFile.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/tools/file/searchFiles.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/tools/file/writeFile.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/tools/web/fetchUrl.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/tools/web/readWebChunk.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/tools/web/webSearch.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/types/agent.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/types/tool.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/ui/AgentExecutionService.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/ui/ExecutionPresenter.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/ui/WebSourceCollector.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/BraveWebSearchProvider.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/DuckDuckGoWebSearchProvider.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/ExaWebSearchProvider.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/NetworkPolicy.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/PublicHttpClient.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/SystemWebDnsResolver.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/WebContentStore.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/WebIconService.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/WebPageService.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/WebSearchProvider.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/WebSearchService.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/defaultSearchProvider.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/htmlText.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/operation.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/relevantExcerpt.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/agent/web/researchPrompt.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/chat-completion-options.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/jev/JevPredictionClient.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/jev/image.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/json-request.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/llm/ChatCompletionsAgentProvider.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/llm/LLMProvider.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/llm/VisibleTextStream.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/llm/contextWindow.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/model-configuration.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/models/ModelCatalog.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/models/adapters.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/models/catalogue-mapping.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/models/http.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/models/vision-test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/ai/provider.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/analysis/PredictionError.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/analysis/PredictionService.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/analysis/auto-action-router.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/analysis/screenshot-analyzer.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/calendar/mac-calendar.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/main/capture/CaptureModeRouter.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/chat/ChatImages.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/chat/image-validation.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/chat/provider-images.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/main/index.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/main/legacy/LegacyDataService.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/notes/NotebookService.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/notes/registerNotesIPC.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/main/storage/CapturePreferencesStore.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/main/storage/ScreenshotStore.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/storage/chat-images.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/storage/history.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/storage/prediction-settings.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/storage/schedule.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/main/storage/settings.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/main/windows/capture-overlay-window.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/main/windows/quick-chat-placement.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/preload/index.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/App.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/agent/AgentExecution.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/agent/AgentNotebook.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/agent/AgentPermissionPanel.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/agent/NoteChanges.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/agent/SourceReferences.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/agent/activity.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/agent/execution.css"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/agent/file-approval.css"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/agent/sources.css"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/agent/useAgentExecution.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/capture/CaptureOverlay.tsx"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/capture/PinnedCapture.tsx"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/capture/editor/ScreenshotEditor.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/ChatComposer.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/ChatMessages.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/ChatResizeHandle.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/ChatSidebar.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/ChatWorkspace.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/EditingPanel.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/ImageAttachments.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/MarkdownMessage.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/QuickChat.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/editing.css"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/image-attachments.css"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/model-choice.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/quick-chat.css"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/sidebar.css"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/useChatScroll.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/useConversationModel.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/chat/workspace.css"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/components/AppShell.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/components/AppTitleBar.tsx"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/components/FeedbackDialog.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/components/WorkspaceHeader.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/components/ui/EmptyState.tsx"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/renderer/src/components/ui/ReleaseMarkdown.tsx"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/design/app-shell.css"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/renderer/src/design/base.css"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/history/HistoryPanel.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/history/display.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/history/history.css"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/main.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/notes/NoteCodeBlock.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/notes/NoteIcon.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/notes/NotePreview.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/notes/NotesEditor.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/notes/NotesOutline.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/notes/NotesPanel.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/notes/NotesTree.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/notes/code-language.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/notes/live-preview.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/notes/note-drag.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/notes/notes.css"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/notes/useNoteDocument.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/permissions/ScreenPermissionCard.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/refined.css"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/schedule/SchedulePanel.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/schedule/display.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/schedule/schedule.css"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/settings/AppearanceSettings.tsx"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/renderer/src/settings/LegacyDataPanel.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/settings/ModelSelectRow.tsx"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/settings/PredictionSettings.tsx"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/settings/SettingsPanel.tsx"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/renderer/src/settings/ShortcutRecorder.tsx"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/settings/UpdateSettings.tsx"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/renderer/src/settings/settings.css"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/renderer/src/settings/v2-settings.css"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/renderer/src/style.css"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/agent-file-change.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/agent/editing.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/agent/execution.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/agent/message.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/agent/note-writing.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/agent/permission.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/agent/source-schema.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/agent/sources.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/shared/capture-mode.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/shared/capture-preferences.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/chat-images.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/chat-window.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/shared/contracts.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/shared/desktop-api.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/history.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/shared/legacy.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/models.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/note-markdown.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/notes.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/prediction-failure.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "src/shared/prediction-settings.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/shared/screenshot-editor.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "src/shared/screenshot-understanding.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "src/shared/screenshot.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/agent-commands.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/agent-execution.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/agent-file-approval.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/agent-note-writing.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/agent-notebooks.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/appearance.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/capture-early-selection.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/capture-latency-real.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/capture-local-first-latency.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/capture-performance-phase3.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/capture-performance-phase4.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/capture-performance-phase5.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/capture-performance-phase6.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/capture-window-visibility.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/chat-controls.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/chat-images.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/chat-redesign.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/chat-workspace.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/desktop.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/dock-icon.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/editing-workspace.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/feedback.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/jev-prediction.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/local-first-compatibility.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/local-first.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/model-catalog.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/model-transport.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/monochrome.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/notes-drag.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/notes-markdown.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/notes-navigation.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/notes-preferences.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/notes.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/performance.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/prediction-criteria.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/prediction-errors.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/provider-settings.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/quick-chat-workspace.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/screenshot-editor.spec.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/integration/updates.spec.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "tests/integration/v2-settings.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/visual-acceptance.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/windows-release.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/integration/workspace-browsing.spec.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-activity.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-chat-provider.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-commands.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-context-window.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-execution-ui.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-file-changes.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-loop.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-mcp-stdio.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-mcp.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-note-checkpoints.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-note-writing.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-permissions.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-readonly-web.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-session-store.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-tool-executor.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-tools.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-web-exa.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-web-network.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-web-research.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-web-tools.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/agent-web-transport.test.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "tests/unit/capture-mode-router.test.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "tests/unit/capture-preferences.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/chat-images.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/chat-model-choice.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/chat-workspace.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/editing-proposals.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/helpers/web.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/history.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/jev-prediction.test.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "tests/unit/legacy-data.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/mac-calendar.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/model-catalog.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/note-code-language.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/note-drag.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/notes.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/prediction-service.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/prediction-settings.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/provider.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/quick-chat-placement.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/schedule.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/screenshot-analyzer.test.ts"
+      ]
+    },
+    {
+      "status": "A",
+      "paths": [
+        "tests/unit/screenshot-store.test.ts"
+      ]
+    },
+    {
+      "status": "M",
+      "paths": [
+        "tests/unit/settings.test.ts"
+      ]
+    },
+    {
+      "status": "D",
+      "paths": [
+        "tests/unit/workspace-browsing.test.ts"
+      ]
+    }
+  ]
+}

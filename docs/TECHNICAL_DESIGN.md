@@ -8,6 +8,18 @@
 
 Agent 工具层已实现 Main 内的工具注册、只读访问、workspace 授权边界和带 diff 预览的文件写入及 [统一权限系统](AGENT_PERMISSIONS.md)；[Agent Runtime](AGENT_RUNTIME.md) 核心循环已基于 Provider 接口实现，已通过 [Agent Execution UI](AGENT_EXECUTION_UI.md) 接入主聊天和 QuickChat 默认开启的只读联网 Agent 模式，以及 Chat Completions Tool Calling/SSE 适配。产品入口暂时禁用文件写入、编辑、Undo 和外部 MCP 工具调用，底层实现保留。工具实现、限制和接入方式见 [Agent Tool System](AGENT_TOOL_SYSTEM.md)、[Agent 文件修改](AGENT_FILE_CHANGES.md) 、[Agent Web Tools](AGENT_WEB_TOOLS.md) 与 [Agent MCP 接入](AGENT_MCP.md)。
 
+## V2 Phase 1 当前结构（2026-10-23）
+
+主入口只编排设置、原采集链路和更新。CaptureEngine/ScreenCaptureKitBackend/ElectronCaptureBackend 负责像素；CaptureModeRouter 保存可取消的 Session 并决定 quick/edit 后处理，collect 明确拒绝。Quick 复制并复用贴图；Edit 继续使用原 Overlay 标注器。原 Swift Helper、JPEG Binary IPC、坐标转换、预热、健康与熔断逻辑未重写。
+
+ScreenshotItem 的 UUID 独立于任何会话。ScreenshotStore 区分有界内存 Buffer（最多 32 项、256 MiB）、无 Base64 的元数据和 screenshots/ 下的原子索引/图片文件。运行时创建不读取历史、不写盘；持久化、删除和复制按独立截图 ID 操作。只有展示 IPC 临时构造预览 data URL，元数据与索引不携带图片字符串。
+
+LegacyDataService 仅按需读取旧 JSON、导出白名单记录、引用截图和对话附件，或显式幂等复制旧截图。原索引、截图及外部 Markdown 不删除、不重写，不启动旧业务服务。导出不包含 credentials、account 或 API Key；外部 Markdown 留在原目录，导出 notebooks.json 以供定位。异常单独报告，损坏索引不阻塞截图；新库损坏时拒绝持久化但临时截图可继续。
+
+CapturePreferencesStore 独立保存两个已启用快捷键，继承旧值但不回写旧模型配置。旧 settings.json 只供主题及兼容解析；V2 启动跳过凭据解密/迁移/删除，并拒绝后续覆盖损坏的旧设置。IPC 保留 Main/Overlay/Pin 身份及 mainFrame 校验，所有历史业务写通道均已移除。进一步说明见 [V2 审计](v2/PHASE1_AUDIT.md)。
+
+以下各节保留早期 V1 架构设计范围；不表示 V2 仍含 AI/Agent/笔记产品。
+
 ## 1. 技术选型
 
 | 层 | 方案 | 原因与代价 |

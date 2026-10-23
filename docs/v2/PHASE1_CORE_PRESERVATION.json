@@ -1,0 +1,24 @@
+{
+  "baseline": "d1673f08bc2875be4218ddea86105d28611d8b0d",
+  "unchangedCore": {
+    "src/main/capture/capture-readiness.ts": "fce59b036166ba3a608f216d9a47998d75bb5a62d01f2d023dd6c4f2e552183b",
+    "src/main/capture/capture-engine.ts": "e01cee0a2a42b33e1d3f07b434c419c0b3bdce39099e10fe1ed3c9250eccb94b",
+    "src/main/capture/screen-capture-kit-backend.ts": "97bcd572622f03163df228ea8e7b1bea79c3c90e3a96b4754e3ef8c967e03f10",
+    "src/main/capture/thumbnail-size.ts": "f06b0403d0a9eb8d42a25de3e6fce55f24d9acc0de6c1bd50120d5e91ce44d77",
+    "src/main/capture/types.ts": "698c6a9085cee3c0a1968ea18984fe903f8988f14bfa5607873c4b829af4433b",
+    "src/main/capture/electron-capture-backend.ts": "099161fb3749e6033240527eb9bef183c959494067c79e888abc6225bb9421ba",
+    "src/main/capture/capture-health.ts": "c396eafc284f7f4ca0c3aad3126649998840b70caca1a3787221dccf8d7d42a4",
+    "src/main/capture/desktop-source-selection.ts": "66ef353d6be2df680116bada27e726a848d755d4713674c6cec539de25a8db7d",
+    "src/main/windows/screenshot-to-all-window.ts": "4e6f06aef444659ef9c583f16e174001b17866ea9316bed8ccc3985dc0db35be",
+    "src/main/performance/screenshot-performance.ts": "2a11c8acb3e95d652be3ee52d6177cb0930b5c6d33d5bdb556699a6363889072",
+    "native/screen-capture-kit-helper/main.swift": "a8500b1cf14531e6fbcf6daa8c37d114e666075f5677e1ae1cb416b1ae4e3131"
+  },
+  "changedOrRemoved": {
+    "src/main/windows/quick-chat-placement.ts": "removed",
+    "src/main/windows/capture-overlay-window.ts": {
+      "before": "eb9aa61fe169389ca7326223442671891746c9b67f0db06cd6030d5bd59aacc5",
+      "after": "265c978acfce933598b34a6a4409b8c27827aa5357d7a85cf0b6f25b9fb2de23"
+    }
+  },
+  "nativeAndEngineUnchanged": true
+}

@@ -11,14 +11,16 @@ function seed() {
   const capture = { id: crypto.randomUUID(), fileName: '', width: 2, height: 2, createdAt: new Date().toISOString() }; capture.fileName = capture.id + '.jpg';
   mkdirSync(join(directory, 'history/captures'), { recursive: true }); mkdirSync(join(directory, 'schedule/captures'), { recursive: true });
   writeFileSync(join(directory, 'history/captures', capture.fileName), Buffer.from([255, 216, 255, 217]));
-  const record = { id: crypto.randomUUID(), title: '旧对话', createdAt: capture.createdAt, messages: [{ role: 'assistant', content: '旧内容' }], capture };
+  const attachmentId = crypto.randomUUID(); mkdirSync(join(directory, 'history/attachments'));
+  writeFileSync(join(directory, 'history/attachments', attachmentId + '.png'), 'SYNTHETIC_ATTACHMENT');
+  const record = { id: crypto.randomUUID(), title: '旧对话', createdAt: capture.createdAt, messages: [{ role: 'assistant', content: '旧内容' }, { role: 'user', content: '旧图片', images: [{ id: attachmentId }] }], capture };
   writeFileSync(join(directory, 'history/conversations.json'), JSON.stringify([record]));
   writeFileSync(join(directory, 'schedule/jobs.json'), JSON.stringify([{ ...record, title: '旧日程', events: [{ title: '必须保留的会议', notes: '原备注' }] }]));
   const book = { id: crypto.randomUUID(), name: '外部笔记', directory: join(directory, 'external-notes') }; mkdirSync(book.directory);
   writeFileSync(join(book.directory, 'note.md'), '# Keep original');
   writeFileSync(join(directory, 'notebooks.json'), JSON.stringify({ activeId: book.id, notebooks: [book] }));
   writeFileSync(join(directory, 'credentials.json'), 'NOT_FOR_EXPORT');
-  return { capture, record, book, history: readFileSync(join(directory, 'history/conversations.json')), schedule: readFileSync(join(directory, 'schedule/jobs.json')) };
+  return { capture, record, book, attachmentId, history: readFileSync(join(directory, 'history/conversations.json')), schedule: readFileSync(join(directory, 'schedule/jobs.json')) };
 }
 describe('read-only v1 compatibility', () => {
   it('performs no startup IO and reads old conversations, schedule events and notebook locations on demand', async () => {
@@ -57,7 +59,8 @@ describe('read-only v1 compatibility', () => {
     const fixture = seed(), service = new LegacyDataService(directory), output = join(directory, 'legacy.zip');
     await service.exportTo(output);
     const zip = readFileSync(output);
-    for (const name of ['history/conversations.json', 'schedule/jobs.json', 'notebooks.json', fixture.capture.fileName, 'README.txt']) expect(zip.includes(Buffer.from(name))).toBe(true);
+    for (const name of ['history/conversations.json', 'schedule/jobs.json', 'notebooks.json', fixture.capture.fileName, 'history/attachments/' + fixture.attachmentId + '.png', 'EXPORT_STATUS.json', 'README.txt']) expect(zip.includes(Buffer.from(name))).toBe(true);
+    expect(readFileSync(join(directory, 'history/attachments', fixture.attachmentId + '.png'), 'utf8')).toBe('SYNTHETIC_ATTACHMENT');
     expect(zip.includes(Buffer.from('credentials.json'))).toBe(false); expect(zip.includes(Buffer.from('note.md'))).toBe(false);
     expect(readFileSync(join(fixture.book.directory, 'note.md'), 'utf8')).toBe('# Keep original');
     await expect(service.exportTo(output)).rejects.toThrow();

@@ -81,6 +81,7 @@ export class LegacyDataService {
     // Only these historical indexes and their referenced screenshots are eligible.
     // User-owned external Markdown stays in place; the original registry is exported.
     let total = 0;
+    const warnings: string[] = [];
     for (const relative of ['history/conversations.json', 'schedule/jobs.json', 'notebooks.json']) {
       const bytes = await this.bytes(relative);
       if (bytes) { zip.addBuffer(bytes, relative, { mode: 0o600 }); total += bytes.length; }
@@ -89,18 +90,34 @@ export class LegacyDataService {
     for (const kind of ['history', 'schedule'] as const) {
       // A damaged index is still exported above byte-for-byte; skip only its image references.
       let records: Awaited<ReturnType<LegacyDataService['records']>> = [];
-      try { records = await this.records(kind); } catch { /* Raw index is already preserved. */ }
+      try { records = await this.records(kind); } catch { warnings.push(kind + ' index unreadable; raw bytes preserved'); }
       for (const record of records) {
         if (!record.capture) continue;
         const relative = kind + '/captures/' + record.capture.fileName;
         if (added.has(relative)) continue;
         const bytes = await this.bytes(relative, 64 * 1024 * 1024);
-        if (!bytes) continue;
+        if (!bytes) { warnings.push(relative + ' is missing'); continue; }
         total += bytes.length; if (total > 512 * 1024 * 1024) throw new Error('旧记录超过 512 MiB，请从本地数据目录备份');
         zip.addBuffer(bytes, relative, { mode: 0o600 }); added.add(relative);
       }
     }
-    zip.addBuffer(Buffer.from('Legacy indexes and referenced screenshots only. External Markdown remains in its original directory; see notebooks.json. Credentials are excluded.\n'), 'README.txt');
+    let history: Awaited<ReturnType<LegacyDataService['records']>> = [];
+    try { history = await this.records('history'); } catch { /* Raw history and its warning are already preserved above. */ }
+    const imageMessage = z.object({ images: z.array(z.object({ id: z.string().uuid() })).optional() });
+    for (const record of history) for (const message of record.messages ?? []) {
+      const parsed = imageMessage.safeParse(message);
+      if (!parsed.success) { warnings.push('Unrecognized attachment metadata in ' + record.id); continue; }
+      for (const image of parsed.data.images ?? []) {
+        const relative = 'history/attachments/' + image.id + '.png';
+        if (added.has(relative)) continue;
+        const bytes = await this.bytes(relative, 4 * 1024 * 1024);
+        if (!bytes) { warnings.push(relative + ' is missing'); continue; }
+        total += bytes.length; if (total > 512 * 1024 * 1024) throw new Error('旧记录超过 512 MiB，请从本地数据目录备份');
+        zip.addBuffer(bytes, relative, { mode: 0o600 }); added.add(relative);
+      }
+    }
+    zip.addBuffer(Buffer.from(JSON.stringify({ version: 1, warnings }, null, 2)), 'EXPORT_STATUS.json');
+    zip.addBuffer(Buffer.from('Legacy indexes, referenced screenshots and chat attachments only. External Markdown remains in its original directory; see notebooks.json. Credentials are excluded.\n'), 'README.txt');
     const stream = createWriteStream(path, { flags: 'wx', mode: 0o600 });
     const complete = pipeline(zip.outputStream, stream); zip.end(); await complete;
   }

@@ -1,0 +1,2979 @@
+{
+  "at": "2026-10-23T08:08:12.169Z",
+  "records": [
+    {
+      "permission": {
+        "ok": true,
+        "value": {
+          "status": "granted",
+          "applicationName": "Electron.app",
+          "applicationPath": "/Users/macbook/IdeaProjects/Snipvia-public-baseline/node_modules/.pnpm/electron@44.4.1/node_modules/electron/dist/Electron.app",
+          "development": true,
+          "supported": true
+        }
+      }
+    },
+    {
+      "initial": {
+        "ok": true,
+        "value": {
+          "preference": "sck",
+          "runtimeScreenshots": {
+            "items": 0,
+            "bytes": 0
+          },
+          "screenCaptureKit": {
+            "available": true,
+            "healthy": true,
+            "helperPid": 61103,
+            "helperPath": "/Users/macbook/IdeaProjects/Snipvia-public-baseline/build/native/snipvia-capture-helper",
+            "helperRestarts": 0,
+            "displays": [
+              {
+                "scaleFactor": 2,
+                "id": "1",
+                "pixelHeight": 2234,
+                "height": 1117,
+                "x": 0,
+                "pixelWidth": 3456,
+                "y": 0,
+                "width": 1728
+              }
+            ],
+            "excludedApplicationFound": true,
+            "state": "ready",
+            "captureCount": 0,
+            "successCount": 0,
+            "failureCount": 0,
+            "timeoutCount": 0,
+            "consecutiveFailures": 0,
+            "recentFailures": 0,
+            "displayCacheGeneration": 1,
+            "displayInvalidationCount": 0
+          },
+          "processes": [
+            {
+              "pid": 61083,
+              "type": "Browser",
+              "workingSetKb": 182208,
+              "privateBytesKb": 0
+            },
+            {
+              "pid": 61096,
+              "type": "GPU",
+              "workingSetKb": 91104,
+              "privateBytesKb": 0
+            },
+            {
+              "pid": 61097,
+              "type": "Utility",
+              "workingSetKb": 43312,
+              "privateBytesKb": 0
+            },
+            {
+              "pid": 61098,
+              "type": "Tab",
+              "workingSetKb": 160688,
+              "privateBytesKb": 0
+            },
+            {
+              "pid": 61101,
+              "type": "Tab",
+              "workingSetKb": 116544,
+              "privateBytesKb": 0
+            },
+            {
+              "pid": 61102,
+              "type": "Tab",
+              "workingSetKb": 115808,
+              "privateBytesKb": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "mode": "quick",
+      "result": {
+        "ok": true,
+        "value": {
+          "sessionId": "capture_1792742889365_18092dc8",
+          "createdAt": "2026-10-23T08:08:09.365Z",
+          "metadata": {
+            "trigger": "main",
+            "captureMode": "quick",
+            "platform": "darwin",
+            "architecture": "arm64",
+            "osRelease": "27.0.0",
+            "cpu": "Apple M1 Pro",
+            "electron": "44.4.1",
+            "mode": "PROD build preview",
+            "displayId": "1",
+            "displayWidthDip": 1728,
+            "displayHeightDip": 1117,
+            "scaleFactor": 2,
+            "captureDelayMs": 200,
+            "captureReadinessStrategy": "hide-event-16",
+            "captureSourceTypes": "screen",
+            "captureFetchWindowIcons": false,
+            "captureBackendPreference": "sck",
+            "captureThumbnailWidthPx": 3456,
+            "captureThumbnailHeightPx": 2234,
+            "captureBackend": "screen-capture-kit",
+            "screenCaptureKitRequestId": "921dfc52-185a-430d-8a25-7719e413b9bf",
+            "screenCaptureKitHelperPid": 61103,
+            "screenCaptureKitHelperRestarts": 0,
+            "screenCaptureKitRequestDurationMs": 260.5038750000001,
+            "screenCaptureKitDisplayCacheGeneration": 1,
+            "screenCaptureKitDisplayId": "1",
+            "screenCaptureKitDisplayMapping": "verified-direct-id",
+            "screenCaptureKitCaptureMs": 230.317083,
+            "screenCaptureKitEncodeMs": 27.654042,
+            "screenCaptureKitPayloadBytes": 948887,
+            "screenCaptureKitFormat": "jpeg",
+            "screenCaptureKitRawEncodeMs": null,
+            "screenCaptureKitJpegEncodeMs": null,
+            "captureFallbackUsed": false,
+            "frameWidthPx": 3456,
+            "frameHeightPx": 2234,
+            "frameCapturedAtEpochMs": 1792742889602.937,
+            "nativeImageConstructed": true,
+            "captureFrameTransport": "jpeg-95",
+            "captureVisibilityRafCount": 1,
+            "captureFrameMemoryBeforeEncodeKb": 683952,
+            "captureFrameEncodedBytes": 948887,
+            "captureFrameMemoryAfterEncodeKb": 683984,
+            "captureFrameMemoryEncodeDeltaKb": 32,
+            "captureFrameMemoryVisibleKb": 700880,
+            "overlayVisibleAtEpochMs": 1792742889657,
+            "frameAgeMs": 54.06298828125,
+            "framePipelineAgeMs": 53.16054200000008,
+            "captureFrameMemoryVisibleDeltaKb": 16928,
+            "selectionXDip": 60,
+            "selectionYDip": 80,
+            "selectionWidthDip": 200,
+            "selectionHeightDip": 140,
+            "selectionWidthPx": 400,
+            "selectionHeightPx": 280
+          },
+          "metrics": {
+            "captureStartToOverlayVisibleMs": 290.79650000000015,
+            "captureStartToOverlayShellVisibleMs": 18.182208000000173
+          },
+          "measures": [
+            {
+              "id": "selection-clipboard",
+              "label": "Selection → Clipboard Committed",
+              "start": "selection_end",
+              "end": "clipboard_committed",
+              "category": "local",
+              "durationMs": 32.257499999999936,
+              "warning": "notice"
+            },
+            {
+              "id": "capture-start-permission-check",
+              "label": "Capture Start → Permission Check",
+              "start": "capture_start",
+              "end": "permission_check_start",
+              "category": "local",
+              "durationMs": 0.181208000000197
+            },
+            {
+              "id": "permission-check",
+              "label": "Screen Recording Permission Check",
+              "start": "permission_check_start",
+              "end": "permission_check_end",
+              "category": "local",
+              "durationMs": 0.0027499999998781277
+            },
+            {
+              "id": "permission-display-gap",
+              "label": "Permission Check → Display Resolve",
+              "start": "permission_check_end",
+              "end": "display_resolve_start",
+              "category": "local",
+              "durationMs": 0.0029580000000350992
+            },
+            {
+              "id": "display-resolve",
+              "label": "Capture Display Resolve",
+              "start": "display_resolve_start",
+              "end": "display_resolve_end",
+              "category": "local",
+              "durationMs": 0.041459000000031665
+            },
+            {
+              "id": "display-sck-request-gap",
+              "label": "Display Resolve → SCK Request",
+              "start": "display_resolve_end",
+              "end": "sck_request_sent",
+              "category": "local",
+              "durationMs": 6.038708000000042
+            },
+            {
+              "id": "capture-start-sck-capture",
+              "label": "Capture Start → SCK Capture",
+              "start": "capture_start",
+              "end": "sck_capture_start",
+              "category": "local",
+              "durationMs": 8.854041000000052
+            },
+            {
+              "id": "capture-start-sck-request",
+              "label": "Capture Start → SCK Request",
+              "start": "capture_start",
+              "end": "sck_request_sent",
+              "category": "local",
+              "durationMs": 6.267083000000184
+            },
+            {
+              "id": "sck-request-dispatch",
+              "label": "SCK Request Dispatch",
+              "start": "sck_request_sent",
+              "end": "sck_capture_start",
+              "category": "local",
+              "durationMs": 2.5869579999998678
+            },
+            {
+              "id": "sck-capture",
+              "label": "ScreenCaptureKit Capture",
+              "start": "sck_capture_start",
+              "end": "sck_capture_end",
+              "category": "local",
+              "durationMs": 228.77216700000008,
+              "warning": "very-slow"
+            },
+            {
+              "id": "sck-encode",
+              "label": "ScreenCaptureKit Encode",
+              "start": "sck_encode_start",
+              "end": "sck_encode_end",
+              "category": "local",
+              "durationMs": 27.698374999999942,
+              "warning": "notice"
+            },
+            {
+              "id": "sck-bridge",
+              "label": "ScreenCaptureKit Binary Bridge",
+              "start": "sck_bridge_start",
+              "end": "sck_bridge_end",
+              "category": "local",
+              "durationMs": 1.3308749999998781
+            },
+            {
+              "id": "sck-encode-bridge-gap",
+              "label": "SCK Encode Complete → Bridge Start",
+              "start": "sck_encode_end",
+              "end": "sck_bridge_start",
+              "category": "local",
+              "durationMs": 0.16916700000001583
+            },
+            {
+              "id": "sck-native-image-create",
+              "label": "SCK Bridge Complete → NativeImage Ready",
+              "start": "sck_bridge_end",
+              "end": "sck_frame_ready",
+              "category": "local",
+              "durationMs": 0.009833000000071479
+            },
+            {
+              "id": "sck-request-frame-ready",
+              "label": "SCK Request → Frame Ready",
+              "start": "sck_request_sent",
+              "end": "sck_frame_ready",
+              "category": "local",
+              "durationMs": 260.6105829999999,
+              "warning": "very-slow"
+            },
+            {
+              "id": "sck-captured-frame-ready",
+              "label": "SCK Captured → Frame Ready",
+              "start": "sck_capture_end",
+              "end": "sck_frame_ready",
+              "category": "local",
+              "durationMs": 29.251457999999957,
+              "warning": "notice"
+            },
+            {
+              "id": "frame-encode",
+              "label": "Frame Encode",
+              "start": "frame_encode_start",
+              "end": "frame_encode_end",
+              "category": "local",
+              "durationMs": 0.01904200000012679
+            },
+            {
+              "id": "frame-to-jpeg",
+              "label": "NativeImage.toJPEG",
+              "start": "frame_to_jpeg_start",
+              "end": "frame_to_jpeg_end",
+              "category": "local",
+              "durationMs": 0.006333000000040556
+            },
+            {
+              "id": "frame-captured-encoded",
+              "label": "Frame Captured → Encoded",
+              "start": "frame_capture_end",
+              "end": "frame_encode_end",
+              "category": "local",
+              "durationMs": 30.300042000000076,
+              "warning": "notice"
+            },
+            {
+              "id": "encoded-renderer-received",
+              "label": "Encoded → Renderer Received",
+              "start": "frame_encode_end",
+              "end": "capture_frame_ipc_return",
+              "category": "local",
+              "durationMs": 1.5094159999998737
+            },
+            {
+              "id": "frame-blob-create",
+              "label": "Renderer Blob/Object URL",
+              "start": "frame_blob_create_start",
+              "end": "frame_blob_create_end",
+              "category": "local",
+              "durationMs": 0.8672910000000229
+            },
+            {
+              "id": "renderer-received-image-ready",
+              "label": "Renderer Received → Image Ready",
+              "start": "capture_frame_ipc_return",
+              "end": "frame_image_decode_end",
+              "category": "local",
+              "durationMs": 3.8942500000000564
+            },
+            {
+              "id": "image-ready-overlay-show-called",
+              "label": "Image Ready → Overlay Show Called",
+              "start": "frame_image_decode_end",
+              "end": "capture_overlay_show_called",
+              "category": "local",
+              "durationMs": 0.143291999999974
+            },
+            {
+              "id": "overlay-show-call",
+              "label": "Overlay Show Call",
+              "start": "capture_overlay_show_called",
+              "end": "capture_overlay_show_returned",
+              "category": "local",
+              "durationMs": 9.317999999999984
+            },
+            {
+              "id": "overlay-show-paint-confirmed",
+              "label": "Overlay Show → Paint Confirmed",
+              "start": "capture_overlay_show_returned",
+              "end": "capture_overlay_visible",
+              "category": "local",
+              "durationMs": 7.995542000000114
+            },
+            {
+              "id": "image-ready-overlay-visible",
+              "label": "Image Ready → Overlay Visible",
+              "start": "frame_image_decode_end",
+              "end": "capture_overlay_visible",
+              "category": "local",
+              "durationMs": 17.45683400000007,
+              "warning": "notice"
+            },
+            {
+              "id": "overlay-image-decode",
+              "label": "Overlay IPC + Image Decode",
+              "start": "capture_frame_ipc_return",
+              "end": "capture_overlay_image_loaded",
+              "category": "local",
+              "durationMs": 3.9297090000000026
+            },
+            {
+              "id": "overlay-image-paint",
+              "label": "Overlay Image Paint",
+              "start": "capture_overlay_image_loaded",
+              "end": "capture_overlay_visible",
+              "category": "local",
+              "durationMs": 17.421375000000126,
+              "warning": "notice"
+            },
+            {
+              "id": "capture-shell-response",
+              "label": "Capture Start → Immediate Overlay",
+              "start": "capture_start",
+              "end": "capture_overlay_shell_visible",
+              "category": "local",
+              "durationMs": 18.182208000000173,
+              "warning": "notice"
+            },
+            {
+              "id": "capture-shell-show-call",
+              "label": "Immediate Overlay Show Call",
+              "start": "capture_overlay_shell_show_called",
+              "end": "capture_overlay_shell_show_returned",
+              "category": "local",
+              "durationMs": 8.631916000000047
+            },
+            {
+              "id": "capture-overlay-reuse",
+              "label": "CaptureOverlay Reuse → Visible",
+              "start": "capture_overlay_reuse_start",
+              "end": "capture_overlay_reuse_visible",
+              "category": "local",
+              "durationMs": 284.9910830000001,
+              "warning": "very-slow"
+            },
+            {
+              "id": "capture-finish-ipc",
+              "label": "Capture Finish IPC",
+              "start": "capture_finish_ipc_start",
+              "end": "capture_finish_main_received",
+              "category": "local",
+              "durationMs": 24.89945899999998,
+              "warning": "notice"
+            },
+            {
+              "id": "selection-validation",
+              "label": "Selection Validation",
+              "start": "selection_validation_start",
+              "end": "selection_validation_end",
+              "category": "local",
+              "durationMs": 0.8269169999998667
+            },
+            {
+              "id": "coordinate-conversion",
+              "label": "Coordinate Conversion",
+              "start": "coordinate_conversion_start",
+              "end": "coordinate_conversion_end",
+              "category": "local",
+              "durationMs": 0.04229199999986122
+            },
+            {
+              "id": "crop",
+              "label": "Crop",
+              "start": "crop_start",
+              "end": "crop_end",
+              "category": "local",
+              "durationMs": 0.01862499999992906
+            }
+          ],
+          "marks": [
+            {
+              "event": "capture_start",
+              "source": "main",
+              "atMs": 1653.447084,
+              "elapsedMs": 0.013041999999813925
+            },
+            {
+              "event": "permission_check_start",
+              "source": "main",
+              "atMs": 1653.628292,
+              "elapsedMs": 0.19425000000001091
+            },
+            {
+              "event": "permission_check_end",
+              "source": "main",
+              "atMs": 1653.631042,
+              "elapsedMs": 0.19699999999988904,
+              "metadata": {
+                "status": "granted",
+                "cached": true
+              }
+            },
+            {
+              "event": "display_resolve_start",
+              "source": "main",
+              "atMs": 1653.634,
+              "elapsedMs": 0.19995799999992414
+            },
+            {
+              "event": "display_resolve_end",
+              "source": "main",
+              "atMs": 1653.675459,
+              "elapsedMs": 0.2414169999999558
+            },
+            {
+              "event": "capture_overlay_reuse_start",
+              "source": "main",
+              "atMs": 1659.202167,
+              "elapsedMs": 5.768124999999827
+            },
+            {
+              "event": "sck_request_sent",
+              "source": "main",
+              "atMs": 1659.714167,
+              "elapsedMs": 6.280124999999998,
+              "metadata": {
+                "displayId": "1",
+                "format": "jpeg",
+                "requestId": "921dfc52-185a-430d-8a25-7719e413b9bf"
+              }
+            },
+            {
+              "event": "sck_capture_start",
+              "source": "main",
+              "atMs": 1662.301125,
+              "elapsedMs": 8.867082999999866
+            },
+            {
+              "event": "frame_capture_start",
+              "source": "main",
+              "atMs": 1662.304667,
+              "elapsedMs": 8.870625000000018,
+              "metadata": {
+                "backend": "screen-capture-kit"
+              }
+            },
+            {
+              "event": "capture_overlay_shell_show_called",
+              "source": "main",
+              "atMs": 1662.442584,
+              "elapsedMs": 9.008541999999807
+            },
+            {
+              "event": "capture_overlay_shell_show_returned",
+              "source": "main",
+              "atMs": 1671.0745,
+              "elapsedMs": 17.640457999999853
+            },
+            {
+              "event": "capture_overlay_shell_visible",
+              "source": "renderer",
+              "atMs": 1671.629292,
+              "elapsedMs": 18.195249999999987
+            },
+            {
+              "event": "sck_capture_end",
+              "source": "main",
+              "atMs": 1891.073292,
+              "elapsedMs": 237.63924999999995
+            },
+            {
+              "event": "frame_capture_end",
+              "source": "main",
+              "atMs": 1891.083042,
+              "elapsedMs": 237.6489999999999,
+              "metadata": {
+                "backend": "screen-capture-kit",
+                "sourceCount": 1
+              }
+            },
+            {
+              "event": "sck_encode_start",
+              "source": "main",
+              "atMs": 1891.1165,
+              "elapsedMs": 237.682458
+            },
+            {
+              "event": "sck_encode_end",
+              "source": "main",
+              "atMs": 1918.814875,
+              "elapsedMs": 265.38083299999994
+            },
+            {
+              "event": "sck_bridge_start",
+              "source": "main",
+              "atMs": 1918.984042,
+              "elapsedMs": 265.54999999999995
+            },
+            {
+              "event": "sck_request_received",
+              "source": "main",
+              "atMs": 1920.300542,
+              "elapsedMs": 266.86649999999986
+            },
+            {
+              "event": "sck_bridge_end",
+              "source": "main",
+              "atMs": 1920.314917,
+              "elapsedMs": 266.88087499999983,
+              "metadata": {
+                "bytes": 948887
+              }
+            },
+            {
+              "event": "sck_frame_ready",
+              "source": "main",
+              "atMs": 1920.32475,
+              "elapsedMs": 266.8907079999999,
+              "metadata": {
+                "width": 3456,
+                "height": 2234,
+                "format": "jpeg"
+              }
+            },
+            {
+              "event": "capture_frame_request",
+              "source": "renderer",
+              "atMs": 1920.877792,
+              "elapsedMs": 267.4437499999999
+            },
+            {
+              "event": "frame_encode_start",
+              "source": "main",
+              "atMs": 1921.364042,
+              "elapsedMs": 267.92999999999984,
+              "metadata": {
+                "transport": "jpeg-95"
+              }
+            },
+            {
+              "event": "frame_to_jpeg_start",
+              "source": "main",
+              "atMs": 1921.367209,
+              "elapsedMs": 267.9331669999999,
+              "metadata": {
+                "quality": 95,
+                "reusedNativePreview": true
+              }
+            },
+            {
+              "event": "frame_to_jpeg_end",
+              "source": "main",
+              "atMs": 1921.373542,
+              "elapsedMs": 267.93949999999995,
+              "metadata": {
+                "bytes": 948887,
+                "quality": 95,
+                "reusedNativePreview": true
+              }
+            },
+            {
+              "event": "frame_encode_end",
+              "source": "main",
+              "atMs": 1921.383084,
+              "elapsedMs": 267.94904199999996,
+              "metadata": {
+                "transport": "jpeg-95",
+                "encodedBytes": 948887
+              }
+            },
+            {
+              "event": "capture_frame_ipc_return",
+              "source": "renderer",
+              "atMs": 1922.8925,
+              "elapsedMs": 269.45845799999984,
+              "metadata": {
+                "transport": "jpeg-95"
+              }
+            },
+            {
+              "event": "frame_blob_create_start",
+              "source": "renderer",
+              "atMs": 1922.966459,
+              "elapsedMs": 269.5324169999999
+            },
+            {
+              "event": "frame_blob_create_end",
+              "source": "renderer",
+              "atMs": 1923.83375,
+              "elapsedMs": 270.3997079999999
+            },
+            {
+              "event": "frame_image_decode_start",
+              "source": "renderer",
+              "atMs": 1923.889042,
+              "elapsedMs": 270.4549999999999
+            },
+            {
+              "event": "frame_image_decode_end",
+              "source": "renderer",
+              "atMs": 1926.78675,
+              "elapsedMs": 273.3527079999999
+            },
+            {
+              "event": "capture_overlay_image_loaded",
+              "source": "renderer",
+              "atMs": 1926.822209,
+              "elapsedMs": 273.38816699999984
+            },
+            {
+              "event": "overlay_image_ready",
+              "source": "renderer",
+              "atMs": 1926.844625,
+              "elapsedMs": 273.41058299999986
+            },
+            {
+              "event": "capture_overlay_show_called",
+              "source": "main",
+              "atMs": 1926.930042,
+              "elapsedMs": 273.49599999999987
+            },
+            {
+              "event": "capture_overlay_show_returned",
+              "source": "main",
+              "atMs": 1936.248042,
+              "elapsedMs": 282.81399999999985
+            },
+            {
+              "event": "capture_overlay_reuse_visible",
+              "source": "renderer",
+              "atMs": 1944.19325,
+              "elapsedMs": 290.75920799999994
+            },
+            {
+              "event": "capture_overlay_visible",
+              "source": "renderer",
+              "atMs": 1944.243584,
+              "elapsedMs": 290.80954199999996
+            },
+            {
+              "event": "selection_start",
+              "source": "renderer",
+              "atMs": 1964.141292,
+              "elapsedMs": 310.70724999999993
+            },
+            {
+              "event": "selection_end",
+              "source": "renderer",
+              "atMs": 1974.188167,
+              "elapsedMs": 320.75412499999993,
+              "metadata": {
+                "widthDip": 200,
+                "heightDip": 140
+              }
+            },
+            {
+              "event": "capture_finish_ipc_start",
+              "source": "renderer",
+              "atMs": 1974.22525,
+              "elapsedMs": 320.79120799999987
+            },
+            {
+              "event": "capture_finish_main_received",
+              "source": "main",
+              "atMs": 1999.124709,
+              "elapsedMs": 345.69066699999985
+            },
+            {
+              "event": "selection_validation_start",
+              "source": "main",
+              "atMs": 1999.129167,
+              "elapsedMs": 345.69512499999996
+            },
+            {
+              "event": "selection_validation_end",
+              "source": "main",
+              "atMs": 1999.956084,
+              "elapsedMs": 346.52204199999983
+            },
+            {
+              "event": "coordinate_conversion_start",
+              "source": "main",
+              "atMs": 1999.9645,
+              "elapsedMs": 346.53045799999995
+            },
+            {
+              "event": "coordinate_conversion_end",
+              "source": "main",
+              "atMs": 2000.006792,
+              "elapsedMs": 346.5727499999998
+            },
+            {
+              "event": "crop_start",
+              "source": "main",
+              "atMs": 2000.007167,
+              "elapsedMs": 346.5731249999999
+            },
+            {
+              "event": "crop_end",
+              "source": "main",
+              "atMs": 2000.025792,
+              "elapsedMs": 346.5917499999998,
+              "metadata": {
+                "width": 400,
+                "height": 280
+              }
+            },
+            {
+              "event": "clipboard_committed",
+              "source": "main",
+              "atMs": 2006.445667,
+              "elapsedMs": 353.01162499999987
+            }
+          ]
+        }
+      }
+    },
+    {
+      "mode": "collect",
+      "result": {
+        "ok": true,
+        "value": {
+          "sessionId": "capture_1792742889920_eb7e8bc0",
+          "createdAt": "2026-10-23T08:08:09.920Z",
+          "metadata": {
+            "trigger": "main",
+            "captureMode": "collect",
+            "platform": "darwin",
+            "architecture": "arm64",
+            "osRelease": "27.0.0",
+            "cpu": "Apple M1 Pro",
+            "electron": "44.4.1",
+            "mode": "PROD build preview",
+            "displayId": "1",
+            "displayWidthDip": 1728,
+            "displayHeightDip": 1117,
+            "scaleFactor": 2,
+            "captureDelayMs": 200,
+            "captureReadinessStrategy": "hide-event-16",
+            "captureSourceTypes": "screen",
+            "captureFetchWindowIcons": false,
+            "captureBackendPreference": "sck",
+            "captureThumbnailWidthPx": 3456,
+            "captureThumbnailHeightPx": 2234,
+            "captureBackend": "screen-capture-kit",
+            "screenCaptureKitRequestId": "0bfe1921-d642-4ece-955a-a71d307a3d6e",
+            "screenCaptureKitHelperPid": 61103,
+            "screenCaptureKitHelperRestarts": 0,
+            "screenCaptureKitRequestDurationMs": 97.52575000000024,
+            "screenCaptureKitDisplayCacheGeneration": 1,
+            "screenCaptureKitDisplayId": "1",
+            "screenCaptureKitDisplayMapping": "verified-direct-id",
+            "screenCaptureKitCaptureMs": 65.925042,
+            "screenCaptureKitEncodeMs": 23.736125,
+            "screenCaptureKitPayloadBytes": 948889,
+            "screenCaptureKitFormat": "jpeg",
+            "screenCaptureKitRawEncodeMs": null,
+            "screenCaptureKitJpegEncodeMs": null,
+            "captureFallbackUsed": false,
+            "frameWidthPx": 3456,
+            "frameHeightPx": 2234,
+            "frameCapturedAtEpochMs": 1792742889994.648,
+            "nativeImageConstructed": true,
+            "captureFrameTransport": "jpeg-95",
+            "captureVisibilityRafCount": 1,
+            "captureFrameMemoryBeforeEncodeKb": 841104,
+            "captureFrameEncodedBytes": 948889,
+            "captureFrameMemoryAfterEncodeKb": 840496,
+            "captureFrameMemoryEncodeDeltaKb": -608,
+            "captureFrameMemoryVisibleKb": 847936,
+            "overlayVisibleAtEpochMs": 1792742890036,
+            "frameAgeMs": 41.35205078125,
+            "framePipelineAgeMs": 40.544374999999945,
+            "captureFrameMemoryVisibleDeltaKb": 6832,
+            "selectionXDip": 60,
+            "selectionYDip": 80,
+            "selectionWidthDip": 200,
+            "selectionHeightDip": 140,
+            "selectionWidthPx": 400,
+            "selectionHeightPx": 280
+          },
+          "metrics": {
+            "captureStartToOverlayVisibleMs": 114.81174999999985,
+            "captureStartToOverlayShellVisibleMs": 7.4159169999998085
+          },
+          "measures": [
+            {
+              "id": "selection-collection",
+              "label": "Selection → Collection Updated",
+              "start": "selection_end",
+              "end": "collection_updated",
+              "category": "local",
+              "durationMs": 26.221166000000267,
+              "warning": "notice"
+            },
+            {
+              "id": "capture-start-permission-check",
+              "label": "Capture Start → Permission Check",
+              "start": "capture_start",
+              "end": "permission_check_start",
+              "category": "local",
+              "durationMs": 0.11229199999979755
+            },
+            {
+              "id": "permission-check",
+              "label": "Screen Recording Permission Check",
+              "start": "permission_check_start",
+              "end": "permission_check_end",
+              "category": "local",
+              "durationMs": 0.0019580000002861198
+            },
+            {
+              "id": "permission-display-gap",
+              "label": "Permission Check → Display Resolve",
+              "start": "permission_check_end",
+              "end": "display_resolve_start",
+              "category": "local",
+              "durationMs": 0.002541999999721156
+            },
+            {
+              "id": "display-resolve",
+              "label": "Capture Display Resolve",
+              "start": "display_resolve_start",
+              "end": "display_resolve_end",
+              "category": "local",
+              "durationMs": 0.033792000000175904
+            },
+            {
+              "id": "display-sck-request-gap",
+              "label": "Display Resolve → SCK Request",
+              "start": "display_resolve_end",
+              "end": "sck_request_sent",
+              "category": "local",
+              "durationMs": 1.4457910000000993
+            },
+            {
+              "id": "capture-start-sck-capture",
+              "label": "Capture Start → SCK Capture",
+              "start": "capture_start",
+              "end": "sck_capture_start",
+              "category": "local",
+              "durationMs": 9.048334000000068
+            },
+            {
+              "id": "capture-start-sck-request",
+              "label": "Capture Start → SCK Request",
+              "start": "capture_start",
+              "end": "sck_request_sent",
+              "category": "local",
+              "durationMs": 1.59637500000008
+            },
+            {
+              "id": "sck-request-dispatch",
+              "label": "SCK Request Dispatch",
+              "start": "sck_request_sent",
+              "end": "sck_capture_start",
+              "category": "local",
+              "durationMs": 7.451958999999988
+            },
+            {
+              "id": "sck-capture",
+              "label": "ScreenCaptureKit Capture",
+              "start": "sck_capture_start",
+              "end": "sck_capture_end",
+              "category": "local",
+              "durationMs": 65.21129100000007,
+              "warning": "slow"
+            },
+            {
+              "id": "sck-encode",
+              "label": "ScreenCaptureKit Encode",
+              "start": "sck_encode_start",
+              "end": "sck_encode_end",
+              "category": "local",
+              "durationMs": 23.742999999999938,
+              "warning": "notice"
+            },
+            {
+              "id": "sck-bridge",
+              "label": "ScreenCaptureKit Binary Bridge",
+              "start": "sck_bridge_start",
+              "end": "sck_bridge_end",
+              "category": "local",
+              "durationMs": 0.790042000000085
+            },
+            {
+              "id": "sck-encode-bridge-gap",
+              "label": "SCK Encode Complete → Bridge Start",
+              "start": "sck_encode_end",
+              "end": "sck_bridge_start",
+              "category": "local",
+              "durationMs": 0.38495800000009694
+            },
+            {
+              "id": "sck-native-image-create",
+              "label": "SCK Bridge Complete → NativeImage Ready",
+              "start": "sck_bridge_end",
+              "end": "sck_frame_ready",
+              "category": "local",
+              "durationMs": 0.00641700000005585
+            },
+            {
+              "id": "sck-request-frame-ready",
+              "label": "SCK Request → Frame Ready",
+              "start": "sck_request_sent",
+              "end": "sck_frame_ready",
+              "category": "local",
+              "durationMs": 97.60783399999991,
+              "warning": "slow"
+            },
+            {
+              "id": "sck-captured-frame-ready",
+              "label": "SCK Captured → Frame Ready",
+              "start": "sck_capture_end",
+              "end": "sck_frame_ready",
+              "category": "local",
+              "durationMs": 24.94458399999985,
+              "warning": "notice"
+            },
+            {
+              "id": "frame-encode",
+              "label": "Frame Encode",
+              "start": "frame_encode_start",
+              "end": "frame_encode_end",
+              "category": "local",
+              "durationMs": 0.007749999999759893
+            },
+            {
+              "id": "frame-to-jpeg",
+              "label": "NativeImage.toJPEG",
+              "start": "frame_to_jpeg_start",
+              "end": "frame_to_jpeg_end",
+              "category": "local",
+              "durationMs": 0.0016660000001138542
+            },
+            {
+              "id": "frame-captured-encoded",
+              "label": "Frame Captured → Encoded",
+              "start": "frame_capture_end",
+              "end": "frame_encode_end",
+              "category": "local",
+              "durationMs": 25.685583999999835,
+              "warning": "notice"
+            },
+            {
+              "id": "encoded-renderer-received",
+              "label": "Encoded → Renderer Received",
+              "start": "frame_encode_end",
+              "end": "capture_frame_ipc_return",
+              "category": "local",
+              "durationMs": 1.3294160000000375
+            },
+            {
+              "id": "frame-blob-create",
+              "label": "Renderer Blob/Object URL",
+              "start": "frame_blob_create_start",
+              "end": "frame_blob_create_end",
+              "category": "local",
+              "durationMs": 0.6584579999998823
+            },
+            {
+              "id": "renderer-received-image-ready",
+              "label": "Renderer Received → Image Ready",
+              "start": "capture_frame_ipc_return",
+              "end": "frame_image_decode_end",
+              "category": "local",
+              "durationMs": 2.402042000000165
+            },
+            {
+              "id": "image-ready-overlay-show-called",
+              "label": "Image Ready → Overlay Show Called",
+              "start": "frame_image_decode_end",
+              "end": "capture_overlay_show_called",
+              "category": "local",
+              "durationMs": 0.08783300000004601
+            },
+            {
+              "id": "overlay-show-call",
+              "label": "Overlay Show Call",
+              "start": "capture_overlay_show_called",
+              "end": "capture_overlay_show_returned",
+              "category": "local",
+              "durationMs": 5.889834000000064
+            },
+            {
+              "id": "overlay-show-paint-confirmed",
+              "label": "Overlay Show → Paint Confirmed",
+              "start": "capture_overlay_show_returned",
+              "end": "capture_overlay_visible",
+              "category": "local",
+              "durationMs": 5.149665999999797
+            },
+            {
+              "id": "image-ready-overlay-visible",
+              "label": "Image Ready → Overlay Visible",
+              "start": "frame_image_decode_end",
+              "end": "capture_overlay_visible",
+              "category": "local",
+              "durationMs": 11.127332999999908
+            },
+            {
+              "id": "overlay-image-decode",
+              "label": "Overlay IPC + Image Decode",
+              "start": "capture_frame_ipc_return",
+              "end": "capture_overlay_image_loaded",
+              "category": "local",
+              "durationMs": 2.430667000000085
+            },
+            {
+              "id": "overlay-image-paint",
+              "label": "Overlay Image Paint",
+              "start": "capture_overlay_image_loaded",
+              "end": "capture_overlay_visible",
+              "category": "local",
+              "durationMs": 11.098707999999988
+            },
+            {
+              "id": "capture-shell-response",
+              "label": "Capture Start → Immediate Overlay",
+              "start": "capture_start",
+              "end": "capture_overlay_shell_visible",
+              "category": "local",
+              "durationMs": 7.4159169999998085
+            },
+            {
+              "id": "capture-shell-show-call",
+              "label": "Immediate Overlay Show Call",
+              "start": "capture_overlay_shell_show_called",
+              "end": "capture_overlay_shell_show_returned",
+              "category": "local",
+              "durationMs": 0.8250419999999394
+            },
+            {
+              "id": "capture-overlay-reuse",
+              "label": "CaptureOverlay Reuse → Visible",
+              "start": "capture_overlay_reuse_start",
+              "end": "capture_overlay_reuse_visible",
+              "category": "local",
+              "durationMs": 113.27975000000015,
+              "warning": "very-slow"
+            },
+            {
+              "id": "capture-finish-ipc",
+              "label": "Capture Finish IPC",
+              "start": "capture_finish_ipc_start",
+              "end": "capture_finish_main_received",
+              "category": "local",
+              "durationMs": 18.884917000000314,
+              "warning": "notice"
+            },
+            {
+              "id": "selection-validation",
+              "label": "Selection Validation",
+              "start": "selection_validation_start",
+              "end": "selection_validation_end",
+              "category": "local",
+              "durationMs": 0.06987500000013824
+            },
+            {
+              "id": "coordinate-conversion",
+              "label": "Coordinate Conversion",
+              "start": "coordinate_conversion_start",
+              "end": "coordinate_conversion_end",
+              "category": "local",
+              "durationMs": 0.008166999999957625
+            },
+            {
+              "id": "crop",
+              "label": "Crop",
+              "start": "crop_start",
+              "end": "crop_end",
+              "category": "local",
+              "durationMs": 0.012958000000253378
+            }
+          ],
+          "marks": [
+            {
+              "event": "capture_start",
+              "source": "main",
+              "atMs": 2208.49575,
+              "elapsedMs": 0.015416000000186614
+            },
+            {
+              "event": "permission_check_start",
+              "source": "main",
+              "atMs": 2208.608042,
+              "elapsedMs": 0.12770799999998417
+            },
+            {
+              "event": "permission_check_end",
+              "source": "main",
+              "atMs": 2208.61,
+              "elapsedMs": 0.1296660000002703,
+              "metadata": {
+                "status": "granted",
+                "cached": true
+              }
+            },
+            {
+              "event": "display_resolve_start",
+              "source": "main",
+              "atMs": 2208.612542,
+              "elapsedMs": 0.13220799999999144
+            },
+            {
+              "event": "display_resolve_end",
+              "source": "main",
+              "atMs": 2208.646334,
+              "elapsedMs": 0.16600000000016735
+            },
+            {
+              "event": "capture_overlay_reuse_start",
+              "source": "main",
+              "atMs": 2209.99575,
+              "elapsedMs": 1.5154160000001866
+            },
+            {
+              "event": "sck_request_sent",
+              "source": "main",
+              "atMs": 2210.092125,
+              "elapsedMs": 1.6117910000002666,
+              "metadata": {
+                "displayId": "1",
+                "format": "jpeg",
+                "requestId": "0bfe1921-d642-4ece-955a-a71d307a3d6e"
+              }
+            },
+            {
+              "event": "capture_overlay_shell_show_called",
+              "source": "main",
+              "atMs": 2214.297292,
+              "elapsedMs": 5.816958000000341
+            },
+            {
+              "event": "capture_overlay_shell_show_returned",
+              "source": "main",
+              "atMs": 2215.122334,
+              "elapsedMs": 6.64200000000028
+            },
+            {
+              "event": "capture_overlay_shell_visible",
+              "source": "renderer",
+              "atMs": 2215.911667,
+              "elapsedMs": 7.431332999999995
+            },
+            {
+              "event": "sck_capture_start",
+              "source": "main",
+              "atMs": 2217.544084,
+              "elapsedMs": 9.063750000000255
+            },
+            {
+              "event": "frame_capture_start",
+              "source": "main",
+              "atMs": 2217.550375,
+              "elapsedMs": 9.070040999999947,
+              "metadata": {
+                "backend": "screen-capture-kit"
+              }
+            },
+            {
+              "event": "sck_capture_end",
+              "source": "main",
+              "atMs": 2282.755375,
+              "elapsedMs": 74.27504100000033
+            },
+            {
+              "event": "frame_capture_end",
+              "source": "main",
+              "atMs": 2282.763125,
+              "elapsedMs": 74.28279100000009,
+              "metadata": {
+                "backend": "screen-capture-kit",
+                "sourceCount": 1
+              }
+            },
+            {
+              "event": "sck_encode_start",
+              "source": "main",
+              "atMs": 2282.775542,
+              "elapsedMs": 74.295208
+            },
+            {
+              "event": "sck_encode_end",
+              "source": "main",
+              "atMs": 2306.518542,
+              "elapsedMs": 98.03820799999994
+            },
+            {
+              "event": "sck_bridge_start",
+              "source": "main",
+              "atMs": 2306.9035,
+              "elapsedMs": 98.42316600000004
+            },
+            {
+              "event": "sck_request_received",
+              "source": "main",
+              "atMs": 2307.687834,
+              "elapsedMs": 99.20749999999998
+            },
+            {
+              "event": "sck_bridge_end",
+              "source": "main",
+              "atMs": 2307.693542,
+              "elapsedMs": 99.21320800000012,
+              "metadata": {
+                "bytes": 948889
+              }
+            },
+            {
+              "event": "sck_frame_ready",
+              "source": "main",
+              "atMs": 2307.699959,
+              "elapsedMs": 99.21962500000018,
+              "metadata": {
+                "width": 3456,
+                "height": 2234,
+                "format": "jpeg"
+              }
+            },
+            {
+              "event": "capture_frame_request",
+              "source": "renderer",
+              "atMs": 2308.062875,
+              "elapsedMs": 99.58254100000022
+            },
+            {
+              "event": "frame_encode_start",
+              "source": "main",
+              "atMs": 2308.440959,
+              "elapsedMs": 99.96062500000016,
+              "metadata": {
+                "transport": "jpeg-95"
+              }
+            },
+            {
+              "event": "frame_to_jpeg_start",
+              "source": "main",
+              "atMs": 2308.442584,
+              "elapsedMs": 99.96225000000004,
+              "metadata": {
+                "quality": 95,
+                "reusedNativePreview": true
+              }
+            },
+            {
+              "event": "frame_to_jpeg_end",
+              "source": "main",
+              "atMs": 2308.44425,
+              "elapsedMs": 99.96391600000015,
+              "metadata": {
+                "bytes": 948889,
+                "quality": 95,
+                "reusedNativePreview": true
+              }
+            },
+            {
+              "event": "frame_encode_end",
+              "source": "main",
+              "atMs": 2308.448709,
+              "elapsedMs": 99.96837499999992,
+              "metadata": {
+                "transport": "jpeg-95",
+                "encodedBytes": 948889
+              }
+            },
+            {
+              "event": "capture_frame_ipc_return",
+              "source": "renderer",
+              "atMs": 2309.778125,
+              "elapsedMs": 101.29779099999996,
+              "metadata": {
+                "transport": "jpeg-95"
+              }
+            },
+            {
+              "event": "frame_blob_create_start",
+              "source": "renderer",
+              "atMs": 2309.808292,
+              "elapsedMs": 101.32795800000031
+            },
+            {
+              "event": "frame_blob_create_end",
+              "source": "renderer",
+              "atMs": 2310.46675,
+              "elapsedMs": 101.98641600000019
+            },
+            {
+              "event": "frame_image_decode_start",
+              "source": "renderer",
+              "atMs": 2310.495167,
+              "elapsedMs": 102.01483300000018
+            },
+            {
+              "event": "frame_image_decode_end",
+              "source": "renderer",
+              "atMs": 2312.180167,
+              "elapsedMs": 103.69983300000013
+            },
+            {
+              "event": "capture_overlay_image_loaded",
+              "source": "renderer",
+              "atMs": 2312.208792,
+              "elapsedMs": 103.72845800000005
+            },
+            {
+              "event": "overlay_image_ready",
+              "source": "renderer",
+              "atMs": 2312.23675,
+              "elapsedMs": 103.75641600000017
+            },
+            {
+              "event": "capture_overlay_show_called",
+              "source": "main",
+              "atMs": 2312.268,
+              "elapsedMs": 103.78766600000017
+            },
+            {
+              "event": "capture_overlay_show_returned",
+              "source": "main",
+              "atMs": 2318.157834,
+              "elapsedMs": 109.67750000000024
+            },
+            {
+              "event": "capture_overlay_reuse_visible",
+              "source": "renderer",
+              "atMs": 2323.2755,
+              "elapsedMs": 114.79516600000034
+            },
+            {
+              "event": "capture_overlay_visible",
+              "source": "renderer",
+              "atMs": 2323.3075,
+              "elapsedMs": 114.82716600000003
+            },
+            {
+              "event": "selection_start",
+              "source": "renderer",
+              "atMs": 2343.53825,
+              "elapsedMs": 135.0579160000002
+            },
+            {
+              "event": "selection_end",
+              "source": "renderer",
+              "atMs": 2349.350459,
+              "elapsedMs": 140.87012499999992,
+              "metadata": {
+                "widthDip": 200,
+                "heightDip": 140
+              }
+            },
+            {
+              "event": "capture_finish_ipc_start",
+              "source": "renderer",
+              "atMs": 2349.38975,
+              "elapsedMs": 140.90941599999996
+            },
+            {
+              "event": "capture_finish_main_received",
+              "source": "main",
+              "atMs": 2368.274667,
+              "elapsedMs": 159.79433300000028
+            },
+            {
+              "event": "selection_validation_start",
+              "source": "main",
+              "atMs": 2368.278125,
+              "elapsedMs": 159.79779099999996
+            },
+            {
+              "event": "selection_validation_end",
+              "source": "main",
+              "atMs": 2368.348,
+              "elapsedMs": 159.8676660000001
+            },
+            {
+              "event": "coordinate_conversion_start",
+              "source": "main",
+              "atMs": 2368.349042,
+              "elapsedMs": 159.86870799999997
+            },
+            {
+              "event": "coordinate_conversion_end",
+              "source": "main",
+              "atMs": 2368.357209,
+              "elapsedMs": 159.87687499999993
+            },
+            {
+              "event": "crop_start",
+              "source": "main",
+              "atMs": 2368.357709,
+              "elapsedMs": 159.87737500000003
+            },
+            {
+              "event": "crop_end",
+              "source": "main",
+              "atMs": 2368.370667,
+              "elapsedMs": 159.89033300000028,
+              "metadata": {
+                "width": 400,
+                "height": 280
+              }
+            },
+            {
+              "event": "collection_updated",
+              "source": "main",
+              "atMs": 2375.571625,
+              "elapsedMs": 167.09129100000018
+            }
+          ]
+        }
+      }
+    },
+    {
+      "mode": "quick",
+      "result": {
+        "ok": true,
+        "value": {
+          "sessionId": "capture_1792742890134_1ad57f5e",
+          "createdAt": "2026-10-23T08:08:10.134Z",
+          "metadata": {
+            "trigger": "main",
+            "captureMode": "quick",
+            "platform": "darwin",
+            "architecture": "arm64",
+            "osRelease": "27.0.0",
+            "cpu": "Apple M1 Pro",
+            "electron": "44.4.1",
+            "mode": "PROD build preview",
+            "displayId": "1",
+            "displayWidthDip": 1728,
+            "displayHeightDip": 1117,
+            "scaleFactor": 2,
+            "captureDelayMs": 200,
+            "captureReadinessStrategy": "hide-event-16",
+            "captureSourceTypes": "screen",
+            "captureFetchWindowIcons": false,
+            "captureBackendPreference": "sck",
+            "captureThumbnailWidthPx": 3456,
+            "captureThumbnailHeightPx": 2234,
+            "captureBackend": "screen-capture-kit",
+            "screenCaptureKitRequestId": "35520564-c1f6-48a7-9384-aa81e5178c61",
+            "screenCaptureKitHelperPid": 61103,
+            "screenCaptureKitHelperRestarts": 0,
+            "screenCaptureKitRequestDurationMs": 118.35233300000027,
+            "screenCaptureKitDisplayCacheGeneration": 1,
+            "screenCaptureKitDisplayId": "1",
+            "screenCaptureKitDisplayMapping": "verified-direct-id",
+            "screenCaptureKitCaptureMs": 79.202083,
+            "screenCaptureKitEncodeMs": 22.970584,
+            "screenCaptureKitPayloadBytes": 948809,
+            "screenCaptureKitFormat": "jpeg",
+            "screenCaptureKitRawEncodeMs": null,
+            "screenCaptureKitJpegEncodeMs": null,
+            "captureFallbackUsed": false,
+            "frameWidthPx": 3456,
+            "frameHeightPx": 2234,
+            "frameCapturedAtEpochMs": 1792742890269.716,
+            "nativeImageConstructed": true,
+            "captureFrameTransport": "jpeg-95",
+            "captureVisibilityRafCount": 1,
+            "captureFrameMemoryBeforeEncodeKb": 880928,
+            "captureFrameEncodedBytes": 948809,
+            "captureFrameMemoryAfterEncodeKb": 880928,
+            "captureFrameMemoryEncodeDeltaKb": 0,
+            "captureFrameMemoryVisibleKb": 887040,
+            "overlayVisibleAtEpochMs": 1792742890306,
+            "frameAgeMs": 36.283935546875,
+            "framePipelineAgeMs": 35.91358300000002,
+            "captureFrameMemoryVisibleDeltaKb": 6112,
+            "selectionXDip": 60,
+            "selectionYDip": 80,
+            "selectionWidthDip": 200,
+            "selectionHeightDip": 140,
+            "selectionWidthPx": 400,
+            "selectionHeightPx": 280
+          },
+          "metrics": {
+            "captureStartToOverlayVisibleMs": 171.020125,
+            "captureStartToOverlayShellVisibleMs": 57.495708999999806
+          },
+          "measures": [
+            {
+              "id": "selection-clipboard",
+              "label": "Selection → Clipboard Committed",
+              "start": "selection_end",
+              "end": "clipboard_committed",
+              "category": "local",
+              "durationMs": 24.478833000000122,
+              "warning": "notice"
+            },
+            {
+              "id": "capture-start-permission-check",
+              "label": "Capture Start → Permission Check",
+              "start": "capture_start",
+              "end": "permission_check_start",
+              "category": "local",
+              "durationMs": 35.54112500000019,
+              "warning": "notice"
+            },
+            {
+              "id": "permission-check",
+              "label": "Screen Recording Permission Check",
+              "start": "permission_check_start",
+              "end": "permission_check_end",
+              "category": "local",
+              "durationMs": 0.005583999999998923
+            },
+            {
+              "id": "permission-display-gap",
+              "label": "Permission Check → Display Resolve",
+              "start": "permission_check_end",
+              "end": "display_resolve_start",
+              "category": "local",
+              "durationMs": 0.004500000000007276
+            },
+            {
+              "id": "display-resolve",
+              "label": "Capture Display Resolve",
+              "start": "display_resolve_start",
+              "end": "display_resolve_end",
+              "category": "local",
+              "durationMs": 0.04574999999977081
+            },
+            {
+              "id": "display-sck-request-gap",
+              "label": "Display Resolve → SCK Request",
+              "start": "display_resolve_end",
+              "end": "sck_request_sent",
+              "category": "local",
+              "durationMs": 5.3072910000000775
+            },
+            {
+              "id": "capture-start-sck-capture",
+              "label": "Capture Start → SCK Capture",
+              "start": "capture_start",
+              "end": "sck_capture_start",
+              "category": "local",
+              "durationMs": 56.094666999999845,
+              "warning": "slow"
+            },
+            {
+              "id": "capture-start-sck-request",
+              "label": "Capture Start → SCK Request",
+              "start": "capture_start",
+              "end": "sck_request_sent",
+              "category": "local",
+              "durationMs": 40.90425000000005,
+              "warning": "notice"
+            },
+            {
+              "id": "sck-request-dispatch",
+              "label": "SCK Request Dispatch",
+              "start": "sck_request_sent",
+              "end": "sck_capture_start",
+              "category": "local",
+              "durationMs": 15.190416999999798
+            },
+            {
+              "id": "sck-capture",
+              "label": "ScreenCaptureKit Capture",
+              "start": "sck_capture_start",
+              "end": "sck_capture_end",
+              "category": "local",
+              "durationMs": 79.00162500000033,
+              "warning": "slow"
+            },
+            {
+              "id": "sck-encode",
+              "label": "ScreenCaptureKit Encode",
+              "start": "sck_encode_start",
+              "end": "sck_encode_end",
+              "category": "local",
+              "durationMs": 23.235583000000133,
+              "warning": "notice"
+            },
+            {
+              "id": "sck-bridge",
+              "label": "ScreenCaptureKit Binary Bridge",
+              "start": "sck_bridge_start",
+              "end": "sck_bridge_end",
+              "category": "local",
+              "durationMs": 0.7965420000000449
+            },
+            {
+              "id": "sck-encode-bridge-gap",
+              "label": "SCK Encode Complete → Bridge Start",
+              "start": "sck_encode_end",
+              "end": "sck_bridge_start",
+              "category": "local",
+              "durationMs": 0.1297500000000582
+            },
+            {
+              "id": "sck-native-image-create",
+              "label": "SCK Bridge Complete → NativeImage Ready",
+              "start": "sck_bridge_end",
+              "end": "sck_frame_ready",
+              "category": "local",
+              "durationMs": 0.007499999999708962
+            },
+            {
+              "id": "sck-request-frame-ready",
+              "label": "SCK Request → Frame Ready",
+              "start": "sck_request_sent",
+              "end": "sck_frame_ready",
+              "category": "local",
+              "durationMs": 118.37816699999985,
+              "warning": "very-slow"
+            },
+            {
+              "id": "sck-captured-frame-ready",
+              "label": "SCK Captured → Frame Ready",
+              "start": "sck_capture_end",
+              "end": "sck_frame_ready",
+              "category": "local",
+              "durationMs": 24.18612499999972,
+              "warning": "notice"
+            },
+            {
+              "id": "frame-encode",
+              "label": "Frame Encode",
+              "start": "frame_encode_start",
+              "end": "frame_encode_end",
+              "category": "local",
+              "durationMs": 0.012708000000202446
+            },
+            {
+              "id": "frame-to-jpeg",
+              "label": "NativeImage.toJPEG",
+              "start": "frame_to_jpeg_start",
+              "end": "frame_to_jpeg_end",
+              "category": "local",
+              "durationMs": 0.002167000000099506
+            },
+            {
+              "id": "frame-captured-encoded",
+              "label": "Frame Captured → Encoded",
+              "start": "frame_capture_end",
+              "end": "frame_encode_end",
+              "category": "local",
+              "durationMs": 24.991250000000036,
+              "warning": "notice"
+            },
+            {
+              "id": "encoded-renderer-received",
+              "label": "Encoded → Renderer Received",
+              "start": "frame_encode_end",
+              "end": "capture_frame_ipc_return",
+              "category": "local",
+              "durationMs": 1.019249999999829
+            },
+            {
+              "id": "frame-blob-create",
+              "label": "Renderer Blob/Object URL",
+              "start": "frame_blob_create_start",
+              "end": "frame_blob_create_end",
+              "category": "local",
+              "durationMs": 0.9902500000002874
+            },
+            {
+              "id": "renderer-received-image-ready",
+              "label": "Renderer Received → Image Ready",
+              "start": "capture_frame_ipc_return",
+              "end": "frame_image_decode_end",
+              "category": "local",
+              "durationMs": 2.4985420000002705
+            },
+            {
+              "id": "image-ready-overlay-show-called",
+              "label": "Image Ready → Overlay Show Called",
+              "start": "frame_image_decode_end",
+              "end": "capture_overlay_show_called",
+              "category": "local",
+              "durationMs": 0.08066599999983737
+            },
+            {
+              "id": "overlay-show-call",
+              "label": "Overlay Show Call",
+              "start": "capture_overlay_show_called",
+              "end": "capture_overlay_show_returned",
+              "category": "local",
+              "durationMs": 2.8070419999999103
+            },
+            {
+              "id": "overlay-show-paint-confirmed",
+              "label": "Overlay Show → Paint Confirmed",
+              "start": "capture_overlay_show_returned",
+              "end": "capture_overlay_visible",
+              "category": "local",
+              "durationMs": 4.516833000000133
+            },
+            {
+              "id": "image-ready-overlay-visible",
+              "label": "Image Ready → Overlay Visible",
+              "start": "frame_image_decode_end",
+              "end": "capture_overlay_visible",
+              "category": "local",
+              "durationMs": 7.404540999999881
+            },
+            {
+              "id": "overlay-image-decode",
+              "label": "Overlay IPC + Image Decode",
+              "start": "capture_frame_ipc_return",
+              "end": "capture_overlay_image_loaded",
+              "category": "local",
+              "durationMs": 2.522457999999915
+            },
+            {
+              "id": "overlay-image-paint",
+              "label": "Overlay Image Paint",
+              "start": "capture_overlay_image_loaded",
+              "end": "capture_overlay_visible",
+              "category": "local",
+              "durationMs": 7.3806250000002365
+            },
+            {
+              "id": "capture-shell-response",
+              "label": "Capture Start → Immediate Overlay",
+              "start": "capture_start",
+              "end": "capture_overlay_shell_visible",
+              "category": "local",
+              "durationMs": 57.495708999999806,
+              "warning": "slow"
+            },
+            {
+              "id": "capture-shell-show-call",
+              "label": "Immediate Overlay Show Call",
+              "start": "capture_overlay_shell_show_called",
+              "end": "capture_overlay_shell_show_returned",
+              "category": "local",
+              "durationMs": 0.8330409999998665
+            },
+            {
+              "id": "capture-overlay-reuse",
+              "label": "CaptureOverlay Reuse → Visible",
+              "start": "capture_overlay_reuse_start",
+              "end": "capture_overlay_reuse_visible",
+              "category": "local",
+              "durationMs": 130.2327089999999,
+              "warning": "very-slow"
+            },
+            {
+              "id": "capture-finish-ipc",
+              "label": "Capture Finish IPC",
+              "start": "capture_finish_ipc_start",
+              "end": "capture_finish_main_received",
+              "category": "local",
+              "durationMs": 18.69470799999999,
+              "warning": "notice"
+            },
+            {
+              "id": "selection-validation",
+              "label": "Selection Validation",
+              "start": "selection_validation_start",
+              "end": "selection_validation_end",
+              "category": "local",
+              "durationMs": 0.03470800000013696
+            },
+            {
+              "id": "coordinate-conversion",
+              "label": "Coordinate Conversion",
+              "start": "coordinate_conversion_start",
+              "end": "coordinate_conversion_end",
+              "category": "local",
+              "durationMs": 0.007084000000304513
+            },
+            {
+              "id": "crop",
+              "label": "Crop",
+              "start": "crop_start",
+              "end": "crop_end",
+              "category": "local",
+              "durationMs": 0.010999999999967258
+            }
+          ],
+          "marks": [
+            {
+              "event": "capture_start",
+              "source": "main",
+              "atMs": 2422.774625,
+              "elapsedMs": 0.015625
+            },
+            {
+              "event": "permission_check_start",
+              "source": "main",
+              "atMs": 2458.31575,
+              "elapsedMs": 35.55675000000019
+            },
+            {
+              "event": "permission_check_end",
+              "source": "main",
+              "atMs": 2458.321334,
+              "elapsedMs": 35.56233400000019,
+              "metadata": {
+                "status": "granted",
+                "cached": true
+              }
+            },
+            {
+              "event": "display_resolve_start",
+              "source": "main",
+              "atMs": 2458.325834,
+              "elapsedMs": 35.5668340000002
+            },
+            {
+              "event": "display_resolve_end",
+              "source": "main",
+              "atMs": 2458.371584,
+              "elapsedMs": 35.61258399999997
+            },
+            {
+              "event": "capture_overlay_reuse_start",
+              "source": "main",
+              "atMs": 2463.533375,
+              "elapsedMs": 40.774374999999964
+            },
+            {
+              "event": "sck_request_sent",
+              "source": "main",
+              "atMs": 2463.678875,
+              "elapsedMs": 40.91987500000005,
+              "metadata": {
+                "displayId": "1",
+                "format": "jpeg",
+                "requestId": "35520564-c1f6-48a7-9384-aa81e5178c61"
+              }
+            },
+            {
+              "event": "sck_capture_start",
+              "source": "main",
+              "atMs": 2478.869292,
+              "elapsedMs": 56.110291999999845
+            },
+            {
+              "event": "frame_capture_start",
+              "source": "main",
+              "atMs": 2478.874417,
+              "elapsedMs": 56.11541699999998,
+              "metadata": {
+                "backend": "screen-capture-kit"
+              }
+            },
+            {
+              "event": "capture_overlay_shell_show_called",
+              "source": "main",
+              "atMs": 2478.952959,
+              "elapsedMs": 56.19395900000018
+            },
+            {
+              "event": "capture_overlay_shell_show_returned",
+              "source": "main",
+              "atMs": 2479.786,
+              "elapsedMs": 57.027000000000044
+            },
+            {
+              "event": "capture_overlay_shell_visible",
+              "source": "renderer",
+              "atMs": 2480.270334,
+              "elapsedMs": 57.511333999999806
+            },
+            {
+              "event": "sck_capture_end",
+              "source": "main",
+              "atMs": 2557.870917,
+              "elapsedMs": 135.11191700000018
+            },
+            {
+              "event": "frame_capture_end",
+              "source": "main",
+              "atMs": 2557.881167,
+              "elapsedMs": 135.122167,
+              "metadata": {
+                "backend": "screen-capture-kit",
+                "sourceCount": 1
+              }
+            },
+            {
+              "event": "sck_encode_start",
+              "source": "main",
+              "atMs": 2557.887667,
+              "elapsedMs": 135.12866699999995
+            },
+            {
+              "event": "sck_encode_end",
+              "source": "main",
+              "atMs": 2581.12325,
+              "elapsedMs": 158.36425000000008
+            },
+            {
+              "event": "sck_bridge_start",
+              "source": "main",
+              "atMs": 2581.253,
+              "elapsedMs": 158.49400000000014
+            },
+            {
+              "event": "sck_request_received",
+              "source": "main",
+              "atMs": 2582.043375,
+              "elapsedMs": 159.28437500000018
+            },
+            {
+              "event": "sck_bridge_end",
+              "source": "main",
+              "atMs": 2582.049542,
+              "elapsedMs": 159.2905420000002,
+              "metadata": {
+                "bytes": 948809
+              }
+            },
+            {
+              "event": "sck_frame_ready",
+              "source": "main",
+              "atMs": 2582.057042,
+              "elapsedMs": 159.2980419999999,
+              "metadata": {
+                "width": 3456,
+                "height": 2234,
+                "format": "jpeg"
+              }
+            },
+            {
+              "event": "capture_frame_request",
+              "source": "renderer",
+              "atMs": 2582.437167,
+              "elapsedMs": 159.67816700000003
+            },
+            {
+              "event": "frame_encode_start",
+              "source": "main",
+              "atMs": 2582.859709,
+              "elapsedMs": 160.10070899999982,
+              "metadata": {
+                "transport": "jpeg-95"
+              }
+            },
+            {
+              "event": "frame_to_jpeg_start",
+              "source": "main",
+              "atMs": 2582.861875,
+              "elapsedMs": 160.10287500000004,
+              "metadata": {
+                "quality": 95,
+                "reusedNativePreview": true
+              }
+            },
+            {
+              "event": "frame_to_jpeg_end",
+              "source": "main",
+              "atMs": 2582.864042,
+              "elapsedMs": 160.10504200000014,
+              "metadata": {
+                "bytes": 948809,
+                "quality": 95,
+                "reusedNativePreview": true
+              }
+            },
+            {
+              "event": "frame_encode_end",
+              "source": "main",
+              "atMs": 2582.872417,
+              "elapsedMs": 160.11341700000003,
+              "metadata": {
+                "transport": "jpeg-95",
+                "encodedBytes": 948809
+              }
+            },
+            {
+              "event": "capture_frame_ipc_return",
+              "source": "renderer",
+              "atMs": 2583.891667,
+              "elapsedMs": 161.13266699999986,
+              "metadata": {
+                "transport": "jpeg-95"
+              }
+            },
+            {
+              "event": "frame_blob_create_start",
+              "source": "renderer",
+              "atMs": 2583.919709,
+              "elapsedMs": 161.16070899999977
+            },
+            {
+              "event": "frame_blob_create_end",
+              "source": "renderer",
+              "atMs": 2584.909959,
+              "elapsedMs": 162.15095900000006
+            },
+            {
+              "event": "frame_image_decode_start",
+              "source": "renderer",
+              "atMs": 2584.945,
+              "elapsedMs": 162.18600000000015
+            },
+            {
+              "event": "frame_image_decode_end",
+              "source": "renderer",
+              "atMs": 2586.390209,
+              "elapsedMs": 163.63120900000013
+            },
+            {
+              "event": "capture_overlay_image_loaded",
+              "source": "renderer",
+              "atMs": 2586.414125,
+              "elapsedMs": 163.65512499999977
+            },
+            {
+              "event": "overlay_image_ready",
+              "source": "renderer",
+              "atMs": 2586.436,
+              "elapsedMs": 163.67700000000013
+            },
+            {
+              "event": "capture_overlay_show_called",
+              "source": "main",
+              "atMs": 2586.470875,
+              "elapsedMs": 163.71187499999996
+            },
+            {
+              "event": "capture_overlay_show_returned",
+              "source": "main",
+              "atMs": 2589.277917,
+              "elapsedMs": 166.51891699999987
+            },
+            {
+              "event": "capture_overlay_reuse_visible",
+              "source": "renderer",
+              "atMs": 2593.766084,
+              "elapsedMs": 171.00708399999985
+            },
+            {
+              "event": "capture_overlay_visible",
+              "source": "renderer",
+              "atMs": 2593.79475,
+              "elapsedMs": 171.03575
+            },
+            {
+              "event": "selection_start",
+              "source": "renderer",
+              "atMs": 2604.114167,
+              "elapsedMs": 181.35516700000016
+            },
+            {
+              "event": "selection_end",
+              "source": "renderer",
+              "atMs": 2613.081459,
+              "elapsedMs": 190.32245899999998,
+              "metadata": {
+                "widthDip": 200,
+                "heightDip": 140
+              }
+            },
+            {
+              "event": "capture_finish_ipc_start",
+              "source": "renderer",
+              "atMs": 2613.112334,
+              "elapsedMs": 190.3533339999999
+            },
+            {
+              "event": "capture_finish_main_received",
+              "source": "main",
+              "atMs": 2631.807042,
+              "elapsedMs": 209.0480419999999
+            },
+            {
+              "event": "selection_validation_start",
+              "source": "main",
+              "atMs": 2631.809667,
+              "elapsedMs": 209.05066699999998
+            },
+            {
+              "event": "selection_validation_end",
+              "source": "main",
+              "atMs": 2631.844375,
+              "elapsedMs": 209.0853750000001
+            },
+            {
+              "event": "coordinate_conversion_start",
+              "source": "main",
+              "atMs": 2631.845375,
+              "elapsedMs": 209.08637499999986
+            },
+            {
+              "event": "coordinate_conversion_end",
+              "source": "main",
+              "atMs": 2631.852459,
+              "elapsedMs": 209.09345900000017
+            },
+            {
+              "event": "crop_start",
+              "source": "main",
+              "atMs": 2631.852792,
+              "elapsedMs": 209.09379200000012
+            },
+            {
+              "event": "crop_end",
+              "source": "main",
+              "atMs": 2631.863792,
+              "elapsedMs": 209.1047920000001,
+              "metadata": {
+                "width": 400,
+                "height": 280
+              }
+            },
+            {
+              "event": "clipboard_committed",
+              "source": "main",
+              "atMs": 2637.560292,
+              "elapsedMs": 214.8012920000001
+            }
+          ]
+        }
+      }
+    },
+    {
+      "mode": "collect",
+      "result": {
+        "ok": true,
+        "value": {
+          "sessionId": "capture_1792742890881_3fbdf47d",
+          "createdAt": "2026-10-23T08:08:10.881Z",
+          "metadata": {
+            "trigger": "main",
+            "captureMode": "collect",
+            "platform": "darwin",
+            "architecture": "arm64",
+            "osRelease": "27.0.0",
+            "cpu": "Apple M1 Pro",
+            "electron": "44.4.1",
+            "mode": "PROD build preview",
+            "displayId": "1",
+            "displayWidthDip": 1728,
+            "displayHeightDip": 1117,
+            "scaleFactor": 2,
+            "captureDelayMs": 200,
+            "captureReadinessStrategy": "hide-event-16",
+            "captureSourceTypes": "screen",
+            "captureFetchWindowIcons": false,
+            "captureBackendPreference": "sck",
+            "captureThumbnailWidthPx": 3456,
+            "captureThumbnailHeightPx": 2234,
+            "captureBackend": "screen-capture-kit",
+            "screenCaptureKitRequestId": "70ba9c86-f6c0-4da4-bc1d-bf3856b6b70f",
+            "screenCaptureKitHelperPid": 61103,
+            "screenCaptureKitHelperRestarts": 0,
+            "screenCaptureKitRequestDurationMs": 107.91991700000017,
+            "screenCaptureKitDisplayCacheGeneration": 1,
+            "screenCaptureKitDisplayId": "1",
+            "screenCaptureKitDisplayMapping": "verified-direct-id",
+            "screenCaptureKitCaptureMs": 81.789166,
+            "screenCaptureKitEncodeMs": 22.294166,
+            "screenCaptureKitPayloadBytes": 949639,
+            "screenCaptureKitFormat": "jpeg",
+            "screenCaptureKitRawEncodeMs": null,
+            "screenCaptureKitJpegEncodeMs": null,
+            "captureFallbackUsed": false,
+            "frameWidthPx": 3456,
+            "frameHeightPx": 2234,
+            "frameCapturedAtEpochMs": 1792742890975.2888,
+            "nativeImageConstructed": true,
+            "captureFrameTransport": "jpeg-95",
+            "captureVisibilityRafCount": 1,
+            "captureFrameMemoryBeforeEncodeKb": 916912,
+            "captureFrameEncodedBytes": 949639,
+            "captureFrameMemoryAfterEncodeKb": 916912,
+            "captureFrameMemoryEncodeDeltaKb": 0,
+            "captureFrameMemoryVisibleKb": 922560,
+            "overlayVisibleAtEpochMs": 1792742891016,
+            "frameAgeMs": 40.711181640625,
+            "framePipelineAgeMs": 40.53908300000012,
+            "captureFrameMemoryVisibleDeltaKb": 5648,
+            "selectionXDip": 60,
+            "selectionYDip": 80,
+            "selectionWidthDip": 200,
+            "selectionHeightDip": 140,
+            "selectionWidthPx": 400,
+            "selectionHeightPx": 280
+          },
+          "metrics": {
+            "captureStartToOverlayVisibleMs": 134.65837499999998,
+            "captureStartToOverlayShellVisibleMs": 13.456500000000233
+          },
+          "measures": [
+            {
+              "id": "selection-collection",
+              "label": "Selection → Collection Updated",
+              "start": "selection_end",
+              "end": "collection_updated",
+              "category": "local",
+              "durationMs": 24.612916999999925,
+              "warning": "notice"
+            },
+            {
+              "id": "capture-start-permission-check",
+              "label": "Capture Start → Permission Check",
+              "start": "capture_start",
+              "end": "permission_check_start",
+              "category": "local",
+              "durationMs": 9.863166999999976
+            },
+            {
+              "id": "permission-check",
+              "label": "Screen Recording Permission Check",
+              "start": "permission_check_start",
+              "end": "permission_check_end",
+              "category": "local",
+              "durationMs": 0.006667000000106782
+            },
+            {
+              "id": "permission-display-gap",
+              "label": "Permission Check → Display Resolve",
+              "start": "permission_check_end",
+              "end": "display_resolve_start",
+              "category": "local",
+              "durationMs": 0.004540999999790074
+            },
+            {
+              "id": "display-resolve",
+              "label": "Capture Display Resolve",
+              "start": "display_resolve_start",
+              "end": "display_resolve_end",
+              "category": "local",
+              "durationMs": 0.06295900000031907
+            },
+            {
+              "id": "display-sck-request-gap",
+              "label": "Display Resolve → SCK Request",
+              "start": "display_resolve_end",
+              "end": "sck_request_sent",
+              "category": "local",
+              "durationMs": 1.4344579999997222
+            },
+            {
+              "id": "capture-start-sck-capture",
+              "label": "Capture Start → SCK Capture",
+              "start": "capture_start",
+              "end": "sck_capture_start",
+              "category": "local",
+              "durationMs": 12.357417000000169
+            },
+            {
+              "id": "capture-start-sck-request",
+              "label": "Capture Start → SCK Request",
+              "start": "capture_start",
+              "end": "sck_request_sent",
+              "category": "local",
+              "durationMs": 11.371791999999914
+            },
+            {
+              "id": "sck-request-dispatch",
+              "label": "SCK Request Dispatch",
+              "start": "sck_request_sent",
+              "end": "sck_capture_start",
+              "category": "local",
+              "durationMs": 0.9856250000002547
+            },
+            {
+              "id": "sck-capture",
+              "label": "ScreenCaptureKit Capture",
+              "start": "sck_capture_start",
+              "end": "sck_capture_end",
+              "category": "local",
+              "durationMs": 81.75587499999983,
+              "warning": "slow"
+            },
+            {
+              "id": "sck-encode",
+              "label": "ScreenCaptureKit Encode",
+              "start": "sck_encode_start",
+              "end": "sck_encode_end",
+              "category": "local",
+              "durationMs": 24.104624999999942,
+              "warning": "notice"
+            },
+            {
+              "id": "sck-bridge",
+              "label": "ScreenCaptureKit Binary Bridge",
+              "start": "sck_bridge_start",
+              "end": "sck_bridge_end",
+              "category": "local",
+              "durationMs": 1.078208999999788
+            },
+            {
+              "id": "sck-encode-bridge-gap",
+              "label": "SCK Encode Complete → Bridge Start",
+              "start": "sck_encode_end",
+              "end": "sck_bridge_start",
+              "category": "local",
+              "durationMs": 0.005041000000346685
+            },
+            {
+              "id": "sck-native-image-create",
+              "label": "SCK Bridge Complete → NativeImage Ready",
+              "start": "sck_bridge_end",
+              "end": "sck_frame_ready",
+              "category": "local",
+              "durationMs": 0.011124999999992724
+            },
+            {
+              "id": "sck-request-frame-ready",
+              "label": "SCK Request → Frame Ready",
+              "start": "sck_request_sent",
+              "end": "sck_frame_ready",
+              "category": "local",
+              "durationMs": 107.95291700000007,
+              "warning": "very-slow"
+            },
+            {
+              "id": "sck-captured-frame-ready",
+              "label": "SCK Captured → Frame Ready",
+              "start": "sck_capture_end",
+              "end": "sck_frame_ready",
+              "category": "local",
+              "durationMs": 25.211416999999983,
+              "warning": "notice"
+            },
+            {
+              "id": "frame-encode",
+              "label": "Frame Encode",
+              "start": "frame_encode_start",
+              "end": "frame_encode_end",
+              "category": "local",
+              "durationMs": 0.012374999999792635
+            },
+            {
+              "id": "frame-to-jpeg",
+              "label": "NativeImage.toJPEG",
+              "start": "frame_to_jpeg_start",
+              "end": "frame_to_jpeg_end",
+              "category": "local",
+              "durationMs": 0.0037080000001878943
+            },
+            {
+              "id": "frame-captured-encoded",
+              "label": "Frame Captured → Encoded",
+              "start": "frame_capture_end",
+              "end": "frame_encode_end",
+              "category": "local",
+              "durationMs": 25.979667000000063,
+              "warning": "notice"
+            },
+            {
+              "id": "encoded-renderer-received",
+              "label": "Encoded → Renderer Received",
+              "start": "frame_encode_end",
+              "end": "capture_frame_ipc_return",
+              "category": "local",
+              "durationMs": 1.0080410000000484
+            },
+            {
+              "id": "frame-blob-create",
+              "label": "Renderer Blob/Object URL",
+              "start": "frame_blob_create_start",
+              "end": "frame_blob_create_end",
+              "category": "local",
+              "durationMs": 0.4142079999996895
+            },
+            {
+              "id": "renderer-received-image-ready",
+              "label": "Renderer Received → Image Ready",
+              "start": "capture_frame_ipc_return",
+              "end": "frame_image_decode_end",
+              "category": "local",
+              "durationMs": 2.224999999999909
+            },
+            {
+              "id": "image-ready-overlay-show-called",
+              "label": "Image Ready → Overlay Show Called",
+              "start": "frame_image_decode_end",
+              "end": "capture_overlay_show_called",
+              "category": "local",
+              "durationMs": 0.08316700000023047
+            },
+            {
+              "id": "overlay-show-call",
+              "label": "Overlay Show Call",
+              "start": "capture_overlay_show_called",
+              "end": "capture_overlay_show_returned",
+              "category": "local",
+              "durationMs": 4.900250000000142
+            },
+            {
+              "id": "overlay-show-paint-confirmed",
+              "label": "Overlay Show → Paint Confirmed",
+              "start": "capture_overlay_show_returned",
+              "end": "capture_overlay_visible",
+              "category": "local",
+              "durationMs": 6.342957999999726
+            },
+            {
+              "id": "image-ready-overlay-visible",
+              "label": "Image Ready → Overlay Visible",
+              "start": "frame_image_decode_end",
+              "end": "capture_overlay_visible",
+              "category": "local",
+              "durationMs": 11.326375000000098
+            },
+            {
+              "id": "overlay-image-decode",
+              "label": "Overlay IPC + Image Decode",
+              "start": "capture_frame_ipc_return",
+              "end": "capture_overlay_image_loaded",
+              "category": "local",
+              "durationMs": 2.251792000000023
+            },
+            {
+              "id": "overlay-image-paint",
+              "label": "Overlay Image Paint",
+              "start": "capture_overlay_image_loaded",
+              "end": "capture_overlay_visible",
+              "category": "local",
+              "durationMs": 11.299582999999984
+            },
+            {
+              "id": "capture-shell-response",
+              "label": "Capture Start → Immediate Overlay",
+              "start": "capture_start",
+              "end": "capture_overlay_shell_visible",
+              "category": "local",
+              "durationMs": 13.456500000000233
+            },
+            {
+              "id": "capture-shell-show-call",
+              "label": "Immediate Overlay Show Call",
+              "start": "capture_overlay_shell_show_called",
+              "end": "capture_overlay_shell_show_returned",
+              "category": "local",
+              "durationMs": 0.6505409999999756
+            },
+            {
+              "id": "capture-overlay-reuse",
+              "label": "CaptureOverlay Reuse → Visible",
+              "start": "capture_overlay_reuse_start",
+              "end": "capture_overlay_reuse_visible",
+              "category": "local",
+              "durationMs": 123.35833300000013,
+              "warning": "very-slow"
+            },
+            {
+              "id": "capture-finish-ipc",
+              "label": "Capture Finish IPC",
+              "start": "capture_finish_ipc_start",
+              "end": "capture_finish_main_received",
+              "category": "local",
+              "durationMs": 18.608708000000206,
+              "warning": "notice"
+            },
+            {
+              "id": "selection-validation",
+              "label": "Selection Validation",
+              "start": "selection_validation_start",
+              "end": "selection_validation_end",
+              "category": "local",
+              "durationMs": 0.03262499999982538
+            },
+            {
+              "id": "coordinate-conversion",
+              "label": "Coordinate Conversion",
+              "start": "coordinate_conversion_start",
+              "end": "coordinate_conversion_end",
+              "category": "local",
+              "durationMs": 0.007875000000240107
+            },
+            {
+              "id": "crop",
+              "label": "Crop",
+              "start": "crop_start",
+              "end": "crop_end",
+              "category": "local",
+              "durationMs": 0.012959000000137166
+            }
+          ],
+          "marks": [
+            {
+              "event": "capture_start",
+              "source": "main",
+              "atMs": 3169.28775,
+              "elapsedMs": 0.02045799999996234
+            },
+            {
+              "event": "permission_check_start",
+              "source": "main",
+              "atMs": 3179.150917,
+              "elapsedMs": 9.883624999999938
+            },
+            {
+              "event": "permission_check_end",
+              "source": "main",
+              "atMs": 3179.157584,
+              "elapsedMs": 9.890292000000045,
+              "metadata": {
+                "status": "granted",
+                "cached": true
+              }
+            },
+            {
+              "event": "display_resolve_start",
+              "source": "main",
+              "atMs": 3179.162125,
+              "elapsedMs": 9.894832999999835
+            },
+            {
+              "event": "display_resolve_end",
+              "source": "main",
+              "atMs": 3179.225084,
+              "elapsedMs": 9.957792000000154
+            },
+            {
+              "event": "capture_overlay_reuse_start",
+              "source": "main",
+              "atMs": 3180.561209,
+              "elapsedMs": 11.293916999999965
+            },
+            {
+              "event": "sck_request_sent",
+              "source": "main",
+              "atMs": 3180.659542,
+              "elapsedMs": 11.392249999999876,
+              "metadata": {
+                "displayId": "1",
+                "format": "jpeg",
+                "requestId": "70ba9c86-f6c0-4da4-bc1d-bf3856b6b70f"
+              }
+            },
+            {
+              "event": "sck_capture_start",
+              "source": "main",
+              "atMs": 3181.645167,
+              "elapsedMs": 12.377875000000131
+            },
+            {
+              "event": "frame_capture_start",
+              "source": "main",
+              "atMs": 3181.648209,
+              "elapsedMs": 12.380916999999954,
+              "metadata": {
+                "backend": "screen-capture-kit"
+              }
+            },
+            {
+              "event": "capture_overlay_shell_show_called",
+              "source": "main",
+              "atMs": 3181.702459,
+              "elapsedMs": 12.435167000000092
+            },
+            {
+              "event": "capture_overlay_shell_show_returned",
+              "source": "main",
+              "atMs": 3182.353,
+              "elapsedMs": 13.085708000000068
+            },
+            {
+              "event": "capture_overlay_shell_visible",
+              "source": "renderer",
+              "atMs": 3182.74425,
+              "elapsedMs": 13.476958000000195
+            },
+            {
+              "event": "sck_capture_end",
+              "source": "main",
+              "atMs": 3263.401042,
+              "elapsedMs": 94.13374999999996
+            },
+            {
+              "event": "frame_capture_end",
+              "source": "main",
+              "atMs": 3263.407042,
+              "elapsedMs": 94.13974999999982,
+              "metadata": {
+                "backend": "screen-capture-kit",
+                "sourceCount": 1
+              }
+            },
+            {
+              "event": "sck_encode_start",
+              "source": "main",
+              "atMs": 3263.413459,
+              "elapsedMs": 94.14616699999988
+            },
+            {
+              "event": "sck_encode_end",
+              "source": "main",
+              "atMs": 3287.518084,
+              "elapsedMs": 118.25079199999982
+            },
+            {
+              "event": "sck_bridge_start",
+              "source": "main",
+              "atMs": 3287.523125,
+              "elapsedMs": 118.25583300000017
+            },
+            {
+              "event": "sck_request_received",
+              "source": "main",
+              "atMs": 3288.593459,
+              "elapsedMs": 119.32616700000017
+            },
+            {
+              "event": "sck_bridge_end",
+              "source": "main",
+              "atMs": 3288.601334,
+              "elapsedMs": 119.33404199999995,
+              "metadata": {
+                "bytes": 949639
+              }
+            },
+            {
+              "event": "sck_frame_ready",
+              "source": "main",
+              "atMs": 3288.612459,
+              "elapsedMs": 119.34516699999995,
+              "metadata": {
+                "width": 3456,
+                "height": 2234,
+                "format": "jpeg"
+              }
+            },
+            {
+              "event": "capture_frame_request",
+              "source": "renderer",
+              "atMs": 3288.990875,
+              "elapsedMs": 119.72358299999996
+            },
+            {
+              "event": "frame_encode_start",
+              "source": "main",
+              "atMs": 3289.374334,
+              "elapsedMs": 120.10704200000009,
+              "metadata": {
+                "transport": "jpeg-95"
+              }
+            },
+            {
+              "event": "frame_to_jpeg_start",
+              "source": "main",
+              "atMs": 3289.377959,
+              "elapsedMs": 120.11066699999992,
+              "metadata": {
+                "quality": 95,
+                "reusedNativePreview": true
+              }
+            },
+            {
+              "event": "frame_to_jpeg_end",
+              "source": "main",
+              "atMs": 3289.381667,
+              "elapsedMs": 120.11437500000011,
+              "metadata": {
+                "bytes": 949639,
+                "quality": 95,
+                "reusedNativePreview": true
+              }
+            },
+            {
+              "event": "frame_encode_end",
+              "source": "main",
+              "atMs": 3289.386709,
+              "elapsedMs": 120.11941699999988,
+              "metadata": {
+                "transport": "jpeg-95",
+                "encodedBytes": 949639
+              }
+            },
+            {
+              "event": "capture_frame_ipc_return",
+              "source": "renderer",
+              "atMs": 3290.39475,
+              "elapsedMs": 121.12745799999993,
+              "metadata": {
+                "transport": "jpeg-95"
+              }
+            },
+            {
+              "event": "frame_blob_create_start",
+              "source": "renderer",
+              "atMs": 3290.419917,
+              "elapsedMs": 121.15262500000017
+            },
+            {
+              "event": "frame_blob_create_end",
+              "source": "renderer",
+              "atMs": 3290.834125,
+              "elapsedMs": 121.56683299999986
+            },
+            {
+              "event": "frame_image_decode_start",
+              "source": "renderer",
+              "atMs": 3290.852667,
+              "elapsedMs": 121.58537500000011
+            },
+            {
+              "event": "frame_image_decode_end",
+              "source": "renderer",
+              "atMs": 3292.61975,
+              "elapsedMs": 123.35245799999984
+            },
+            {
+              "event": "capture_overlay_image_loaded",
+              "source": "renderer",
+              "atMs": 3292.646542,
+              "elapsedMs": 123.37924999999996
+            },
+            {
+              "event": "overlay_image_ready",
+              "source": "renderer",
+              "atMs": 3292.668709,
+              "elapsedMs": 123.40141700000004
+            },
+            {
+              "event": "capture_overlay_show_called",
+              "source": "main",
+              "atMs": 3292.702917,
+              "elapsedMs": 123.43562500000007
+            },
+            {
+              "event": "capture_overlay_show_returned",
+              "source": "main",
+              "atMs": 3297.603167,
+              "elapsedMs": 128.33587500000021
+            },
+            {
+              "event": "capture_overlay_reuse_visible",
+              "source": "renderer",
+              "atMs": 3303.919542,
+              "elapsedMs": 134.6522500000001
+            },
+            {
+              "event": "capture_overlay_visible",
+              "source": "renderer",
+              "atMs": 3303.946125,
+              "elapsedMs": 134.67883299999994
+            },
+            {
+              "event": "selection_start",
+              "source": "renderer",
+              "atMs": 3312.87425,
+              "elapsedMs": 143.60695799999985
+            },
+            {
+              "event": "selection_end",
+              "source": "renderer",
+              "atMs": 3321.0265,
+              "elapsedMs": 151.75920799999994,
+              "metadata": {
+                "widthDip": 200,
+                "heightDip": 140
+              }
+            },
+            {
+              "event": "capture_finish_ipc_start",
+              "source": "renderer",
+              "atMs": 3321.056334,
+              "elapsedMs": 151.78904199999988
+            },
+            {
+              "event": "capture_finish_main_received",
+              "source": "main",
+              "atMs": 3339.665042,
+              "elapsedMs": 170.3977500000001
+            },
+            {
+              "event": "selection_validation_start",
+              "source": "main",
+              "atMs": 3339.668,
+              "elapsedMs": 170.40070800000012
+            },
+            {
+              "event": "selection_validation_end",
+              "source": "main",
+              "atMs": 3339.700625,
+              "elapsedMs": 170.43333299999995
+            },
+            {
+              "event": "coordinate_conversion_start",
+              "source": "main",
+              "atMs": 3339.701459,
+              "elapsedMs": 170.4341669999999
+            },
+            {
+              "event": "coordinate_conversion_end",
+              "source": "main",
+              "atMs": 3339.709334,
+              "elapsedMs": 170.44204200000013
+            },
+            {
+              "event": "crop_start",
+              "source": "main",
+              "atMs": 3339.70975,
+              "elapsedMs": 170.442458
+            },
+            {
+              "event": "crop_end",
+              "source": "main",
+              "atMs": 3339.722709,
+              "elapsedMs": 170.45541700000012,
+              "metadata": {
+                "width": 400,
+                "height": 280
+              }
+            },
+            {
+              "event": "collection_updated",
+              "source": "main",
+              "atMs": 3345.639417,
+              "elapsedMs": 176.37212499999987
+            }
+          ]
+        }
+      }
+    },
+    {
+      "collectionCount": 2
+    },
+    {
+      "final": {
+        "ok": true,
+        "value": {
+          "preference": "sck",
+          "runtimeScreenshots": {
+            "items": 2,
+            "bytes": 83924
+          },
+          "screenCaptureKit": {
+            "available": true,
+            "healthy": true,
+            "helperPid": 61103,
+            "helperPath": "/Users/macbook/IdeaProjects/Snipvia-public-baseline/build/native/snipvia-capture-helper",
+            "helperRestarts": 0,
+            "displays": [
+              {
+                "scaleFactor": 2,
+                "id": "1",
+                "pixelHeight": 2234,
+                "height": 1117,
+                "x": 0,
+                "pixelWidth": 3456,
+                "y": 0,
+                "width": 1728
+              }
+            ],
+            "excludedApplicationFound": true,
+            "state": "ready",
+            "captureCount": 5,
+            "successCount": 5,
+            "failureCount": 0,
+            "timeoutCount": 0,
+            "consecutiveFailures": 0,
+            "recentFailures": 0,
+            "lastCaptureDurationMs": 112.29100000000017,
+            "recentCaptureP95Ms": 260.5038750000001,
+            "displayCacheGeneration": 1,
+            "displayInvalidationCount": 0
+          },
+          "processes": [
+            {
+              "pid": 61083,
+              "type": "Browser",
+              "workingSetKb": 232400,
+              "privateBytesKb": 0
+            },
+            {
+              "pid": 61096,
+              "type": "GPU",
+              "workingSetKb": 116608,
+              "privateBytesKb": 0
+            },
+            {
+              "pid": 61097,
+              "type": "Utility",
+              "workingSetKb": 42608,
+              "privateBytesKb": 0
+            },
+            {
+              "pid": 61098,
+              "type": "Tab",
+              "workingSetKb": 128912,
+              "privateBytesKb": 0
+            },
+            {
+              "pid": 61101,
+              "type": "Tab",
+              "workingSetKb": 156912,
+              "privateBytesKb": 0
+            },
+            {
+              "pid": 61102,
+              "type": "Tab",
+              "workingSetKb": 100064,
+              "privateBytesKb": 0
+            },
+            {
+              "pid": 61112,
+              "type": "Tab",
+              "workingSetKb": 127200,
+              "privateBytesKb": 0
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "privatePixelsPersisted": false,
+  "clipboardMocked": true
+}

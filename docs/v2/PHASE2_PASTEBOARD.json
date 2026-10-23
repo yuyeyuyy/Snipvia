@@ -1,0 +1,7 @@
+{
+  "privateNamedPasteboard": true,
+  "writeSucceeded": true,
+  "nativeItemCount": 2,
+  "targetApplicationPasteTested": false,
+  "command": "xcrun swift -module-cache-path .dev-runtime/v2-phase2/swift-module-cache scripts/research-pasteboard.swift"
+}

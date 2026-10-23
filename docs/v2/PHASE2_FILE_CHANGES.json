@@ -1,0 +1,250 @@
+{
+  "baseline": "ae7db9e",
+  "sourceHead": "5352a011ddfd971441f5088f5ec38bd5650ec849",
+  "files": [
+    {
+      "path": "README.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/UI_DESIGN_LANGUAGE.md",
+      "status": "M"
+    },
+    {
+      "path": "docs/ui/v2/settings-phase2-dark.png",
+      "status": "A"
+    },
+    {
+      "path": "docs/ui/v2/settings-phase2-light.png",
+      "status": "A"
+    },
+    {
+      "path": "docs/ui/v2/shelf-dark.png",
+      "status": "A"
+    },
+    {
+      "path": "docs/ui/v2/shelf-light.png",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_AUDIT.md",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_CLIPBOARD_COMPATIBILITY.md",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_COLLECTION_PERFORMANCE.json",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_COLLECTION_PERFORMANCE_FIRST.json",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_COLLECTION_PERFORMANCE_WINDOW_GUARD.json",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_CONTINUOUS_CAPTURE_REPORT.md",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_CORE_PRESERVATION.json",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_FILE_CHANGES.json",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_METRICS_SUMMARY.json",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_PASTEBOARD.json",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_PERFORMANCE_AFTER.json",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_PERFORMANCE_AFTER_FIRST.json",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_PERFORMANCE_AFTER_WINDOW_GUARD.json",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_PERFORMANCE_BEFORE.json",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_SCK_LIGHT.json",
+      "status": "A"
+    },
+    {
+      "path": "docs/v2/PHASE2_VALIDATION.json",
+      "status": "A"
+    },
+    {
+      "path": "scripts/research-pasteboard.swift",
+      "status": "A"
+    },
+    {
+      "path": "src/main/capture/CaptureModeRouter.ts",
+      "status": "M"
+    },
+    {
+      "path": "src/main/index.ts",
+      "status": "M"
+    },
+    {
+      "path": "src/main/performance/screenshot-performance.ts",
+      "status": "M"
+    },
+    {
+      "path": "src/main/storage/CapturePreferencesStore.ts",
+      "status": "M"
+    },
+    {
+      "path": "src/main/storage/CollectionExporter.ts",
+      "status": "A"
+    },
+    {
+      "path": "src/main/storage/ScreenshotCollection.ts",
+      "status": "A"
+    },
+    {
+      "path": "src/main/storage/ScreenshotStore.ts",
+      "status": "M"
+    },
+    {
+      "path": "src/main/windows/ShelfWindow.ts",
+      "status": "A"
+    },
+    {
+      "path": "src/preload/index.ts",
+      "status": "M"
+    },
+    {
+      "path": "src/renderer/src/capture/CaptureOverlay.tsx",
+      "status": "M"
+    },
+    {
+      "path": "src/renderer/src/collection/ScreenshotShelf.tsx",
+      "status": "A"
+    },
+    {
+      "path": "src/renderer/src/collection/merge-images.ts",
+      "status": "A"
+    },
+    {
+      "path": "src/renderer/src/collection/shelf.css",
+      "status": "A"
+    },
+    {
+      "path": "src/renderer/src/components/WorkspaceHeader.tsx",
+      "status": "A"
+    },
+    {
+      "path": "src/renderer/src/main.tsx",
+      "status": "M"
+    },
+    {
+      "path": "src/renderer/src/settings/SettingsPanel.tsx",
+      "status": "M"
+    },
+    {
+      "path": "src/shared/capture-mode.ts",
+      "status": "M"
+    },
+    {
+      "path": "src/shared/capture-preferences.ts",
+      "status": "M"
+    },
+    {
+      "path": "src/shared/collection-output.ts",
+      "status": "A"
+    },
+    {
+      "path": "src/shared/collection.ts",
+      "status": "A"
+    },
+    {
+      "path": "src/shared/desktop-api.ts",
+      "status": "M"
+    },
+    {
+      "path": "src/shared/performance.ts",
+      "status": "M"
+    },
+    {
+      "path": "tests/integration/appearance.spec.ts",
+      "status": "M"
+    },
+    {
+      "path": "tests/integration/capture-early-selection.spec.ts",
+      "status": "M"
+    },
+    {
+      "path": "tests/integration/capture-local-first-latency.spec.ts",
+      "status": "M"
+    },
+    {
+      "path": "tests/integration/capture-performance-phase3.spec.ts",
+      "status": "M"
+    },
+    {
+      "path": "tests/integration/capture-performance-phase5.spec.ts",
+      "status": "M"
+    },
+    {
+      "path": "tests/integration/capture-window-visibility.spec.ts",
+      "status": "M"
+    },
+    {
+      "path": "tests/integration/performance.spec.ts",
+      "status": "M"
+    },
+    {
+      "path": "tests/integration/v2-continuous.spec.ts",
+      "status": "A"
+    },
+    {
+      "path": "tests/integration/v2-sck-light.spec.ts",
+      "status": "A"
+    },
+    {
+      "path": "tests/integration/v2-settings.spec.ts",
+      "status": "M"
+    },
+    {
+      "path": "tests/unit/capture-mode-router.test.ts",
+      "status": "M"
+    },
+    {
+      "path": "tests/unit/capture-preferences.test.ts",
+      "status": "M"
+    },
+    {
+      "path": "tests/unit/collection-exporter.test.ts",
+      "status": "A"
+    },
+    {
+      "path": "tests/unit/collection-geometry.test.ts",
+      "status": "A"
+    },
+    {
+      "path": "tests/unit/collection-output.test.ts",
+      "status": "A"
+    },
+    {
+      "path": "tests/unit/screenshot-collection.test.ts",
+      "status": "A"
+    }
+  ]
+}

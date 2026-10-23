@@ -1,0 +1,83 @@
+{
+  "branch": "refactor/snipvia-v2",
+  "sourceHead": "5352a011ddfd971441f5088f5ec38bd5650ec849",
+  "environment": {
+    "node": "24.15.0",
+    "pnpm": "11.1.3",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osVersion": "27.0.1",
+    "electron": "44.4.1",
+    "appVersion": "0.3.2",
+    "displayResolutionDip": {
+      "width": 1728,
+      "height": 1117
+    },
+    "displayBounds": {
+      "x": 0,
+      "y": 0,
+      "width": 1728,
+      "height": 1117
+    },
+    "scaleFactor": 2
+  },
+  "commands": [
+    {
+      "command": "pnpm typecheck",
+      "exitCode": 0,
+      "localLog": ".dev-runtime/v2-phase2/typecheck.log",
+      "logSha256": "8366207267355d3e3d5bf3bf6e8c94c5f93f6078c34f08973fa2b38cdda6cc92"
+    },
+    {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "localLog": ".dev-runtime/v2-phase2/lint.log",
+      "logSha256": "050c69da23536758722729aeda55a8d0fb9d557495ef6d33d70873a3b64a71c1"
+    },
+    {
+      "command": "pnpm test",
+      "exitCode": 0,
+      "localLog": ".dev-runtime/v2-phase2/unit.log",
+      "logSha256": "bd225650eb7abdce6c250fc0a321cf066fc61e06e3c4ce2e13e908282c384ed5"
+    },
+    {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "localLog": ".dev-runtime/v2-phase2/build.log",
+      "logSha256": "3a0377bb4ee9b6e2ddf4973df759de97c31f0a291ba2a43c13adb839ec452081"
+    },
+    {
+      "command": "pnpm test:smoke",
+      "exitCode": 0,
+      "localLog": ".dev-runtime/v2-phase2/smoke-final.log",
+      "logSha256": "2bd3c4be811bfd5cece22d6f40483a96683659be3c38303809d659e8459c5609"
+    },
+    {
+      "command": "SNIPVIA_REAL_SCREEN=1 pnpm exec playwright test tests/integration/v2-sck-light.spec.ts",
+      "exitCode": 0,
+      "localLog": ".dev-runtime/v2-phase2/sck-light-final.log",
+      "logSha256": "3a65e70f7e2a8e9def9dd4f411cbfe3a857c100d78e9a07f622893770f07b896"
+    }
+  ],
+  "unit": {
+    "files": 34,
+    "passed": 227
+  },
+  "smoke": {
+    "passed": 21,
+    "optInNotRun": 11,
+    "total": 32
+  },
+  "realSck": {
+    "passedTests": 1,
+    "captures": 4,
+    "cancelledSelections": 1,
+    "traceAndScreenshotsDisabled": true,
+    "clipboardMocked": true
+  },
+  "unchangedCoreFiles": 9,
+  "highLoadRuns": false,
+  "remoteOperations": false,
+  "packaging": false,
+  "performanceAcceptedWithoutReservations": false
+}

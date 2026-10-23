@@ -45,6 +45,36 @@ beforeEach(() => {
 afterEach(() => rmSync(runtime.directory, { recursive: true, force: true }));
 
 describe('provider credentials', () => {
+  it('V2 preserves a configured old screenshot accelerator and refuses to overwrite a damaged legacy file later', async () => {
+    const path = join(runtime.directory, 'settings.json');
+    const raw = JSON.stringify({ settings: { ...defaults, editorShortcut: 'CommandOrControl+Alt+A' }, encryptedKeys: {} });
+    writeFileSync(path, raw);
+    const storage = await import('../../src/main/storage/settings');
+    storage.loadSettings({ migrateCredentials: false });
+    expect(storage.publicSettings().editorShortcut).toBe('CommandOrControl+Alt+A');
+    expect(readFileSync(path, 'utf8')).toBe(raw);
+    writeFileSync(path, '{broken legacy settings');
+    expect(() => storage.loadSettings({ migrateCredentials: false })).toThrow();
+    expect(() => storage.saveAppearanceMode('dark')).toThrow('原文件已保留');
+    expect(() => storage.saveChatFontSize(20)).toThrow('原文件已保留');
+    expect(readFileSync(path, 'utf8')).toBe('{broken legacy settings');
+  });
+
+  it('V2 loads appearance and shortcuts without decrypting, migrating, rewriting or deleting old credentials', async () => {
+    const path = join(runtime.directory, 'settings.json'), raw = JSON.stringify({ settings: defaults, encryptedKey: 'SYNTHETIC_CIPHERTEXT', appearance: { mode: 'dark', chatFontSize: 18 } });
+    writeFileSync(path, raw);
+    writeFileSync(join(runtime.directory, 'credentials.json'), '{broken old credentials');
+    writeFileSync(join(runtime.directory, 'credentials.key'), 'original opaque key');
+    runtime.available = false;
+    const storage = await import('../../src/main/storage/settings');
+    storage.loadSettings({ migrateCredentials: false });
+    expect(storage.appearanceMode()).toBe('dark'); expect(storage.chatFontSize()).toBe(18);
+    expect(storage.publicSettings().shortcut).toBe(defaults.shortcut);
+    expect(readFileSync(path, 'utf8')).toBe(raw);
+    expect(readFileSync(join(runtime.directory, 'credentials.json'), 'utf8')).toBe('{broken old credentials');
+    expect(readFileSync(join(runtime.directory, 'credentials.key'), 'utf8')).toBe('original opaque key');
+  });
+
   it('confirmed branch edits preserve current model, encrypted keys and appearance; stale versions leave storage unchanged', async () => {
     const storage = await import('../../src/main/storage/settings');
     storage.saveSettings(defaults, 'synthetic-branch-key'); storage.saveAppearanceMode('dark');

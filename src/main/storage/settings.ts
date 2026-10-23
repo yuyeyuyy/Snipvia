@@ -1,7 +1,6 @@
-import { fileHash } from '../agent/WorkspaceService';
 import { predictionBranchListSchema, type PredictionBranch } from '../../shared/screenshot-understanding';
 import { app, safeStorage } from 'electron';
-import { createDecipheriv } from 'node:crypto';
+import { createDecipheriv, createHash } from 'node:crypto';
 import { chmodSync, existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { defaults, settingsSchema, type ModelProfile, type PublicSettings, type Settings } from '../../shared/contracts';
@@ -10,8 +9,11 @@ import { credentialScope, inferProvider } from '../../shared/providers';
 import { z } from 'zod';
 import { chatFontSizeSchema, defaultChatFontSize, themeModeSchema, type ThemeMode } from '../../shared/appearance';
 
+const fileHash = (bytes: Buffer) => createHash('sha256').update(bytes).digest('hex');
+
 type Stored = { settings: Settings; encryptedKeys: Record<string, string>; profiles: Record<string, Settings>; appearance: { mode: ThemeMode; chatFontSize: number } };
 let stored: Stored = { settings: defaults, encryptedKeys: {}, profiles: {}, appearance: { mode: 'system', chatFontSize: defaultChatFontSize } };
+let legacySettingsReadOnly = false;
 const file = () => join(app.getPath('userData'), 'settings.json');
 const credentialsFile = () => join(app.getPath('userData'), 'credentials.json');
 const credentialsKeyFile = () => join(app.getPath('userData'), 'credentials.key');
@@ -61,6 +63,7 @@ function readCredentials() {
 }
 
 function persistSettings(value: Stored) {
+  if (legacySettingsReadOnly) throw new Error('旧设置文件无法读取，原文件已保留；请先备份检查');
   mkdirSync(app.getPath('userData'), { recursive: true, mode: 0o700 });
   const temporary = `${file()}.tmp`;
   writeFileSync(temporary, JSON.stringify(value, null, 2), { mode: 0o600 });
@@ -83,7 +86,13 @@ function predictionBranchesChanged(value: unknown, settings: Settings) {
   return Array.isArray(branches) && branches.length !== settings.predictionBranches.length;
 }
 
-export function loadSettings() {
+export function loadSettings(options: { migrateCredentials?: boolean } = {}) {
+  legacySettingsReadOnly = false;
+  try { loadStoredSettings(options); }
+  catch (error) { legacySettingsReadOnly = true; throw error; }
+}
+
+function loadStoredSettings(options: { migrateCredentials?: boolean }) {
   const value = existsSync(file()) ? z.object({
     settings: z.object({ endpoint: z.string(), provider: z.string().optional() }).passthrough(),
     encryptedKey: z.string().optional(),
@@ -91,8 +100,9 @@ export function loadSettings() {
     profiles: z.record(z.string(), z.unknown()).default({}),
     appearance: z.object({ mode: themeModeSchema, chatFontSize: chatFontSizeSchema.catch(defaultChatFontSize).default(defaultChatFontSize) }).catch({ mode: 'system', chatFontSize: defaultChatFontSize }).default({ mode: 'system', chatFontSize: defaultChatFontSize })
   }).parse(JSON.parse(readFileSync(file(), 'utf8'))) : undefined;
+  const prepare = (input: Record<string, unknown>) => options.migrateCredentials === false && input.editorShortcut !== undefined ? input : migrateEditorShortcut(input);
   const settings = value
-    ? settingsSchema.parse(migrateEditorShortcut({ ...value.settings, provider: value.settings.provider ?? inferProvider(value.settings.endpoint) }))
+    ? settingsSchema.parse(prepare({ ...value.settings, provider: value.settings.provider ?? inferProvider(value.settings.endpoint) }))
     : defaults;
   const encryptedKeys = { ...value?.encryptedKeys };
   let predictionsChanged = predictionBranchesChanged(value?.settings, settings);
@@ -100,15 +110,15 @@ export function loadSettings() {
   const profiles: Record<string, Settings> = {};
   for (const [scope, profile] of Object.entries(value?.profiles ?? {})) {
     const parsed = settingsSchema.safeParse(typeof profile === 'object' && profile !== null
-      ? migrateEditorShortcut(profile as Record<string, unknown>) : profile);
+      ? prepare(profile as Record<string, unknown>) : profile);
     if (parsed.success) {
       profiles[scope] = parsed.data;
       predictionsChanged ||= predictionBranchesChanged(profile, parsed.data);
     }
   }
   profiles[credentialScope(settings)] = settings;
-  const legacyCredentialsPresent = existsSync(credentialsFile());
-  const legacyKeys = readCredentials();
+  const legacyCredentialsPresent = options.migrateCredentials !== false && existsSync(credentialsFile());
+  const legacyKeys = options.migrateCredentials === false ? {} : readCredentials();
   if (Object.keys(legacyKeys).length > 0 && !safeStorage.isEncryptionAvailable()) {
     throw new Error('系统凭据保护不可用，无法迁移已有 API Key；原凭据文件已保留');
   }
@@ -117,7 +127,7 @@ export function loadSettings() {
     encryptedKeys[scope] = safeStorage.encryptString(key).toString('base64');
   }
   const next = { settings, encryptedKeys, profiles, appearance: value?.appearance ?? { mode: 'system' as const, chatFontSize: defaultChatFontSize } };
-  if (predictionsChanged || legacyCredentialsPresent || value?.encryptedKey) persistSettings(next);
+  if (options.migrateCredentials !== false && (predictionsChanged || legacyCredentialsPresent || value?.encryptedKey)) persistSettings(next);
   stored = next;
   if (legacyCredentialsPresent) {
     unlinkSync(credentialsFile());

@@ -6,8 +6,9 @@ import type { PerformanceMetadata, ScreenshotPerformanceEvent, ScreenshotPerform
 import type { EditorCrop, EditorFinishRequest } from './screenshot-editor';
 
 export type DesktopAPI = {
+  collection: import('./collection').CollectionAPI;
   platform: NodeJS.Platform;
-  window: { ready(role: 'capture' | 'pin'): void };
+  window: { ready(role: 'capture' | 'pin' | 'shelf'): void };
   settings: {
     get(): Promise<Result<CapturePreferences>>;
     saveShortcuts(value: { shortcut: string; editorShortcut: string }): Promise<Result<CapturePreferences>>;

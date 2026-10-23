@@ -9,6 +9,10 @@ async function bootstrap() {
       import('./capture/CaptureOverlay')
     ]);
     Component = module.CaptureOverlay;
+  } else if (location.hash === '#shelf') {
+    await import('./design/base.css');
+    await import('./design/controls.css');
+    Component = (await import('./collection/ScreenshotShelf')).ScreenshotShelf;
   } else if (location.hash === '#pin') {
     document.documentElement.classList.add('floating-window');
     const [, module] = await Promise.all([

@@ -33,6 +33,22 @@ if (initialPerformanceSessionId) {
 }
 
 const api: SnipviaAPI = {
+  collection: {
+    current: () => ipcRenderer.invoke('collection:current'),
+    toggle: () => ipcRenderer.invoke('collection:toggle'),
+    collapse: () => ipcRenderer.invoke('collection:collapse'),
+    hide: () => ipcRenderer.invoke('collection:hide'),
+    remove: id => ipcRenderer.invoke('collection:remove', id),
+    reorder: value => ipcRenderer.invoke('collection:reorder', value),
+    clear: () => ipcRenderer.invoke('collection:clear'),
+    thumbnail: id => ipcRenderer.invoke('collection:thumbnail', id),
+    preview: id => ipcRenderer.invoke('collection:preview', id),
+    onChanged: callback => {
+      const listener = (_event: Electron.IpcRendererEvent, state: import('../shared/collection').ShelfState) => callback(state);
+      ipcRenderer.on('collection:changed', listener);
+      return () => { ipcRenderer.removeListener('collection:changed', listener); };
+    }
+  },
   updates: {
     current: () => ipcRenderer.invoke('updates:current'),
     check: () => ipcRenderer.invoke('updates:check'),
@@ -56,7 +72,7 @@ const api: SnipviaAPI = {
   },
   platform: process.platform,
   window: {
-    ready: (role: 'capture' | 'pin') => ipcRenderer.send('window:ready', role)
+    ready: (role: 'capture' | 'pin' | 'shelf') => ipcRenderer.send('window:ready', role)
   },
   settings: {
     get: () => ipcRenderer.invoke('settings:get'),

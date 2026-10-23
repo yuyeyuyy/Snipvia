@@ -51,3 +51,53 @@ test('Quick copies directly, retries clipboard failures, isolates sessions and n
     await mkdir('test-results', { recursive: true }); await writeFile('test-results/v2-quick.json', JSON.stringify(samples, null, 2));
   } finally { await app.close(); await rm(dir, { recursive: true, force: true }); }
 });
+
+test('Collect keeps ten ordered thumbnails, reuses Shelf, and safely previews, sorts, removes and clears', async () => {
+  test.setTimeout(90_000);
+  const dir = await mkdtemp(join(tmpdir(), 'snipvia-v2-collection-'));
+  const app = await launchDesktop({ args: ['.', '--user-data-dir=' + dir], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
+  try {
+    await synthetic(app);
+    const page = await app.firstWindow(), overlay = app.windows().find(p => p.url().endsWith('#capture'))!, pin = app.windows().find(p => p.url().endsWith('#pin'))!;
+    expect(app.windows().some(p => p.url().endsWith('#shelf'))).toBe(false);
+    const samples = [];
+    for (let i = 0; i < 10; i++) {
+      const id = await select(page, overlay, 'collect', i);
+      await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.count; }).toBe(i + 1);
+      const report = await page.evaluate(id => window.snipvia.performance.report(id), id); samples.push(report);
+    }
+    const shelf = app.windows().find(p => p.url().endsWith('#shelf'))!;
+    await expect(shelf.getByRole('button', { name: '展开截图收纳区' })).toBeVisible();
+    const windows = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map(w => w.id));
+    await shelf.getByRole('button', { name: '展开截图收纳区' }).click();
+    await expect(shelf.getByRole('heading', { name: '截图收纳', exact: true })).toBeVisible();
+    await expect(shelf.locator('.shelf-preview img')).toHaveCount(10);
+    const before = await page.evaluate(() => window.snipvia.collection.current());
+    if (!before.ok) throw new Error(before.error);
+    const ids = before.value.collection.items.map(item => item.id);
+    expect(new Set(ids).size).toBe(10);
+    await shelf.getByRole('button', { name: '下移截图 1', exact: true }).click();
+    await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.items[0].id; }).toBe(ids[1]);
+    const stale = await shelf.evaluate(value => window.snipvia.collection.reorder(value), { ids, revision: before.value.collection.revision });
+    expect(stale.ok).toBe(false);
+    await shelf.getByRole('button', { name: '收起收纳区' }).click();
+    await shelf.getByRole('button', { name: '展开截图收纳区' }).click();
+    expect(await shelf.locator('.shelf-grid article').first().getAttribute('data-id')).toBe(ids[1]);
+    await shelf.getByRole('button', { name: '预览截图 1', exact: true }).click();
+    await expect(pin.getByAltText('置顶截图')).toBeVisible();
+    await shelf.getByRole('button', { name: '删除截图 1', exact: true }).click();
+    await expect(pin.getByAltText('置顶截图')).toBeVisible();
+    expect((await pin.evaluate(() => window.snipvia.pin.copy())).ok).toBe(true);
+    await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 0, checkboxChecked: false }); });
+    await shelf.getByRole('button', { name: '清空…', exact: true }).click();
+    let current = await page.evaluate(() => window.snipvia.collection.current()); expect(current.ok && current.value.collection.count).toBe(9);
+    await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); });
+    await shelf.getByRole('button', { name: '清空…', exact: true }).click();
+    await expect(shelf.locator('.shelf-grid article')).toHaveCount(0);
+    current = await page.evaluate(() => window.snipvia.collection.current()); expect(current.ok && current.value.collection.count).toBe(0);
+    expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map(w => w.id))).toEqual(windows);
+    expect((await overlay.evaluate(() => window.snipvia.collection.current())).ok).toBe(false);
+    const usage = await page.evaluate(() => window.snipvia.performance.captureBackendStatus()); expect(usage.ok && usage.value.runtimeScreenshots).toEqual({ items: 0, bytes: 0 });
+    await mkdir('test-results', { recursive: true }); await writeFile('test-results/v2-collect.json', JSON.stringify(samples, null, 2));
+  } finally { await app.close(); await rm(dir, { recursive: true, force: true }); }
+});

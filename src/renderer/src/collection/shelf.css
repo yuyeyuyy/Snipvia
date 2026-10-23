@@ -1,0 +1,25 @@
+html, body, #root { background: transparent; }
+.shelf { color: var(--text-primary); background: var(--bg-panel); border: 1px solid var(--border-default); border-radius: 14px; height: 100%; overflow: hidden; font-size: 12px; }
+.shelf button { color: inherit; background: transparent; }
+.shelf button:focus-visible { outline: 2px solid var(--focus); outline-offset: -3px; }
+.shelf.collapsed { display: flex; align-items: center; }
+.shelf-open { display: flex; flex: 1; align-items: center; justify-content: space-evenly; gap: 6px; height: 100%; border: 0; padding: 8px; }
+.shelf-stack { font-size: 24px; }
+.shelf-hide { border: 0; padding: 8px; }
+.shelf.expanded { display: flex; flex-direction: column; }
+.workspace-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border-subtle); }
+.workspace-header h1 { font-size: 15px; margin: 0; }
+.workspace-header > div { display: flex; align-items: center; gap: 10px; }
+.workspace-header button { border: 0; font-size: 18px; }
+.shelf-caption { margin: 10px 16px; color: var(--text-secondary); }
+.shelf-grid { padding: 4px 14px 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-content: start; overflow: auto; flex: 1; }
+.shelf-grid article { min-width: 0; border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; }
+.shelf-preview { width: 100%; height: 86px; padding: 4px; border: 0; background: var(--bg-window) !important; }
+.shelf-preview img { width: 100%; height: 100%; object-fit: contain; }
+.shelf-item-tools { display: flex; align-items: center; gap: 2px; padding: 4px; }
+.shelf-item-tools span { margin-right: auto; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.shelf-item-tools button { border: 0; padding: 2px 4px; }
+.shelf footer { display: flex; align-items: center; gap: 8px; padding: 12px; border-top: 1px solid var(--border-subtle); }
+.shelf footer span { margin-left: auto; font-size: 10px; color: var(--text-secondary); }
+.shelf [role=alert] { padding: 8px 12px; margin: 0; background: var(--bg-selected); }
+.shelf-empty { grid-column: 1 / -1; color: var(--text-secondary); text-align: center; padding: 40px 0; }

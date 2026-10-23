@@ -14,6 +14,9 @@ import { cropRectangle } from '../shared/geometry';
 import { loadSettings, publicSettings } from './storage/settings';
 import { CapturePreferencesStore } from './storage/CapturePreferencesStore';
 import { capturePreferencesSchema } from '../shared/capture-preferences';
+import { ScreenshotCollection } from './storage/ScreenshotCollection';
+import { ShelfWindow } from './windows/ShelfWindow';
+import { collectionOrderSchema } from '../shared/collection';
 import { ScreenshotStore } from './storage/ScreenshotStore';
 import { LegacyDataService } from './legacy/LegacyDataService';
 import { AppearanceService } from './appearance';
@@ -37,6 +40,7 @@ let updates: UpdateCheckService;
 let capturePreferences: CapturePreferencesStore;
 export const appearance = new AppearanceService(() => mainWindow);
 let captureOverlayWindow: CaptureOverlayWindow | null = null;
+let shelfWindow: ShelfWindow | null = null;
 let screenshotToAllWindow: ScreenshotToAllWindow | null = null;
 let resolveCaptureOverlayReady: (() => void) | null = null;
 let rejectCaptureOverlayReady: ((error: unknown) => void) | null = null;
@@ -78,6 +82,7 @@ if (developmentSession) {
 if (process.platform === 'win32') app.setAppUserModelId('com.snipvia.desktop');
 const webPreferences = { preload: join(__dirname, '../preload/index.js'), sandbox: true, contextIsolation: true, nodeIntegration: false };
 export const screenshots = new ScreenshotStore(join(app.getPath('userData'), 'screenshots'));
+export const collection = new ScreenshotCollection(screenshots);
 export const legacyData = new LegacyDataService(app.getPath('userData'));
 type RoutedImage = { image: NativeImage; selection: Selection; display: CaptureDisplay; action?: 'copy' | 'save' | 'pin' };
 const modeRouter = new CaptureModeRouter<RoutedImage>({
@@ -87,6 +92,16 @@ const modeRouter = new CaptureModeRouter<RoutedImage>({
     screenshotPerformance.mark(session.id, 'clipboard_committed');
     session.signal.throwIfAborted();
     if (modeRouter.current(session.id)) cleanupOverlay(false);
+  },
+  collect: async (result, session) => {
+    session.signal.throwIfAborted();
+    const { image, display } = result.value;
+    const item = screenshots.create(image.toPNG(), { ...image.getSize(), mimeType: 'image/png' });
+    try { collection.append(item.id); } catch (error) { screenshots.release(item.id); throw error; }
+    screenshotPerformance.mark(session.id, 'collection_updated');
+    cleanupOverlay(false);
+    const completedGeneration = generation;
+    setImmediate(() => { if (generation === completedGeneration) shelfWindow?.collected(display.workArea, session.id); else shelfWindow?.publish(); });
   },
   edit: async (result, session) => {
     const { image, selection, display, action } = result.value;
@@ -123,12 +138,13 @@ function closePinnedFlow() {
   const pin = localPin;
   localPin = null;
   screenshotToAllWindow?.hide();
-  if (pin) { screenshots.release(pin.item.id); screenshotPerformance.mark(pin.performanceSessionId, 'capture_closed'); }
+  if (pin) { screenshots.unretain(pin.item.id, 'pin'); screenshotPerformance.mark(pin.performanceSessionId, 'capture_closed'); }
 }
 async function presentLocalPin(item: ScreenshotItem, selection: Selection, display: CaptureDisplay, sessionId: string) {
   if (!screenshotToAllWindow || !modeRouter.current(sessionId)) throw new Error('截图会话已结束');
   closePinnedFlow();
   const { bytes } = screenshots.image(item.id);
+  screenshots.retain(item.id, 'pin');
   localPin = { item, performanceSessionId: sessionId };
   const preview = { id: item.id, width: item.width, height: item.height, createdAt: item.createdAt, dataUrl: 'data:' + item.mimeType + ';base64,' + bytes.toString('base64'), performanceSessionId: sessionId };
   cleanupOverlay(false);
@@ -387,6 +403,7 @@ function cleanupOverlay(cancelSession = true) {
   capturedFrame = null;
   captureDisplay = null;
   preparing = false;
+  shelfWindow?.resume();
   restoreDock();
 }
 function announceError(error: unknown) {
@@ -415,7 +432,8 @@ function pinnedBounds(selection: { x: number; y: number; width: number; height: 
 type CaptureTrigger = 'hotkey' | 'menu' | 'tray' | 'main';
 
 async function startCapture(trigger: CaptureTrigger = 'main', mode: CaptureMode = 'quick') {
-  if (mode === 'collect') throw new Error('连续收纳尚未实现');
+  shelfWindow?.suspend();
+  if (mode === 'collect') void shelfWindow?.prepare();
   const performanceSessionId = screenshotPerformance.startSession({
     trigger,
     captureMode: mode,
@@ -579,10 +597,11 @@ async function finishEditor(value: unknown) {
     return { completed: completed !== false };
   } finally { editorFinishing.delete(request.sessionId); }
 }
-type WindowRole = 'main' | 'overlay' | 'pin';
+type WindowRole = 'main' | 'overlay' | 'pin' | 'shelf';
 
 function windowForRole(role: WindowRole) {
   if (role === 'main') return mainWindow;
+  if (role === 'shelf') return shelfWindow?.peekWindow() ?? null;
   if (role === 'overlay') return captureOverlayWindow?.peekWindow() ?? null;
   return screenshotToAllWindow?.peekWindow() ?? null;
 }
@@ -604,7 +623,44 @@ function handle(channel: string, role: WindowRole | WindowRole[], action: (value
   });
 }
 
+async function confirmClearCollection() {
+  const revision = collection.snapshot().revision;
+  if (!collection.getCount()) return shelfWindow!.current();
+  const result = await dialog.showMessageBox({ type: 'question', title: '清空收纳区', message: '清空全部 ' + collection.getCount() + ' 张截图？', detail: '未导出的临时截图将被移除。已保存或预览中的图片仍会保留。', buttons: ['取消', '清空'], defaultId: 0, cancelId: 0, noLink: true });
+  if (result.response === 1) collection.clear(true, revision);
+  shelfWindow?.publish(); return shelfWindow!.current();
+}
 function setupIPC() {
+  handle('collection:current', ['main', 'shelf'], () => shelfWindow!.current());
+  handle('collection:toggle', ['main', 'shelf'], () => shelfWindow!.toggle());
+  handle('collection:collapse', 'shelf', () => shelfWindow!.collapse());
+  handle('collection:hide', 'shelf', () => shelfWindow!.hide());
+  handle('collection:remove', 'shelf', value => { collection.remove(z.string().uuid().parse(value)); shelfWindow?.publish(); return shelfWindow!.current(); });
+  handle('collection:reorder', 'shelf', value => {
+    const request = collectionOrderSchema.parse(value);
+    const id = screenshotPerformance.startSession({ trigger: 'shelf-reorder' });
+    screenshotPerformance.mark(id, 'shelf_reorder_start'); collection.reorder(request.ids, request.revision); screenshotPerformance.mark(id, 'shelf_reorder_updated');
+    shelfWindow?.publish(); return shelfWindow!.current();
+  });
+  handle('collection:clear', ['main', 'shelf'], () => confirmClearCollection());
+  handle('collection:thumbnail', 'shelf', value => {
+    const id = z.string().uuid().parse(value); collection.getItem(id);
+    const image = nativeImage.createFromBuffer(screenshots.image(id).bytes);
+    if (image.isEmpty()) throw new Error('截图无法预览');
+    return image.resize({ width: Math.min(240, image.getSize().width) }).toDataURL();
+  });
+  handle('collection:preview', 'shelf', async value => {
+    const item = collection.getItem(z.string().uuid().parse(value));
+    if (preparing || captureOverlayWindow?.isActive()) throw new Error('请先完成截图');
+    const sessionId = screenshotPerformance.startSession({ trigger: 'collection-preview' });
+    const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
+    const { bytes } = screenshots.image(item.id); closePinnedFlow(); screenshots.retain(item.id, 'pin');
+    localPin = { item, performanceSessionId: sessionId };
+    await screenshotToAllWindow!.present(sessionId, pinnedBounds({ x: 40, y: 80, width: item.width, height: item.height }, display), {
+      localOnly: true, chatActive: false, performanceSessionId: sessionId,
+      capture: { id: item.id, createdAt: item.createdAt, width: item.width, height: item.height, dataUrl: 'data:' + item.mimeType + ';base64,' + bytes.toString('base64') }
+    });
+  });
   handle('updates:current', 'main', value => { z.undefined().parse(value); return updates.current(); });
   handle('updates:check', 'main', value => { z.undefined().parse(value); return updates.check(); });
   handle('updates:open-release', 'main', value => { z.undefined().parse(value); return updates.openRelease(); });
@@ -641,17 +697,18 @@ function setupIPC() {
   });
   ipcMain.on('window:ready', (event, value: unknown) => {
     if (value === 'capture' && senderAllowed(event, 'overlay')) captureOverlayWindow?.markRendererReady();
+    if (value === 'shelf' && senderAllowed(event, 'shelf')) shelfWindow?.markReady();
     if (value === 'pin' && senderAllowed(event, 'pin')) screenshotToAllWindow?.markRendererReady();
   });
   ipcMain.on('performance:mark', (event, value: unknown) => {
-    if (!senderAllowed(event, ['main', 'overlay', 'pin'])) return;
+    if (!senderAllowed(event, ['main', 'overlay', 'pin', 'shelf'])) return;
     const parsed = performanceMarkSchema.safeParse(value);
     if (!parsed.success) return;
     screenshotPerformance.mark(parsed.data.sessionId, parsed.data.event, 'renderer', parsed.data.metadata);
   });
-  handle('performance:report', ['main', 'overlay', 'pin'], (value) => screenshotPerformance.report(performanceSessionIdSchema.parse(value)));
-  handle('performance:startup-report', ['main', 'overlay', 'pin'], () => startupPerformanceSessionId ? screenshotPerformance.report(startupPerformanceSessionId) : null);
-  handle('performance:capture-backend-status', ['main', 'overlay', 'pin'], () => ({
+  handle('performance:report', ['main', 'overlay', 'pin', 'shelf'], (value) => screenshotPerformance.report(performanceSessionIdSchema.parse(value)));
+  handle('performance:startup-report', ['main', 'overlay', 'pin', 'shelf'], () => startupPerformanceSessionId ? screenshotPerformance.report(startupPerformanceSessionId) : null);
+  handle('performance:capture-backend-status', ['main', 'overlay', 'pin', 'shelf'], () => ({
     preference: captureBackendPreference(),
     runtimeScreenshots: screenshots.runtimeUsage(),
     screenCaptureKit: screenCaptureKitBackend?.status() ?? null,
@@ -880,6 +937,7 @@ else {
     writePackagedTestResult({ stage: 'main-window-handlers-ready' });
     captureOverlayWindow = new CaptureOverlayWindow(webPreferencesFor(startupPerformanceSessionId), loadWindow, startupPerformanceSessionId, () => cleanupOverlay());
     screenshotToAllWindow = new ScreenshotToAllWindow(webPreferencesFor(startupPerformanceSessionId), loadWindow, startupPerformanceSessionId, () => {}, () => closePinnedFlow());
+    shelfWindow = new ShelfWindow(webPreferences, loadWindow, () => collection.snapshot());
     writePackagedTestResult({ stage: 'window-managers-ready' });
     updates = new UpdateCheckService({
       currentVersion: app.isPackaged ? app.getVersion() : sourceVersion,
@@ -1047,6 +1105,7 @@ app.on('before-quit', () => {
   closePinnedFlow();
   captureOverlayWindow?.destroy();
   screenshotToAllWindow?.destroy();
+  shelfWindow?.destroy();
   screenshots.dispose();
   void captureEngine?.dispose();
 });

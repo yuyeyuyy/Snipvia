@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { captureFinishSchema } from './contracts';
 
 export const editorFinishSchema = captureFinishSchema.extend({
-  action: z.enum(['copy', 'save', 'pin', 'ai']),
+  action: z.enum(['copy', 'save', 'pin']),
   png: z.instanceof(Uint8Array).refine((bytes) => bytes.byteLength > 0 && bytes.byteLength <= 64 * 1024 * 1024, '截图文件过大')
 });
 export type EditorFinishRequest = z.infer<typeof editorFinishSchema>;

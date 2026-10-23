@@ -1,3 +1,4 @@
+// V1 prediction rules retained only for lossless legacy settings compatibility.
 import { z } from 'zod';
 
 export const screenshotContentTypes = ['error', 'code', 'text', 'table', 'ui', 'question', 'unknown'] as const;
@@ -96,56 +97,3 @@ export const predictionBranchListSchema = z.array(predictionBranchSchema).max(30
     ids.add(branch.id);
   }
 }).transform((branches) => branches.filter((branch) => !retiredPredictionBranchIds.has(branch.id)));
-
-export const screenshotAnalysisSchema = z.object({
-  contentType: screenshotContentTypeSchema,
-  confidence: z.number().finite().min(0).max(1),
-  recommendedAction: screenshotActionIdSchema,
-  matchedBranchId: screenshotActionIdSchema.nullable().optional(),
-  signals: z.object({
-    hasCode: z.boolean().optional(),
-    hasError: z.boolean().optional(),
-    hasTable: z.boolean().optional(),
-    hasQuestion: z.boolean().optional(),
-    hasUI: z.boolean().optional(),
-    hasSchedule: z.boolean().optional(),
-    detectedLanguage: z.string().max(32).optional()
-  }).optional()
-});
-export type ScreenshotAnalysis = z.infer<typeof screenshotAnalysisSchema>;
-
-export type ScreenshotAction = {
-  id: ScreenshotActionId;
-  label: string;
-  runningLabel: string;
-  prompt: string;
-  local?: boolean;
-};
-
-export const autoActionStates = ['awaiting_input', 'idle', 'analyzing', 'recommended', 'executing', 'streaming', 'done', 'error'] as const;
-export type AutoActionState = typeof autoActionStates[number];
-
-export type AutoActionSnapshot = {
-  captureId: string;
-  operationId: string;
-  state: AutoActionState;
-  actionId: ScreenshotActionId;
-  analysis?: ScreenshotAnalysis;
-  content: string;
-  error?: string;
-};
-
-export type ChatStreamEvent = {
-  captureId: string;
-  requestId: string;
-  type: 'start' | 'delta' | 'complete' | 'error';
-  delta?: string;
-  message?: import('./contracts').Message;
-  error?: string;
-};
-
-export const chatStreamRequestSchema = z.object({
-  captureId: z.string().uuid(),
-  question: z.string().trim().min(1).max(12000),
-  performanceSessionId: z.string().regex(/^capture_\d+_[0-9a-f]{8}$/).optional()
-});

@@ -26,7 +26,7 @@ async function launch(): Promise<Launched> {
     }
   });
   const main = await app.firstWindow();
-  await expect(main.getByRole('button', { name: 'AI 笔记', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(main.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
   await expect.poll(() => app.windows().some((window) => window.url().endsWith('#capture'))).toBe(true);
   const overlay = app.windows().find((window) => window.url().endsWith('#capture'))!;
   await expect.poll(async () => {

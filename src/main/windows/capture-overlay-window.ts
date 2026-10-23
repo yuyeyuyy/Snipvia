@@ -76,12 +76,12 @@ export class CaptureOverlayWindow {
     return this.readyPromise;
   }
 
-  async present(sessionId: string, bounds: Rectangle, frameReady = true, mode: CaptureMode = 'ai') {
+  async present(sessionId: string, bounds: Rectangle, frameReady = true, mode: CaptureMode = 'quick') {
     await this.beginSession(sessionId, bounds, frameReady, mode);
     return this.visiblePromise ?? false;
   }
 
-  async prepare(sessionId: string, bounds: Rectangle, mode: CaptureMode = 'ai') {
+  async prepare(sessionId: string, bounds: Rectangle, mode: CaptureMode = 'quick') {
     await this.beginSession(sessionId, bounds, false, mode);
   }
 

@@ -104,7 +104,7 @@ async function launch(options: LaunchOptions) {
     }
   });
   const main = await app.firstWindow();
-  await expect(main.getByRole('button', { name: 'AI 笔记', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(main.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
   await expect.poll(() => app.windows().some((window) => window.url().endsWith('#capture'))).toBe(true);
   await expect.poll(() => app.windows().some((window) => window.url().endsWith('#pin'))).toBe(true);
   const permission = await main.evaluate(() => window.snipvia.permissions.screen());
@@ -243,10 +243,7 @@ test('runs the real macOS Phase 3 capture experiment', async () => {
     await stateValidation.overlay.mouse.up();
     await expect(stateValidation.pin.getByAltText('置顶截图')).toBeVisible();
     await setMarker(stateValidation.pin, pinMarker, 'pin');
-    await expect.poll(() => stateValidation.app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(true);
-    const quickChat = stateValidation.app.windows().find(window => window.url().endsWith('#quick-chat'))!;
-    await expect(quickChat.locator('.quick-chat')).toBeVisible();
-    await setMarker(quickChat, chatMarker, 'quick-chat');
+    expect(stateValidation.app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(false);
     await stateValidation.app.evaluate(({ app }) => app.emit('activate'));
     await expect(stateValidation.main.locator('#phase3-self-capture-marker')).toBeVisible();
     const allWindows = await stateValidation.main.evaluate(() => window.snipvia.capture.start());

@@ -31,7 +31,7 @@ export function ScreenPermissionCard({ onChange }: { onChange?(info: ScreenPermi
   const stableDevelopment = !!info?.development && info.applicationName === '截然 Dev.app';
   return <section className="permission-card" aria-label="录屏权限">
     <div className="permission-heading"><strong>录屏权限</strong><span className={`permission-status ${info?.status ?? 'unknown'}`}>{info ? statusText[info.status] : '正在检查…'}</span></div>
-    {info?.status === 'granted' ? <p>系统已授权，可以使用截图与后续对话、日程识别。{stableDevelopment ? '源码更新继续运行 pnpm dev，不需要重新添加权限。' : info.development ? '若 macOS 要求重启，请退出 Electron 欢迎页，在项目终端停止旧进程后重新运行 pnpm dev。' : '若 macOS 要求重启，请重新打开 Snipvia.app。'}</p> : <>
+    {info?.status === 'granted' ? <p>系统已授权，可以使用截图与标注。{stableDevelopment ? '源码更新继续运行 pnpm dev，不需要重新添加权限。' : info.development ? '若 macOS 要求重启，请退出 Electron 欢迎页，在项目终端停止旧进程后重新运行 pnpm dev。' : '若 macOS 要求重启，请重新打开 Snipvia.app。'}</p> : <>
       <p>首次截图时 macOS 会请求授权。若此前已拒绝，系统不会重复弹出授权框，需要在「系统设置 → 隐私与安全性 → 录屏与系统录音」中打开。</p>
       {info && <>
         <p>列表中应查找 <strong>{info.applicationName}</strong>{info.development && !stableDevelopment ? '（当前开发模式以 Electron 运行）' : ''}。{stableDevelopment ? '当前开发应用使用临时签名，macOS 不会自动把它加入列表。点击“在 Finder 中选中”，把已选中的应用直接拖入录屏列表并打开开关；无需浏览文件夹。' : '若列表中没有，请点「添加」，在文件选择器按 ⌘⇧G，粘贴下方路径后选择该应用。'}</p>

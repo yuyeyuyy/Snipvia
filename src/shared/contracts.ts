@@ -1,11 +1,7 @@
-import type { EditorCrop, EditorFinishRequest } from './screenshot-editor';
-import type { AgentExecutionAPI } from './agent/execution';
-import type { AgentPermissionAPI } from './agent/permission';
-import type { ThemeMode, ThemeSnapshot } from './appearance';
 import { z } from 'zod';
 import { isProviderEndpoint, providerIds } from './providers';
-import { performanceSessionIdSchema, type PerformanceMetadata, type ScreenshotPerformanceEvent, type ScreenshotPerformanceReport } from './performance';
-import { defaultPredictionBranches, predictionBranchListSchema, type AutoActionSnapshot, type ChatStreamEvent, type ScreenshotAction } from './screenshot-understanding';
+import { performanceSessionIdSchema } from './performance';
+import { defaultPredictionBranches, predictionBranchListSchema } from './screenshot-understanding';
 
 export const settingsSchema = z.object({
   provider: z.enum(providerIds).default('custom'),
@@ -92,42 +88,8 @@ export type PublicSettings = Settings & {
   credentialStorage: 'macos-keychain' | 'windows-dpapi' | 'system-secret-store';
 };
 export type Selection = z.infer<typeof selectionSchema>;
-export type Capture = {
-  id: string;
-  conversationId: string;
-  dataUrl: string;
-  width: number;
-  height: number;
-  createdAt: string;
-  performanceSessionId?: string;
-  continuesConversation?: boolean;
-};
-export type Message = {
-  images?: import('./chat-images').ChatImage[];
-  editProposals?: import('./agent/editing').ProposalSummary[];
-  /** Earlier successful answers retained when the user regenerates the latest turn. */
-  previousAnswers?: string[];
-  noteChanges?: import('./agent/note-writing').NoteChangeSummary[];
-  role: 'user' | 'assistant';
-  content: string;
-  createdAt?: string;
-  provider?: Settings['provider'];
-  model?: string;
-  sources?: import('./agent/sources').WebSource[];
-};
-export type ConversationSummary = {
-  id: string;
-  title: string;
-  createdAt: string;
-  updatedAt: string;
-  messageCount: number;
-  profile: ModelProfile;
-};
-export type Conversation = ConversationSummary & { capture: Capture; messages: Message[] };
-export type WorkspaceConversation = ConversationSummary & { capture?: Capture; messages: Message[] };
-export type ChatState = { capture: Capture; messages: Message[]; performanceSessionId?: string; autoAction?: AutoActionSnapshot };
-export type PinnedCaptureState = { localOnly?: boolean; capture: Capture; chatActive: boolean; performanceSessionId: string };
-export type CaptureMode = 'ai' | 'standard';
+export type PinnedCaptureState = { localOnly?: boolean; capture: import('./screenshot').ScreenshotPreview; chatActive: boolean; performanceSessionId: string };
+export type CaptureMode = import('./capture-mode').CaptureMode;
 export type CaptureOverlaySession = { mode: CaptureMode; performanceSessionId: string; frameReady: boolean };
 export type ReusableWindowRole = 'capture' | 'pin' | 'quick-chat';
 export type CaptureFrameTransport = 'data-url' | 'png-base64' | 'png-binary' | 'jpeg-90' | 'jpeg-95';
@@ -152,6 +114,7 @@ export type CaptureFrameQuality = {
   sampledPixels: number;
 };
 export type CaptureBackendStatus = {
+  runtimeScreenshots?: { items: number; bytes: number };
   preference: 'auto' | 'electron' | 'sck';
   screenCaptureKit: {
     available: boolean;
@@ -210,7 +173,7 @@ export type ScheduleJobSummary = {
   error?: string;
 };
 export type ScheduleJob = ScheduleJobSummary & {
-  capture: Omit<Capture, 'conversationId'>;
+  capture: import('./screenshot').ScreenshotPreview;
 };
 export type MacCalendar = { id: string; name: string };
 export type MacReminderList = { id: string; name: string };
@@ -223,120 +186,6 @@ export type ScreenPermissionInfo = {
 };
 export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
 export type LoginItemState = { supported: boolean; enabled: boolean; description: string };
-export type SnipviaAPI = {
-  chatImages: import('./chat-images').ChatImagesAPI;
-  updates: import('./updates').UpdatesAPI;
-  prediction: import('./prediction-settings').PredictionSettingsAPI;
-  notes: import('./notes').NotesAPI;
-  agentPermissions: AgentPermissionAPI;
-  agent: AgentExecutionAPI;
-  editing: import('./agent/editing').EditingAPI;
-  platform: NodeJS.Platform;
-  window: {
-    ready(role: ReusableWindowRole): void;
-  };
-  settings: {
-    get(): Promise<Result<PublicSettings>>;
-    save(value: Settings & { apiKey?: string }): Promise<Result<PublicSettings>>;
-    loginItem(): Promise<Result<LoginItemState>>;
-    setLoginItem(enabled: boolean): Promise<Result<LoginItemState>>;
-    onChanged(callback: (settings: PublicSettings) => void): () => void;
-  };
-  appearance: {
-    current(): ThemeSnapshot;
-    set(mode: ThemeMode): Promise<Result<ThemeSnapshot>>;
-    setChatFontSize(size: number): Promise<Result<ThemeSnapshot>>;
-    onChanged(callback: (theme: ThemeSnapshot) => void): () => void;
-  };
-  models: import('./models').ModelCatalogAPI;
-  browser: { openExternal(url: string): Promise<Result<void>> };
-  permissions: {
-    screen(): Promise<Result<ScreenPermissionInfo>>;
-    openScreenSettings(): Promise<Result<void>>;
-    revealApplication(): Promise<Result<void>>;
-    copyApplicationPath(): Promise<Result<void>>;
-  };
-  capture: {
-    start(mode?: CaptureMode): Promise<Result<void>>;
-    editorCrop(value: { sessionId: string; selection: Selection }): Promise<Result<EditorCrop>>;
-    editorFinish(value: EditorFinishRequest): Promise<Result<{ completed: boolean }>>;
-    import(): Promise<Result<Capture | null>>;
-    current(): Promise<Result<Capture | null>>;
-    frame(): Promise<Result<CaptureFramePayload>>;
-    finish(value: { sessionId: string; selection: Selection }): Promise<Result<void>>;
-    cancel(): Promise<Result<void>>;
-    sessionShellRendered(sessionId: string): Promise<Result<boolean>>;
-    sessionRendered(sessionId: string): Promise<Result<boolean>>;
-    sessionVisible(sessionId: string): Promise<Result<boolean>>;
-    onSession(callback: (session: CaptureOverlaySession) => void): () => void;
-    onFrameReady(callback: (sessionId: string) => void): () => void;
-    onResetSession(callback: () => void): () => void;
-    onChanged(callback: (capture: Capture) => void): () => void;
-    onResumeConversation(callback: (conversationId: string) => void): () => void;
-    onError(callback: (error: string) => void): () => void;
-  };
-  pin: {
-    current(): Promise<Result<PinnedCaptureState>>;
-    close(): Promise<Result<void>>;
-    copy(): Promise<Result<void>>;
-    startChat(): Promise<Result<void>>;
-    returnToApp(): Promise<Result<void>>;
-    sessionRendered(sessionId: string): Promise<Result<boolean>>;
-    sessionVisible(sessionId: string): Promise<Result<boolean>>;
-    onSession(callback: (state: PinnedCaptureState) => void): () => void;
-    onResetSession(callback: () => void): () => void;
-    onChatState(callback: (active: boolean) => void): () => void;
-  };
-  chat: {
-    state(): Promise<Result<ChatState>>;
-    setExpanded(expanded: boolean): Promise<Result<void>>;
-    resize(size: { width: number; height: number }): Promise<Result<{ width: number; height: number }>>;
-    saveImage(): Promise<Result<boolean>>;
-    send(value: { captureId: string; question: string; performanceSessionId?: string }): Promise<Result<Message>>;
-    stream(value: { captureId: string; question: string; performanceSessionId?: string }): Promise<Result<{ requestId: string }>>;
-    cancel(): Promise<Result<void>>;
-    onStream(callback: (event: ChatStreamEvent) => void): () => void;
-  };
-  autoAction: {
-    actions(): Promise<Result<ScreenshotAction[]>>;
-    state(): Promise<Result<AutoActionSnapshot | null>>;
-    start(captureId: string): Promise<Result<void>>;
-    cancel(): Promise<Result<void>>;
-    userIntent(): Promise<Result<void>>;
-    close(): Promise<Result<void>>;
-    onChanged(callback: (state: AutoActionSnapshot) => void): () => void;
-  };
-  history: {
-    onChanged(callback: () => void): () => void;
-    list(): Promise<Result<ConversationSummary[]>>;
-    create(): Promise<Result<WorkspaceConversation>>;
-    read(id: string): Promise<Result<WorkspaceConversation>>;
-    rename(id: string, title: string): Promise<Result<ConversationSummary>>;
-    open(id: string): Promise<Result<Conversation>>;
-    delete(id: string): Promise<Result<boolean>>;
-    clear(): Promise<Result<boolean>>;
-  };
-  schedule: {
-    list(): Promise<Result<ScheduleJobSummary[]>>;
-    open(id: string): Promise<Result<ScheduleJob>>;
-    save(value: { jobId: string; eventId: string; draft: ScheduleDraft }): Promise<Result<ScheduleJob>>;
-    delete(id: string): Promise<Result<boolean>>;
-    macCalendars(): Promise<Result<MacCalendar[]>>;
-    macReminderLists(): Promise<Result<MacReminderList[]>>;
-    saveToMac(value: { jobId: string; eventId: string; calendarId: string; draft: ScheduleDraft }): Promise<Result<ScheduleJob>>;
-    saveToReminders(value: { jobId: string; eventId: string; listId: string; draft: ScheduleDraft }): Promise<Result<ScheduleJob>>;
-    onChanged(callback: () => void): () => void;
-    onNavigate(callback: () => void): () => void;
-  };
-  performance: {
-    initialSessionId: string | null;
-    mark(sessionId: string | null | undefined, event: ScreenshotPerformanceEvent, metadata?: PerformanceMetadata): void;
-    report(sessionId: string): Promise<Result<ScreenshotPerformanceReport | null>>;
-    startupReport(): Promise<Result<ScreenshotPerformanceReport | null>>;
-    frameQuality(sessionId: string): Promise<Result<CaptureFrameQuality>>;
-    captureBackendStatus(): Promise<Result<CaptureBackendStatus>>;
-  };
-};
 
 export const defaults: Settings = {
   provider: 'openai', endpoint: 'https://api.openai.com/v1', model: 'gpt-6.1-sol',
@@ -344,3 +193,5 @@ export const defaults: Settings = {
   shortcut: 'CommandOrControl+Shift+Space', continueShortcut: 'CommandOrControl+Shift+Enter',
   predictionBranches: defaultPredictionBranches.map((branch) => ({ ...branch }))
 };
+
+export type SnipviaAPI = import('./desktop-api').DesktopAPI;

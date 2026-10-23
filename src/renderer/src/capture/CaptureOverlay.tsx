@@ -3,7 +3,7 @@ import { ScreenshotEditor } from './editor/ScreenshotEditor';
 import type { CaptureMode, Selection } from '../../../shared/contracts';
 
 export function CaptureOverlay() {
-  const [mode, setMode] = useState<CaptureMode>('ai');
+  const [mode, setMode] = useState<CaptureMode>('quick');
   const [editing, setEditing] = useState(false);
   const editingRef = useRef(false);
   const [frame, setFrame] = useState('');
@@ -128,7 +128,7 @@ export function CaptureOverlay() {
 
   async function finishSelection(selected: Selection, sessionId: string) {
     if (activeSessionId.current !== sessionId) return;
-    if (mode === 'standard') { setRect(selected); setBusy(false); setEditing(true); editingRef.current = true; return; }
+    if (mode === 'edit') { setRect(selected); setBusy(false); setEditing(true); editingRef.current = true; return; }
     window.snipvia.performance.mark(sessionId, 'capture_finish_ipc_start');
     const result = await window.snipvia.capture.finish({ sessionId, selection: selected });
     if (!result.ok && activeSessionId.current === sessionId) { setError(result.error); setBusy(false); }
@@ -193,6 +193,6 @@ export function CaptureOverlay() {
     <div className="capture-shade" />
     {rect && !editing && <div className="selection" style={{ left: rect.x, top: rect.y, width: rect.width, height: rect.height, backgroundImage: frame ? `url(${frame})` : 'none', backgroundSize: `${innerWidth}px ${innerHeight}px`, backgroundPosition: `-${rect.x}px -${rect.y}px` }}><span>{Math.round(rect.width)} × {Math.round(rect.height)}</span></div>}
     {editing && rect && performanceSessionId && <ScreenshotEditor key={performanceSessionId} frame={frame} initialSelection={rect} sessionId={performanceSessionId} />}
-    {!editing && <div className="capture-hint">{error || (busy ? '正在固定截图…' : frame ? mode === 'standard' ? `拖动选择截图区域 · 松开标注${window.snipvia.platform === 'win32' ? ' · Enter 全屏' : ''} · Esc 取消` : `拖动选择截图区域 · 松开完成${window.snipvia.platform === 'win32' ? ' · Enter 全屏' : ''} · Esc 取消` : '正在准备截图… · Esc 取消')}</div>}
+    {!editing && <div className="capture-hint">{error || (busy ? '正在固定截图…' : frame ? mode === 'edit' ? `拖动选择截图区域 · 松开标注${window.snipvia.platform === 'win32' ? ' · Enter 全屏' : ''} · Esc 取消` : `拖动选择截图区域 · 松开完成${window.snipvia.platform === 'win32' ? ' · Enter 全屏' : ''} · Esc 取消` : '正在准备截图… · Esc 取消')}</div>}
   </div>;
 }

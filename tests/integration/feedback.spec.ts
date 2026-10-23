@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { launchDesktop } from '../helpers/desktop';
 
-test('global feedback shows the QQ group and preserves the current page and draft', async () => {
+test('global feedback shows the QQ group and preserves settings', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-feedback-'));
   const app = await launchDesktop({ args: ['.', '--user-data-dir=' + directory],
     env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
@@ -40,10 +40,7 @@ test('global feedback shows the QQ group and preserves the current page and draf
     await expect(dialog).toHaveCount(0);
     await expect(feedback).toBeFocused();
 
-    await page.getByRole('navigation', { name: '主导航' }).getByRole('button', { name: 'AI 对话', exact: true }).click();
-    const input = page.getByLabel('AI 对话输入', { exact: true });
-    await input.fill('反馈弹窗关闭后保留这条草稿');
-    await mkdir('docs/ui/feedback', { recursive: true });
+    await mkdir('test-results/v2-feedback', { recursive: true });
     for (const theme of ['light', 'dark'] as const) {
       expect((await page.evaluate(theme => window.snipvia.appearance.set(theme), theme)).ok).toBe(true);
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
@@ -51,13 +48,12 @@ test('global feedback shows the QQ group and preserves the current page and draf
       await expect(dialog).toBeVisible();
       await expect(copy).toHaveText('复制群号');
       await expect(dialog.getByText('643251313', { exact: true })).toHaveCSS('user-select', 'text');
-      await page.screenshot({ path: 'docs/ui/feedback/' + theme + '.png', animations: 'disabled' });
+      await page.screenshot({ path: 'test-results/v2-feedback/' + theme + '.png', animations: 'disabled' });
       await dialog.getByRole('button', { name: '关闭', exact: true }).click();
       await expect(dialog).toHaveCount(0);
-      await expect(input).toHaveValue('反馈弹窗关闭后保留这条草稿');
+      await expect(page.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
     }
 
-    await page.getByRole('button', { name: '模型与设置', exact: true }).click();
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().find(window => !new URL(window.webContents.getURL()).hash)!.setSize(840, 600));
     await feedback.click();
     await expect(dialog).toBeVisible();
@@ -65,7 +61,7 @@ test('global feedback shows the QQ group and preserves the current page and draf
       const bounds = node.getBoundingClientRect();
       return bounds.left >= 0 && bounds.top >= 0 && bounds.right <= innerWidth && bounds.bottom <= innerHeight;
     })).toBe(true);
-    await page.screenshot({ path: 'docs/ui/feedback/compact.png', animations: 'disabled' });
+    await page.screenshot({ path: 'test-results/v2-feedback/compact.png', animations: 'disabled' });
     await page.mouse.click(5, 100);
     await expect(dialog).toHaveCount(0);
     await expect(feedback).toBeFocused();

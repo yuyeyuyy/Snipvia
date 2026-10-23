@@ -17,20 +17,10 @@ async function bootstrap() {
     ]);
     Component = module.PinnedCapture;
   } else {
-    // The refined layout must be applied after the base styles, including in Vite development.
-    await import('./style.css');
-    await import('./refined.css');
+    await import('./design/base.css');
     await import('./design/controls.css');
     await import('./design/app-shell.css');
-    if (location.hash === '#agent-permission') {
-      await import('./agent/file-approval.css');
-      Component = (await import('./agent/AgentPermissionPanel')).AgentPermissionPanel;
-    } else if (location.hash === '#quick-chat') {
-      document.documentElement.classList.add('floating-window');
-      Component = (await import('./chat/QuickChat')).QuickChat;
-    } else {
-      Component = (await import('./App')).App;
-    }
+    Component = (await import('./App')).App;
   }
   createRoot(document.getElementById('root')!).render(<React.StrictMode><Component /></React.StrictMode>);
 }

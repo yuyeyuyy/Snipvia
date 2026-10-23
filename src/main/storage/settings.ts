@@ -14,6 +14,7 @@ const fileHash = (bytes: Buffer) => createHash('sha256').update(bytes).digest('h
 type Stored = { settings: Settings; encryptedKeys: Record<string, string>; profiles: Record<string, Settings>; appearance: { mode: ThemeMode; chatFontSize: number } };
 let stored: Stored = { settings: defaults, encryptedKeys: {}, profiles: {}, appearance: { mode: 'system', chatFontSize: defaultChatFontSize } };
 let legacySettingsReadOnly = false;
+let preserveLegacyPayload = false;
 const file = () => join(app.getPath('userData'), 'settings.json');
 const credentialsFile = () => join(app.getPath('userData'), 'credentials.json');
 const credentialsKeyFile = () => join(app.getPath('userData'), 'credentials.key');
@@ -65,8 +66,15 @@ function readCredentials() {
 function persistSettings(value: Stored) {
   if (legacySettingsReadOnly) throw new Error('旧设置文件无法读取，原文件已保留；请先备份检查');
   mkdirSync(app.getPath('userData'), { recursive: true, mode: 0o700 });
-  const temporary = `${file()}.tmp`;
-  writeFileSync(temporary, JSON.stringify(value, null, 2), { mode: 0o600 });
+  let payload: unknown = value;
+  if (preserveLegacyPayload && existsSync(file())) {
+    const original: unknown = JSON.parse(readFileSync(file(), 'utf8'));
+    if (!original || typeof original !== 'object' || Array.isArray(original)) throw new Error('旧设置文件无效，原文件已保留');
+    const legacy = original as Record<string, unknown>;
+    payload = { ...legacy, appearance: { ...(typeof legacy.appearance === 'object' && legacy.appearance !== null ? legacy.appearance : {}), ...value.appearance } };
+  }
+  const temporary = file() + '.tmp';
+  writeFileSync(temporary, JSON.stringify(payload, null, 2), { mode: 0o600 });
   renameSync(temporary, file());
   chmodSync(file(), 0o600);
 }
@@ -88,6 +96,7 @@ function predictionBranchesChanged(value: unknown, settings: Settings) {
 
 export function loadSettings(options: { migrateCredentials?: boolean } = {}) {
   legacySettingsReadOnly = false;
+  preserveLegacyPayload = options.migrateCredentials === false;
   try { loadStoredSettings(options); }
   catch (error) { legacySettingsReadOnly = true; throw error; }
 }

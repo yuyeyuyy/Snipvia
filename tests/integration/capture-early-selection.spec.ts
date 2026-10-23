@@ -20,7 +20,8 @@ for (const fallback of [false, true]) {
       };
     `;
     await writeFile(bootstrap, `
-      const {app,systemPreferences,desktopCapturer,nativeImage,screen} = require('electron');
+      const {app,systemPreferences,desktopCapturer,nativeImage,screen,clipboard} = require('electron');
+      clipboard.write = async () => {};
       app.setAppPath(${JSON.stringify(root)});
       systemPreferences.getMediaAccessStatus = () => 'granted';
       desktopCapturer.getSources = async options => {
@@ -45,17 +46,15 @@ for (const fallback of [false, true]) {
       await app.evaluate(() => (globalThis as typeof globalThis & {releasePixels:()=>void}).releasePixels());
       const pin = app.windows().find(window => window.url().endsWith('#pin'))!;
       await expect(pin.getByAltText('置顶截图')).toBeVisible();
-      await expect.poll(() => app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(true);
-      const chat = app.windows().find(window => window.url().endsWith('#quick-chat'))!;
-      await expect(chat.getByLabel('悬浮对话问题')).toBeFocused();
-      await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getFocusedWindow()?.webContents.getURL().endsWith('#quick-chat') ?? false)).toBe(true);
-      const state = await chat.evaluate(() => window.snipvia.chat.state());
+      expect(app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(false);
+      await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getFocusedWindow()?.webContents.getURL().endsWith('#pin') ?? false)).toBe(true);
+      const state = await pin.evaluate(() => window.snipvia.pin.current());
       expect(state.ok && state.value.performanceSessionId).toBe(sessionId);
       // Synthetic pixels are uniform. The queued selection must retain its exact dimensions.
-      const report = await chat.evaluate(id => window.snipvia.performance.report(id!), sessionId);
+      const report = await pin.evaluate(id => window.snipvia.performance.report(id!), sessionId);
       expect(report.ok && report.value?.metadata.selectionWidthDip).toBe(250);
       expect(report.ok && report.value?.metadata.selectionHeightDip).toBe(150);
-      expect(report.ok && report.value?.measures.some(measure => measure.id === 'selection-chat-visible')).toBe(true);
+      await expect.poll(async () => { const value = await pin.evaluate(id => window.snipvia.performance.report(id!), sessionId); return value.ok ? value.value?.metrics.selectionToScreenshotVisibleMs : undefined; }).toBeGreaterThan(0);
       await pin.evaluate(() => window.snipvia.pin.close());
       await expect.poll(() => app.evaluate(({BrowserWindow}) => BrowserWindow.getAllWindows().some(window => ['#capture','#pin','#quick-chat'].some(hash => window.webContents.getURL().endsWith(hash)) && window.isVisible()))).toBe(false);
     } finally { await app.close(); await rm(directory, {recursive:true,force:true}); }

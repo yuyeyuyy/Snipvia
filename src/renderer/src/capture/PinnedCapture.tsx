@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Capture } from '../../../shared/contracts';
+import type { ScreenshotPreview } from '../../../shared/screenshot';
 
 export function PinnedCapture() {
-  const [capture, setCapture] = useState<Capture | null>(null);
+  const [capture, setCapture] = useState<ScreenshotPreview | null>(null);
   const [performanceSessionId, setPerformanceSessionId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const activeSessionId = useRef<string | null>(null);
-  const aiCaptureId = useRef<string | null>(null);
-  const chatActiveRef = useRef(false);
-  const escapeCancelled = useRef(false);
   const copyInFlight = useRef(false);
 
   useEffect(() => {
@@ -16,38 +13,23 @@ export function PinnedCapture() {
       // Clear focus when the reused window starts a new capture.
       if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
       activeSessionId.current = null;
-      aiCaptureId.current = null;
       setCapture(null);
       setPerformanceSessionId(null);
       copyInFlight.current = false;
-      chatActiveRef.current = false;
-      escapeCancelled.current = false;
       setError('');
     };
     const stopSession = window.snipvia.pin.onSession((state) => {
       const sessionId = state.performanceSessionId;
       activeSessionId.current = sessionId;
-      aiCaptureId.current = state.localOnly ? null : state.capture.id;
       setPerformanceSessionId(sessionId);
       copyInFlight.current = false;
-      chatActiveRef.current = state.chatActive;
-      escapeCancelled.current = false;
       setError('');
       window.snipvia.performance.mark(sessionId, 'pin_image_load_start');
       setCapture(state.capture);
     });
     const stopReset = window.snipvia.pin.onResetSession(reset);
     const stopError = window.snipvia.capture.onError(setError);
-    const stopChatState = window.snipvia.pin.onChatState((active) => {
-      chatActiveRef.current = active;
-    });
     const keyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey && !event.isComposing && !event.repeat &&
-          aiCaptureId.current && !(event.target instanceof Element && event.target.closest('button'))) {
-        event.preventDefault();
-        void window.snipvia.autoAction.start(aiCaptureId.current).then((result) => { if (!result.ok) setError(result.error); }).catch(() => setError('无法开始分析，请重试'));
-        return;
-      }
       if ((event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey && event.key.toLowerCase() === 'c') {
         event.preventDefault();
         if (!copyInFlight.current) void copyAndClose();
@@ -55,10 +37,7 @@ export function PinnedCapture() {
       }
       if (event.key !== 'Escape') return;
       event.preventDefault();
-      if (chatActiveRef.current && !escapeCancelled.current) {
-        escapeCancelled.current = true;
-        void window.snipvia.autoAction.cancel();
-      } else void window.snipvia.pin.close();
+      void window.snipvia.pin.close();
     };
     window.addEventListener('keydown', keyDown);
     const initialSessionId = window.snipvia.performance.initialSessionId;
@@ -71,7 +50,6 @@ export function PinnedCapture() {
       stopSession();
       stopReset();
       stopError();
-      stopChatState();
       window.removeEventListener('keydown', keyDown);
     };
   }, []);

@@ -1,10 +1,9 @@
-/* Stage 4: grouped native preferences in the existing settings shell. */
-.settings-panel.settings-preferences { width: 100%; max-width: 880px; padding: 24px 32px 40px; container: preferences / inline-size; }
-.settings-preferences .settings-page-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.settings-preferences .settings-page-heading h1 { margin: 0; font-size: 20px; letter-spacing: -.02em; }
-.settings-preferences .settings-page-heading p { margin-top: 5px; font-size: 12px; color: var(--text-secondary); }
-.settings-categories { position: sticky; top: -24px; z-index: 2; display: flex; flex-wrap: wrap; gap: 3px; padding: 8px 0; border-bottom: 1px solid var(--border-subtle); background: var(--bg-window); }
-.settings-categories .ui-button { font-size: 12px; padding: 5px 9px; }
+/* Existing grouped preferences language, with explicit base layout. */
+.preference-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.preference-copy { display: grid; min-width: 0; }
+.preferences-header { margin-bottom: 24px; }
+.settings-preferences .preference-section:first-of-type { margin-top: 0; }
+.settings-preferences { container: preferences / inline-size; }
 .settings-preferences .preference-section { margin-top: 32px; }
 .settings-preferences .preference-section h2 { margin: 0; padding: 0 0 12px; font-size: 16px; font-weight: 650; letter-spacing: -.01em; scroll-margin-top: 60px; }
 .settings-preferences .preference-card { overflow: visible; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
@@ -33,39 +32,8 @@
 .settings-preferences .shortcut-recorder { min-width: 136px; height: 30px; border-radius: var(--radius-control); background: var(--bg-input); box-shadow: none; }
 .settings-preferences .shortcut-recorder kbd { font-size: 12px; font-weight: 500; }
 .settings-preferences .shortcut-recorder.recording { outline: 2px solid var(--focus); outline-offset: 2px; background: var(--bg-selected); }
-.settings-preferences .preference-subsection { margin-top: 10px; }
-.settings-preferences .preference-subsection h3 { margin: 0; padding: 12px 0 4px; border-top: 1px solid var(--border-subtle); font-size: 13px; font-weight: 600; color: var(--text-primary); }
-.settings-preferences .prediction-add-row { padding: 6px 0 0; }
-.settings-preferences .prediction-add { padding-inline: 4px; font-size: 12px; }
 .settings-preferences .preference-status { position: sticky; bottom: 0; padding: 10px 12px; margin: 16px 0 0; border: 1px solid var(--border-subtle); border-radius: var(--radius-control); background: var(--bg-raised); font-size: 12px; }
-/* All configuration dialogs reuse the public native Dialog and form controls. */
-.ui-dialog.settings-modal, .ui-dialog.privacy-modal { position: fixed; margin: auto; padding: 0; background: var(--bg-raised); max-height: min(760px, calc(100dvh - 48px)); }
-.ui-dialog.settings-modal { width: min(660px, calc(100vw - 48px)); }
-.ui-dialog.privacy-modal { width: min(500px, calc(100vw - 48px)); }
 .settings-preferences .ui-dialog form { margin: 0; max-height: calc(min(760px, 100dvh - 48px) - 70px); }
-.settings-modal .modal-header { padding: 16px 20px; }
-.settings-modal .modal-header strong { font-size: 14px; }
-.settings-modal .modal-header small { font-size: 12px; line-height: 1.5; }
-.settings-modal .config-row { min-height: 72px; grid-template-columns: minmax(0, 1fr) minmax(200px, 290px); gap: 20px; padding: 13px 0; }
-.settings-modal .config-row > label strong { font-size: 12px; font-weight: 500; }
-.settings-modal .config-row > label span, .settings-modal .preference-copy span { font-size: 11px; line-height: 1.6; color: var(--text-secondary); }
-.settings-modal .config-row > input, .settings-modal .config-row > select, .settings-modal .config-row textarea, .settings-modal .model-select-controls select { font-size: 12px; border-radius: var(--radius-control); }
-.settings-modal .config-row > input[readonly] { color: var(--text-secondary); background: var(--bg-window); }
-.settings-modal .model-select-status { font-size: 11px; color: var(--text-secondary); }
-.settings-modal .provider-config-fields .notice { background: transparent; font-size: 11px; line-height: 1.7; color: var(--text-secondary); border-radius: 0; }
-.settings-modal .modal-status { font-size: 12px; }
-.settings-modal .modal-footer { background: var(--bg-raised); }
-.settings-modal .modal-footer .ui-button { min-height: 32px; font-size: 12px; }
-.settings-modal .config-checkbox { flex-shrink: 0; }
 @container preferences (max-width: 590px) {
-  .settings-preferences .preference-row { gap: 14px; }
-  .settings-preferences .preference-select { min-width: 130px; max-width: 210px; }
-  .settings-preferences .prediction-row { grid-template-columns: minmax(0, 1fr); gap: 9px; }
-  .settings-preferences .prediction-controls { justify-content: flex-end; }
   .settings-preferences .update-settings-row { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-}
-@media (max-width: 620px) {
-  .settings-panel.settings-preferences { padding: 16px 20px 32px; }
-  .settings-modal .config-row { grid-template-columns: minmax(0, 1fr); gap: 9px; }
-  .settings-modal .config-row.compact { grid-template-columns: minmax(0, 1fr) auto; }
 }

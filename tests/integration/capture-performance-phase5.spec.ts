@@ -32,7 +32,7 @@ async function launch(extraEnvironment: Record<string, string> = {}, expectHealt
     }
   });
   const main = await app.firstWindow();
-  await expect(main.getByRole('button', { name: 'AI 笔记', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(main.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
   await expect.poll(() => app.windows().some((window) => window.url().endsWith('#capture'))).toBe(true);
   await expect.poll(() => app.windows().some((window) => window.url().endsWith('#pin'))).toBe(true);
   const overlay = app.windows().find((window) => window.url().endsWith('#capture'))!;
@@ -208,11 +208,7 @@ test.describe.serial('ScreenCaptureKit native bridge', () => {
       await expect(launched.pin.getByAltText('置顶截图')).toBeVisible();
       console.info('[Phase 5] pin visible');
       await setMarker(launched.pin, pinMarker, 'phase5-pin-marker');
-      await expect.poll(() => launched.app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(true);
-    const chat = launched.app.windows().find(window => window.url().endsWith('#quick-chat'))!;
-      await expect(chat.locator('.quick-chat')).toBeVisible();
-      console.info('[Phase 5] quick chat visible');
-      await setMarker(chat, chatMarker, 'phase5-chat-marker');
+      expect(launched.app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(false);
       const statusBefore = await launched.main.evaluate(() => window.snipvia.performance.captureBackendStatus());
       if (!statusBefore.ok || !statusBefore.value.screenCaptureKit?.helperPid) throw new Error(statusBefore.ok ? 'helper pid missing before stress run' : statusBefore.error);
       const helperBefore = processSample(statusBefore.value.screenCaptureKit.helperPid);

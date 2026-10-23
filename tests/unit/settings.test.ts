@@ -45,6 +45,16 @@ beforeEach(() => {
 afterEach(() => rmSync(runtime.directory, { recursive: true, force: true }));
 
 describe('provider credentials', () => {
+  it('V2 theme writes preserve opaque legacy profiles, fields, encrypted keys and migration inputs', async () => {
+    const path = join(runtime.directory, 'settings.json');
+    const before = { settings: { ...defaults, futureBehavior: { enabled: true } }, profiles: { opaqueProfile: { version: 99, untouched: ['not recognized by V2'] } }, encryptedKey: 'SYNTHETIC_OLD_CIPHERTEXT', encryptedKeys: { untouched: 'SYNTHETIC_EXISTING_CIPHERTEXT' }, customMetadata: { keep: true }, appearance: { mode: 'system', futureField: 'keep' } };
+    writeFileSync(path, JSON.stringify(before));
+    const storage = await import('../../src/main/storage/settings'); storage.loadSettings({ migrateCredentials: false });
+    storage.saveAppearanceMode('dark');
+    const after = JSON.parse(readFileSync(path, 'utf8'));
+    expect(after).toEqual({ ...before, appearance: { ...before.appearance, mode: 'dark', chatFontSize: 15 } });
+  });
+
   it('V2 preserves a configured old screenshot accelerator and refuses to overwrite a damaged legacy file later', async () => {
     const path = join(runtime.directory, 'settings.json');
     const raw = JSON.stringify({ settings: { ...defaults, editorShortcut: 'CommandOrControl+Alt+A' }, encryptedKeys: {} });

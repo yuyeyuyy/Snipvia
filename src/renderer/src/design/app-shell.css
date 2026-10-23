@@ -1,7 +1,7 @@
-/* One main-window shell. Business surfaces keep their own layout and state. */
-.app-shell { --sidebar-width: var(--nav-expanded); display: grid; width: 100%; height: 100dvh; overflow: hidden; grid-template-columns: var(--sidebar-width) minmax(0, 1fr); grid-template-rows: var(--titlebar-height) minmax(0, 1fr); color: var(--text-primary); background: var(--bg-window); transition: grid-template-columns var(--duration-pane) var(--ease-ui); }
-.app-shell.sidebar-collapsed { --sidebar-width: var(--nav-collapsed); }
-.app-shell > main { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; background: var(--bg-window); }
+/* The existing main shell now hosts settings only. */
+.app-shell { display: grid; width: 100%; height: 100dvh; overflow: hidden; grid-template-columns: minmax(0, 1fr); grid-template-rows: var(--titlebar-height) minmax(0, 1fr); color: var(--text-primary); background: var(--bg-window); }
+.app-shell > main { grid-column: 1; grid-row: 2; min-width: 0; min-height: 0; overflow: auto; background: var(--bg-window); }
+.titlebar-actions .ui-button { -webkit-app-region: no-drag; }
 .app-titlebar { grid-column: 1 / -1; grid-row: 1; display: block; height: var(--titlebar-height); padding: 0; border-bottom: 1px solid var(--border-subtle); background: var(--bg-chrome); user-select: none; -webkit-app-region: drag; }
 .app-titlebar-content { display: flex; align-items: center; gap: var(--space-3); height: 100%; margin-left: env(titlebar-area-x, 0px); width: env(titlebar-area-width, 100%); padding: 0 var(--space-3); }
 .mac-titlebar .app-titlebar-content { margin-left: 0; width: 100%; padding-left: 92px; }
@@ -13,47 +13,6 @@
 .titlebar-button:hover { background: var(--bg-hover); color: var(--text-primary); }
 .titlebar-button:active { background: var(--bg-active); }
 .titlebar-button.active { background: var(--bg-selected); color: var(--text-selected); }
-.sidebar { grid-column: 1; grid-row: 2; width: 100%; min-height: 0; padding: var(--space-3) var(--space-2); overflow-y: auto; overflow-x: hidden; border-right: 1px solid var(--border-subtle); background: var(--bg-nav); }
-.sidebar nav { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-1); min-width: 0; }
-.sidebar .nav { position: relative; display: flex; align-items: center; gap: var(--space-2); width: 100%; min-width: 0; height: 34px; padding: 0 9px; overflow: hidden; border-radius: var(--radius-control); color: var(--text-secondary); background: transparent; font-size: var(--font-control); font-weight: 500; text-align: left; }
-.sidebar .nav svg { flex-shrink: 0; }
-.sidebar .nav:hover { color: var(--text-primary); background: var(--bg-hover); }
-.sidebar .nav.active { color: var(--text-selected); background: var(--bg-selected); font-weight: 600; }
-.sidebar .nav.active::before { content: ''; position: absolute; left: 1px; top: 10px; bottom: 10px; width: 2px; border-radius: 1px; background: var(--text-selected); }
-.sidebar .nav:active { background: var(--bg-active); }
-.sidebar .nav span { min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: opacity var(--duration-fast) var(--ease-ui), visibility 0s; }
-.sidebar .nav b { float: none; margin-left: auto; min-width: 18px; padding: 1px 4px; border-radius: 8px; color: var(--text-on-accent); background: var(--accent); font-size: 10px; text-align: center; transition: opacity var(--duration-fast) var(--ease-ui), visibility 0s; }
-.sidebar-collapsed .nav span, .sidebar-collapsed .nav b { opacity: 0; visibility: hidden; transition: opacity var(--duration-fast) var(--ease-ui), visibility 0s var(--duration-fast); }
-/* The icon stays on the same axis throughout the continuous width animation. */
-.workspace-panel { padding: var(--space-4) var(--space-6); }
-.workspace-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-height: var(--workspacebar-height); max-width: none; margin: 0; }
-.workspace-heading h1 { margin: 0; color: var(--text-primary); font-size: var(--font-body); line-height: var(--line-ui); letter-spacing: -.02em; font-weight: 600; }
-.workspace-heading-actions { gap: var(--space-2); }
-.workspace-heading .workspace-action, .workspace-heading .workspace-icon-action { min-height: 28px; border-radius: var(--radius-control); font-size: var(--font-caption); }
-.workspace-heading .workspace-action { padding: 5px 10px; }
-.workspace-heading .workspace-icon-action { width: 28px; height: 28px; padding: 0; }
-.settings-preferences { max-width: var(--settings-width); padding: var(--space-6); }
-.settings-page-heading h1 { font-size: var(--font-title); }
-.settings-page-heading { margin-bottom: var(--space-6); }
-.preference-section h2 { font-size: var(--font-control); }
-.preference-section { margin-top: var(--space-6); }
-.preference-card { border-radius: var(--radius-panel); box-shadow: none; }
-.preference-row { min-height: 72px; padding: var(--space-4); gap: var(--space-4); }
-.preference-select { flex-shrink: 0; max-width: 240px; }
-.command-palette { width: min(520px, calc(100vw - 48px)); padding: 0; }
-.command-search { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3); border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); }
-.command-search .ui-input { margin: 0; border: 0; box-shadow: none; background: transparent; }
-.command-search .ui-input:focus-visible { outline: none; }
-.command-search:focus-within { box-shadow: inset 0 -2px 0 var(--focus); }
-.command-search .ui-icon-button { flex-shrink: 0; }
-.command-results { max-height: 320px; padding: var(--space-2); overflow-y: auto; }
-.command-results button { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 36px; padding: var(--space-2); border-radius: var(--radius-control); color: var(--text-secondary); background: transparent; text-align: left; }
-.command-results button.selected { color: var(--text-selected); background: var(--bg-selected); }
-.command-results kbd { margin-left: auto; color: var(--text-muted); }
-.command-footer { display: flex; gap: var(--space-4); padding: var(--space-2) var(--space-4); border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: var(--font-caption); }
-@media (max-width: 1050px) { .workspace-panel { padding: var(--space-3) var(--space-4); } }
-@media (prefers-reduced-motion: reduce) { .app-shell, .sidebar .nav span, .sidebar .nav b { transition: none; } }
-
 .titlebar-button.titlebar-feedback { width: auto; padding: 0 var(--space-3); }
 .feedback-dialog { width: min(360px, calc(100vw - 48px)); padding: 24px; }
 .feedback-dialog h2 { margin: 0; font-size: 16px; font-weight: 600; }

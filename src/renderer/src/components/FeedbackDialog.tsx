@@ -10,7 +10,7 @@ export function FeedbackDialog({ onClose }: { onClose(): void }) {
   async function copyGroup() {
     setCopyState('copying');
     try {
-      const result = await window.snipvia.notes.copyCode(groupNumber);
+      const result = await window.snipvia.clipboard.writeText(groupNumber);
       if (!result.ok) throw new Error(result.error);
       setCopyState('copied');
     } catch { setCopyState('error'); }

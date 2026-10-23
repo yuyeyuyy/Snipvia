@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { UpdateState } from '../../../shared/updates';
 import { Button } from '../components/ui/Button';
 import { Icon } from '../components/Icon';
-import { MarkdownMessage } from '../chat/MarkdownMessage';
+import { ReleaseMarkdown } from '../components/ui/ReleaseMarkdown';
 
 export function UpdateSettings() {
   const [state, setState] = useState<UpdateState | null>(null);
@@ -34,7 +34,7 @@ export function UpdateSettings() {
   const available = !!state && ['available', 'downloading', 'downloaded', 'installing'].includes(state.status);
   const error = requestError || state?.error;
   const message = error || (checking ? '正在检查新版本…' : downloading ? `正在下载 v${state.latestVersion} · ${state.downloadProgress ?? 0}%`
-    : downloaded ? `v${state.latestVersion} 已下载，重启时校验并安装` : installing ? '正在保存笔记并准备重启更新…' : available ? `发现新版本 v${state.latestVersion}`
+    : downloaded ? `v${state.latestVersion} 已下载，重启时校验并安装` : installing ? '正在准备重启更新…' : available ? `发现新版本 v${state.latestVersion}`
     : state?.status === 'up-to-date' ? `当前 v${state.currentVersion} 无需更新` : '启动后在后台检查正式版本');
   return <div className="preference-row update-settings-row">
     <div className="preference-copy">
@@ -61,7 +61,7 @@ export function UpdateSettings() {
     {available && <section className="update-release-notes" aria-label={`v${state.latestVersion} 更新说明`}>
       <h3>更新说明</h3>
       {state.releaseNotes ? <div className="update-release-notes-body" tabIndex={0} aria-label="更新说明内容">
-        <MarkdownMessage content={state.releaseNotes} onError={setRequestError} />
+        <ReleaseMarkdown content={state.releaseNotes} onError={setRequestError} />
       </div> : <p>此版本未提供更新说明，可点击「查看新版本」访问发布页。</p>}
     </section>}
   </div>;

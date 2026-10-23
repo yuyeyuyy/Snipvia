@@ -218,7 +218,6 @@ export function ScreenshotEditor({ frame, initialSelection, sessionId }: { frame
         {button('save', '保存图片', () => { void finish('save'); })}
         {button('close', '取消截图', () => { void window.snipvia.capture.cancel(); })}
         {button('copy', '复制并关闭', () => { void finish('copy'); })}
-        <button type="button" className="editor-ask" disabled={busy} onClick={() => { void finish('ai'); }}><EditorIcon name="ai" />问 AI</button>
       </div>
       <div className="editor-options">
         <div className="editor-colors" aria-label="标注颜色">{colors.map((value) => <button type="button" key={value} aria-label={`颜色 ${value}`} aria-pressed={(text?.color ?? selected?.color ?? color) === value} disabled={busy} style={{ '--swatch': value } as React.CSSProperties} onClick={() => changeStyle({ color: value })} />)}</div>

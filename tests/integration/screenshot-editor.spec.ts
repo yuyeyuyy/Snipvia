@@ -4,13 +4,13 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-test('ordinary capture annotates, flattens, copies, saves, pins locally and hands off to AI', async () => {
+test('ordinary capture annotates, flattens, copies, saves, pins locally without AI or Conversation', async () => {
   test.setTimeout(60_000);
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-editor-'));
   const app = await launchDesktop({ args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron' } });
   try {
     const page = await app.firstWindow();
-    await expect(page.getByRole('button', { name: 'AI 笔记', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
     await expect.poll(() => app.windows().some((window) => window.url().endsWith('#capture'))).toBe(true);
     const overlay = app.windows().find((window) => window.url().endsWith('#capture'))!;
     await expect.poll(() => app.windows().some((window) => window.url().endsWith('#pin'))).toBe(true);
@@ -32,20 +32,14 @@ test('ordinary capture annotates, flattens, copies, saves, pins locally and hand
       };
     });
     await page.evaluate(() => window.snipvia.permissions.screen());
-    await page.getByRole('button', { name: '模型与设置' }).click();
     await page.getByRole('button', { name: '设置普通截图快捷键' }).click();
     await page.getByRole('button', { name: '设置普通截图快捷键' }).press('ControlOrMeta+Alt+F8');
-    await expect(page.locator('.preference-status[role="status"]')).toHaveText('普通截图快捷键已生效');
+    await expect(page.locator('.preference-status[role="status"]')).toHaveText('快捷键已生效');
     const settings = await page.evaluate(() => window.snipvia.settings.get());
     expect(settings.ok && settings.value.editorShortcut).toBe('CommandOrControl+Alt+F8');
     expect(await app.evaluate(({ globalShortcut }) => globalShortcut.isRegistered('CommandOrControl+Alt+F8'))).toBe(true);
     await page.screenshot({ path: 'test-results/editor-settings.png' });
-    expect((await page.evaluate(async () => {
-      const settings = await window.snipvia.settings.get();
-      if (!settings.ok) throw new Error(settings.error);
-      return window.snipvia.settings.save({ ...settings.value, provider: 'custom', endpoint: 'http://127.0.0.1:9/v1', model: 'editor-offline-test', apiKey: '' });
-    })).ok).toBe(true);
-    const history = () => page.evaluate(async () => { const result = await window.snipvia.history.list(); if (!result.ok) throw new Error(result.error); return result.value; });
+    const history = () => page.evaluate(async () => { const result = await window.snipvia.screenshots.list(); if (!result.ok) throw new Error(result.error); return result.value; });
     const start = async () => {
       expect((await page.evaluate(() => window.snipvia.capture.start('standard'))).ok).toBe(true);
       await expect(overlay.locator('.screen-frame')).toBeVisible();
@@ -138,17 +132,19 @@ test('ordinary capture annotates, flattens, copies, saves, pins locally and hand
     expect(await history()).toHaveLength(0);
     const local = await pinned.evaluate(() => window.snipvia.pin.current());
     expect(local.ok && local.value.localOnly).toBe(true);
-    expect((await pinned.evaluate(() => window.snipvia.pin.startChat())).ok).toBe(true);
-    await expect.poll(async () => (await history()).length).toBe(1);
-    await expect.poll(() => app.windows().some((window) => window.url().endsWith('#quick-chat'))).toBe(true);
+    const id = local.ok ? local.value.capture.id : '';
+    expect((await pinned.evaluate(id => window.snipvia.screenshots.save(id), id)).ok).toBe(true);
+    expect(await history()).toHaveLength(1);
     await pinned.evaluate(() => window.snipvia.pin.close());
+    expect(await history()).toHaveLength(1);
+    expect((await page.evaluate(id => window.snipvia.screenshots.copy(id), id)).ok).toBe(true);
+    expect((await page.evaluate(id => window.snipvia.screenshots.delete(id), id)).ok).toBe(true);
+    expect(await history()).toHaveLength(0);
     await start();
-    await overlay.getByRole('button', { name: '问 AI', exact: true }).click();
+    await expect(overlay.getByRole('button', { name: '问 AI', exact: true })).toHaveCount(0);
+    await overlay.getByRole('button', { name: '复制并关闭', exact: true }).click();
     await expect.poll(() => visible('#capture')).toBe(false);
-    await expect.poll(() => visible('#pin')).toBe(true);
-    const promoted = await pinned.evaluate(() => window.snipvia.pin.current());
-    expect(promoted.ok && promoted.value.localOnly).toBeFalsy();
-    expect((await history()).length).toBeGreaterThan(0);
+    expect(app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(false);
     expect(errors).toEqual([]);
   } finally { await app.close(); await rm(directory, { recursive: true, force: true }); }
 });

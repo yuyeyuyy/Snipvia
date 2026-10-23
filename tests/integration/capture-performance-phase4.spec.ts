@@ -48,7 +48,7 @@ async function launch(extraEnvironment: Record<string, string> = {}): Promise<La
     env: { ...process.env, SNIPVIA_PERF: '0', SNIPVIA_CAPTURE_WARMUP: '0', SNIPVIA_CAPTURE_BACKEND: 'electron', ...extraEnvironment }
   });
   const main = await app.firstWindow();
-  await expect(main.getByRole('button', { name: 'AI 笔记', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(main.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
   await expect.poll(() => app.windows().some((window) => window.url().endsWith('#capture'))).toBe(true);
   const overlay = app.windows().find((window) => window.url().endsWith('#capture'))!;
   const permission = await main.evaluate(() => window.snipvia.permissions.screen());

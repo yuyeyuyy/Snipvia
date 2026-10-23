@@ -46,9 +46,8 @@ test('Mac uses the exported Dock icon and monochrome Retina menu bar template', 
   const calls = () => instance.evaluate(() => (globalThis as typeof globalThis & { dockIconCalls: IconCall[] }).dockIconCalls);
   try {
     const page = await instance.firstWindow();
-    // Icon assertions can finish before React mounts the editor's flush listener.
-    // Wait for the real UI so normal app.close() can use the production save-on-quit path.
-    await expect(page.getByRole('button', { name: 'AI 笔记', exact: true })).toBeVisible();
+    // Wait for the actual settings window before checking the Dock/menu lifecycle.
+    await expect(page.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
     await expect.poll(async () => (await calls()).length).toBeGreaterThan(0);
     const tray = await instance.evaluate(() => (globalThis as typeof globalThis & { trayIcon: {
       template: boolean; size: { width: number; height: number }; scales: number[]; retinaBytes: number;
@@ -64,7 +63,7 @@ test('Mac uses the exported Dock icon and monochrome Retina menu bar template', 
     expect(initial.at(-1)).toEqual({ empty: false, size: { width: 256, height: 256 }, pixels: expected });
     await instance.evaluate(({ app, Menu }) => {
       app.dock?.hide();
-      const show = Menu.getApplicationMenu()?.items[0].submenu?.items.find(item => item.label === '显示截然');
+      const show = Menu.getApplicationMenu()?.items[0].submenu?.items.find(item => item.label === '设置…');
       if (!show) throw new Error('Main window menu unavailable');
       show.click();
     });

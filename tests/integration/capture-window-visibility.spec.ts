@@ -119,12 +119,13 @@ for (const backend of ['electron', 'screen-capture-kit'] as const) {
         await overlay.mouse.move(100, 100); await overlay.mouse.down(); await overlay.mouse.move(360, 260); await overlay.mouse.up();
       };
       const quick = async () => {
-        await expect.poll(() => visible('#quick-chat')).toBe(true);
-        return instance.windows().find(w => w.url().endsWith('#quick-chat'))!;
+        await expect.poll(() => visible('#pin')).toBe(true);
+        expect(instance.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(false);
+        return pin;
       };
 
       await start(); await select();
-      const firstChat = await quick();
+      await quick();
       await expect(pin.getByRole('button')).toHaveCount(0);
       const layout = await pin.evaluate(() => {
         const image = document.querySelector('img')!.getBoundingClientRect();
@@ -133,13 +134,13 @@ for (const backend of ['electron', 'screen-capture-kit'] as const) {
       expect(layout.imageHeight).toBe(layout.height);
       expect(layout.imageWidth).toBe(layout.width);
       await pin.screenshot({ path: `test-results/pin-image-only-${backend}.png` });
-      await firstChat.getByLabel('悬浮对话问题').press('Control+C').catch(error => { if (!firstChat.isClosed()) throw error; });
+      await pin.keyboard.press('Control+C');
       await expect.poll(() => visible('#pin')).toBe(false);
       await expectHidden();
-      expect(await instance.evaluate(() => (globalThis as typeof globalThis & { syntheticCopies: number }).syntheticCopies)).toBe(1);
+      expect(await instance.evaluate(() => (globalThis as typeof globalThis & { syntheticCopies: number }).syntheticCopies)).toBe(2);
 
       await openMain(); await start(); await select(); await quick();
-      await (await quick()).getByLabel('关闭截图对话', { exact: true }).click();
+      await (await quick()).keyboard.press('Escape');
       await expect.poll(() => visible('#quick-chat')).toBe(false);
       await expectHidden();
 
@@ -154,13 +155,11 @@ for (const backend of ['electron', 'screen-capture-kit'] as const) {
       await expectHidden();
 
       await openMain(); await start(); await select(); await quick();
-      await (await quick()).getByLabel('返回软件', { exact: true }).click();
-      await expect.poll(() => visible()).toBe(true);
-      await expect.poll(() => visible('#pin')).toBe(false);
-      await expect.poll(() => visible('#quick-chat')).toBe(false);
-      await expect(main.getByLabel('AI 对话输入')).toBeFocused();
+      await pin.keyboard.press('Escape');
+      await openMain();
+      await expect(main.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
       await instance.evaluate(() => { (globalThis as typeof globalThis & { mainShows: number }).mainShows = 0; });
-      await instance.evaluate(({ Menu }) => Menu.getApplicationMenu()!.items[0].submenu!.items.find(item => item.label === '续拍并继续对话')!.click());
+      await instance.evaluate(({ Menu }) => Menu.getApplicationMenu()!.items[0].submenu!.items.find(item => item.label === '快速截图')!.click());
       // Menu callbacks start asynchronously; the hidden reused renderer can
       // still contain the previous frame before the new session is presented.
       await expect.poll(() => visible('#capture')).toBe(true);
@@ -172,7 +171,7 @@ for (const backend of ['electron', 'screen-capture-kit'] as const) {
       await openMain();
       await instance.evaluate(({ Menu }) => {
         (globalThis as typeof globalThis & { captureFailure: boolean }).captureFailure = true;
-        Menu.getApplicationMenu()!.items[0].submenu!.items.find(item => item.label === '普通截图与标注')!.click();
+        Menu.getApplicationMenu()!.items[0].submenu!.items.find(item => item.label === '截图与标注')!.click();
       });
       await expect(main.getByRole('alert').filter({ hasText: 'synthetic capture failure' })).toHaveCount(1);
       await expectHidden();

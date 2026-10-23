@@ -6,7 +6,7 @@ import { launchDesktop } from '../helpers/desktop';
 
 type CaptureProbe = { callback?: () => void; calls: number; blocked: boolean; release: () => void; originalFetch: typeof fetch };
 
-test('registered AI shortcut presents the overlay without waiting for a stalled network', async () => {
+test('registered local screenshot shortcut presents the overlay without waiting for a stalled network', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-capture-local-latency-'));
   const app = await launchDesktop({ args: ['.', `--user-data-dir=${directory}`], env: {
     ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0'
@@ -14,7 +14,8 @@ test('registered AI shortcut presents the overlay without waiting for a stalled 
   try {
     const page = await app.firstWindow();
     const overlay = app.windows().find(window => window.url().endsWith('#capture'))!;
-    await app.evaluate(({ globalShortcut, desktopCapturer, nativeImage, screen, systemPreferences }) => {
+    await app.evaluate(({ globalShortcut, desktopCapturer, nativeImage, screen, systemPreferences, clipboard }) => {
+      clipboard.write = async () => {};
       systemPreferences.getMediaAccessStatus = () => 'granted';
       desktopCapturer.getSources = async options => {
         const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()), size = options.thumbnailSize!;
@@ -34,7 +35,7 @@ test('registered AI shortcut presents the overlay without waiting for a stalled 
     });
     const saved = await page.evaluate(async () => {
       const settings = await window.snipvia.settings.get(); if (!settings.ok) throw new Error(settings.error);
-      return window.snipvia.settings.save({ ...settings.value, shortcut: 'CommandOrControl+Shift+F8', apiKey: '' });
+      return window.snipvia.settings.saveShortcuts({ editorShortcut: settings.value.editorShortcut, shortcut: 'CommandOrControl+Shift+F8' });
     });
     expect(saved.ok).toBe(true);
     // Invoke the callback installed with globalShortcut.register, not capture:start IPC.
@@ -53,11 +54,11 @@ test('registered AI shortcut presents the overlay without waiting for a stalled 
     expect(report.ok && report.value?.metadata.trigger).toBe('hotkey');
     expect(report.ok && report.value?.marks[0].event).toBe('hotkey_pressed');
     await mkdir('test-results', { recursive: true });
-    await writeFile('test-results/capture-local-first-latency.json', JSON.stringify({ scenario: 'all fetches blocked; local capture and chat remain responsive', visibleAfterMs, report: report.ok ? report.value : null }, null, 2));
+    await writeFile('test-results/capture-local-first-latency.json', JSON.stringify({ scenario: 'all fetches blocked; local capture remains responsive without Chat', visibleAfterMs, report: report.ok ? report.value : null }, null, 2));
 
-    // Selection and pinned chat remain local even while all fetches would stall.
+    // Selection and local pin remain local even while all fetches would stall.
     await overlay.mouse.move(100, 100); await overlay.mouse.down(); await overlay.mouse.move(400, 300); await overlay.mouse.up();
-    await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().some(window => window.webContents.getURL().endsWith('#quick-chat') && window.isVisible()))).toBe(true);
+    await expect.poll(() => app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().some(window => window.webContents.getURL().endsWith('#pin') && window.isVisible()))).toBe(true);
     const pin = app.windows().find(window => window.url().endsWith('#pin'))!;
     await expect(pin.getByAltText('置顶截图')).toBeVisible();
     expect(await app.evaluate(() => (globalThis as typeof globalThis & { captureProbe: CaptureProbe }).captureProbe.calls)).toBe(0);

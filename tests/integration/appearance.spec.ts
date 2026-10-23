@@ -6,11 +6,11 @@ import tokens from '../../src/shared/design-tokens.json';
 import { defaults } from '../../src/shared/contracts';
 import { launchDesktop } from '../helpers/desktop';
 
-test('appearance synchronizes windows, preserves editor identity, follows system and survives restart', async () => {
+test('appearance synchronizes windows, preserves settings identity and old Markdown, follows system and survives restart', async () => {
   test.setTimeout(90_000);
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-appearance-'));
   const storage = join(directory, 'app'); const location = join(directory, 'books'); await mkdir(location);
-  await mkdir('docs/ui/ui2-monochrome', { recursive: true });
+  await mkdir('test-results/v2-appearance', { recursive: true });
   const options = { args: ['.', `--user-data-dir=${storage}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } };
   const app = await launchDesktop(options);
   let closed = false;
@@ -20,23 +20,12 @@ test('appearance synchronizes windows, preserves editor identity, follows system
     await expect.poll(() => page.evaluate(() => window.snipvia.appearance.current().mode)).toBe('system');
     const systemDark = await app.evaluate(({ nativeTheme }) => nativeTheme.shouldUseDarkColors);
     await expect(page.locator('html')).toHaveAttribute('data-theme', systemDark ? 'dark' : 'light');
-    await app.evaluate(({ dialog }, location) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [location] }); }, location);
-    await page.getByRole('button', { name: '创建笔记', exact: true }).click();
-    await page.getByLabel('笔记本名称', { exact: true }).fill('主题验证');
-    await page.getByRole('button', { name: '创建', exact: true }).click();
-    await page.getByRole('button', { name: '新建笔记', exact: true }).click();
-    await page.getByLabel('名称', { exact: true }).fill('外观测试');
-    await page.getByRole('button', { name: '创建', exact: true }).click();
-    const editor = page.getByRole('textbox', { name: '笔记编辑器', exact: true });
-    const content = '# 主题验证\n\n切换主题时保留内容。\n\n```python\n# 注释\ndef add(a, b):\n    return a + b\n```';
-    await editor.fill(content);
-    await expect.poll(() => readFile(join(location, '主题验证', '外观测试.md'), 'utf8')).toBe(content);
-    await page.evaluate(() => { (window as typeof window & { editorFixture?: Element | null }).editorFixture = document.querySelector('.cm-editor'); });
-    await page.getByRole('button', { name: '模型与设置' }).click();
-    await page.evaluate(() => { (window as typeof window & { settingsFixture?: Element | null }).settingsFixture = document.querySelector('.settings-preferences'); });
+    const content = '# 旧版笔记\n\n切换主题仍保留原文件。';
+    await writeFile(join(location, 'preserved.md'), content);
+    await page.evaluate(() => { (window as typeof window & { settingsFixture?: Element | null }).settingsFixture = document.querySelector('.v2-preferences'); });
     await page.getByLabel('外观主题').selectOption('light');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await page.screenshot({ animations: 'disabled', path: 'docs/ui/ui2-monochrome/settings-light.png' });
+    await page.screenshot({ animations: 'disabled', path: 'test-results/v2-appearance/settings-light.png' });
     await expect.poll(() => app.windows().some((window) => window.url().endsWith('#pin'))).toBe(true);
     const pinned = app.windows().find((window) => window.url().endsWith('#pin'))!;
     const overlay = app.windows().find((window) => window.url().endsWith('#capture'))!;
@@ -44,31 +33,16 @@ test('appearance synchronizes windows, preserves editor identity, follows system
     const denied = await pinned.evaluate(() => window.snipvia.appearance.set('dark')); expect(denied.ok).toBe(false);
     await page.getByLabel('外观主题').selectOption('dark');
     for (const window of [page, pinned, overlay]) await expect(window.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await page.screenshot({ animations: 'disabled', path: 'docs/ui/ui2-monochrome/settings-dark.png' });
+    await page.screenshot({ animations: 'disabled', path: 'test-results/v2-appearance/settings-dark.png' });
     expect(await pinned.locator('html').evaluate((element) => getComputedStyle(element).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
     expect(await overlay.locator('html').evaluate((element) => getComputedStyle(element).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
     const backgrounds = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map((window) => ({ hash: new URL(window.webContents.getURL()).hash, color: window.getBackgroundColor() })));
     expect(backgrounds.find((window) => !window.hash)?.color.toLowerCase()).toBe(tokens.dark['bg-window'].toLowerCase());
     expect(backgrounds.filter((window) => ['#capture', '#pin'].includes(window.hash)).every((window) => /^#0{6}(?:00)?$/i.test(window.color))).toBe(true);
-    await page.getByRole('button', { name: 'AI 笔记', exact: true }).click();
-    expect(await page.evaluate(() => (window as typeof window & { editorFixture?: Element | null }).editorFixture === document.querySelector('.cm-editor'))).toBe(true);
-    await expect(editor).toContainText('切换主题时保留内容');
-    await page.screenshot({ animations: 'disabled', path: 'docs/ui/ui2-monochrome/notes-dark.png' });
-    await page.evaluate(() => window.snipvia.appearance.set('light'));
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await page.screenshot({ animations: 'disabled', path: 'docs/ui/ui2-monochrome/notes-light.png' });
-    for (const label of ['截图日程', '历史对话']) {
-      await page.getByRole('navigation', { name: '主导航' }).getByRole('button', { name: label, exact: true }).click();
-      await expect(page.getByRole('heading', { name: label, exact: true })).toBeVisible();
-    }
-    await page.getByRole('button', { name: '快捷导航' }).click();
-    await expect(page.getByRole('dialog', { name: '快捷导航' })).toBeVisible();
-    await page.getByLabel('搜索页面与操作').fill('设置'); await page.keyboard.press('Enter');
-    await expect(page.getByLabel('外观主题')).toBeVisible();
-    expect(await page.evaluate(() => (window as typeof window & { settingsFixture?: Element | null }).settingsFixture === document.querySelector('.settings-preferences'))).toBe(true);
-    await page.keyboard.press(process.platform === 'darwin' ? 'Meta+k' : 'Control+k');
-    await expect(page.getByRole('dialog', { name: '快捷导航' })).toBeVisible();
-    await page.keyboard.press('Escape'); await expect(page.getByRole('dialog', { name: '快捷导航' })).toHaveCount(0);
+    expect(await readFile(join(location, 'preserved.md'), 'utf8')).toBe(content);
+    expect(await page.evaluate(() => (window as typeof window & { settingsFixture?: Element | null }).settingsFixture === document.querySelector('.v2-preferences'))).toBe(true);
+    await expect(page.getByRole('button', { name: 'AI 对话', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'AI 笔记', exact: true })).toHaveCount(0);
     await page.getByLabel('外观主题').selectOption('system');
     await app.evaluate(({ nativeTheme }) => { nativeTheme.themeSource = 'dark'; nativeTheme.emit('updated'); });
     for (const window of [page, pinned, overlay]) await expect(window.locator('html')).toHaveAttribute('data-theme', 'dark');
@@ -90,18 +64,19 @@ test('appearance synchronizes windows, preserves editor identity, follows system
     try {
       const first = await restarted.firstWindow(); await expect(first.locator('html')).toHaveAttribute('data-theme', 'dark');
       expect(await first.evaluate(() => window.snipvia.appearance.current().mode)).toBe('dark');
-      await first.getByRole('button', { name: '模型与设置' }).click(); await expect(first.getByLabel('外观主题')).toHaveValue('dark');
+      await expect(first.getByLabel('外观主题')).toHaveValue('dark');
     } finally { await restarted.close(); }
   } finally { if (!closed) await app.close(); await rm(directory, { recursive: true, force: true }); }
 });
 
-test('saved Dark applies to a newly created QuickChat window without changing screenshot close behavior', async () => {
+test('saved Dark applies to the reused local pin window without changing screenshot close behavior', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-theme-chat-'));
   await writeFile(join(directory, 'settings.json'), JSON.stringify({ settings: defaults, appearance: { mode: 'dark' } }));
   const app = await launchDesktop({ args: ['.', `--user-data-dir=${directory}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
   try {
     const page = await app.firstWindow(); await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await app.evaluate(({ desktopCapturer, nativeImage, screen, systemPreferences }) => {
+    await app.evaluate(({ desktopCapturer, nativeImage, screen, systemPreferences, clipboard }) => {
+      clipboard.write = async () => {};
       systemPreferences.getMediaAccessStatus = () => 'granted';
       desktopCapturer.getSources = async (options) => {
         const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()), size = options.thumbnailSize!;
@@ -112,13 +87,14 @@ test('saved Dark applies to a newly created QuickChat window without changing sc
     const overlay = app.windows().find((window) => window.url().endsWith('#capture'))!;
     await expect(overlay.locator('.screen-frame')).toBeVisible();
     await overlay.mouse.move(100, 100); await overlay.mouse.down(); await overlay.mouse.move(250, 200); await overlay.mouse.up();
-    await expect.poll(() => app.windows().some((window) => window.url().endsWith('#quick-chat'))).toBe(true);
-    const chat = app.windows().find((window) => window.url().endsWith('#quick-chat'))!;
+    const chat = app.windows().find(window => window.url().endsWith('#pin'))!;
+    await expect(chat.getByAltText('置顶截图')).toBeVisible();
+    expect(app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(false);
     await expect(chat.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await chat.screenshot({ animations: 'disabled', path: 'docs/ui/ui2-monochrome/quick-chat-dark.png' });
+    await chat.screenshot({ animations: 'disabled', path: 'test-results/v2-appearance/quick-chat-dark.png' });
     expect(await chat.locator('html').evaluate((element) => getComputedStyle(element).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
     await page.evaluate(() => window.snipvia.appearance.set('light'));
     await expect(chat.locator('html')).toHaveAttribute('data-theme', 'light');
-    await chat.screenshot({ animations: 'disabled', path: 'docs/ui/ui2-monochrome/quick-chat-light.png' });
+    await chat.screenshot({ animations: 'disabled', path: 'test-results/v2-appearance/quick-chat-light.png' });
   } finally { await app.close(); await rm(directory, { recursive: true, force: true }); }
 });

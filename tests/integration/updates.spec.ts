@@ -57,7 +57,6 @@ globalThis.enableUpdateDownloadFixture = () => {
   type Probe = { calls: number; status: number; tag: string; body: string | null; blocked: boolean; release?: () => void; opened: string[] };
   try {
     const page = await instance.firstWindow();
-    await page.getByRole('button', { name: '模型与设置', exact: true }).click();
     const row = page.locator('.update-settings-row');
     await expect(row).toContainText('启动后在后台检查正式版本');
     // The normal unpackaged client does not contact GitHub. Simulate its packaged
@@ -74,14 +73,14 @@ globalThis.enableUpdateDownloadFixture = () => {
     expect(await instance.evaluate(() => (globalThis as typeof globalThis & { updateProbe: Probe }).updateProbe.opened))
       .toEqual(['https://github.com/yuyeyuyy/Snipvia/releases/tag/v9.0.0']);
 
-    await mkdir('docs/ui', { recursive: true });
+    await mkdir('test-results/v2-updates', { recursive: true });
     const about = page.locator('section[aria-labelledby="about-settings-title"]');
     for (const theme of ['light', 'dark'] as const) {
       expect((await page.evaluate(theme => window.snipvia.appearance.set(theme), theme)).ok).toBe(true);
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
       await about.scrollIntoViewIfNeeded();
       await expectNeutralChrome(page);
-      await about.screenshot({ path: `docs/ui/update-check-${theme}.png`, animations: 'disabled' });
+      await about.screenshot({ path: `test-results/v2-updates/update-check-${theme}.png`, animations: 'disabled' });
     }
 
     await expect.poll(() => instance.windows().some(window => window.url().endsWith('#pin'))).toBe(true);
@@ -123,8 +122,6 @@ globalThis.enableUpdateDownloadFixture = () => {
     await row.getByRole('button', { name: '检查更新' }).click();
     await expect(row.getByRole('status')).toContainText('无需更新');
     await expect(notes).toHaveCount(0);
-    await page.getByRole('button', { name: 'AI 笔记', exact: true }).click();
-    await page.getByRole('button', { name: '模型与设置', exact: true }).click();
     await expect(row.getByRole('status')).toContainText('无需更新');
     expect(await instance.evaluate(() => (globalThis as typeof globalThis & { updateProbe: Probe }).updateProbe.calls)).toBe(5);
 
@@ -141,7 +138,7 @@ globalThis.enableUpdateDownloadFixture = () => {
     await expect(row.getByRole('status')).toContainText('42%');
     await expect(row.getByRole('progressbar')).toHaveAttribute('value', '42');
     await expect(row.getByRole('button', { name: '重启并更新' })).toHaveCount(0);
-    await row.screenshot({ path: 'docs/ui/update-downloading.png', animations: 'disabled' });
+    await row.screenshot({ path: 'test-results/v2-updates/update-downloading.png', animations: 'disabled' });
     await instance.evaluate(() => (globalThis as typeof globalThis & { updateDownloadProbe: { complete: () => void } }).updateDownloadProbe.complete());
     await expect(row.getByRole('button', { name: '重启并更新' })).toBeEnabled();
     expect(await instance.evaluate(() => (globalThis as typeof globalThis & { updateDownloadProbe: { installs: number } }).updateDownloadProbe.installs)).toBe(0);
@@ -149,27 +146,18 @@ globalThis.enableUpdateDownloadFixture = () => {
       expect((await page.evaluate(theme => window.snipvia.appearance.set(theme), theme)).ok).toBe(true);
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
       await expectNeutralChrome(page);
-      await about.screenshot({ path: `docs/ui/update-downloaded-${theme}.png`, animations: 'disabled' });
+      await about.screenshot({ path: `test-results/v2-updates/update-downloaded-${theme}.png`, animations: 'disabled' });
     }
 
-    // A real local editor in a temporary notebook is saved before restart.
-    await page.getByRole('button', { name: 'AI 笔记', exact: true }).click();
+    // No editor is started in V2; legacy Markdown must remain byte-for-byte intact.
     const bookRoot = join(directory, 'books'); await mkdir(bookRoot);
-    await instance.evaluate(({ dialog }, path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, bookRoot);
-    await page.getByRole('button', { name: '创建笔记', exact: true }).click();
-    await page.getByLabel('笔记本名称', { exact: true }).fill('更新前保存');
-    await page.getByRole('button', { name: '创建', exact: true }).click();
-    await page.getByRole('button', { name: '新建笔记', exact: true }).click();
-    await page.getByLabel('名称', { exact: true }).fill('未丢失内容');
-    await page.getByRole('button', { name: '创建', exact: true }).click();
-    const text = '# 更新前保存\n\n这是用户的笔记内容。';
-    await page.getByRole('textbox', { name: '笔记编辑器', exact: true }).fill(text);
-    await page.getByRole('button', { name: '模型与设置', exact: true }).click();
+    const text = '# 旧版笔记\n\n更新不修改既有内容。';
+    await writeFile(join(bookRoot, 'preserved.md'), text);
     await row.getByRole('button', { name: '重启并更新' }).click();
     await expect.poll(() => instance.evaluate(() => (globalThis as typeof globalThis & { updateDownloadProbe: { installs: number } }).updateDownloadProbe.installs)).toBe(1);
     expect(await instance.evaluate(() => (globalThis as typeof globalThis & { updateDownloadProbe: { captureWindowsBefore: number; captureWindowsAfter: number } }).updateDownloadProbe))
       .toMatchObject({ captureWindowsBefore: 2, captureWindowsAfter: 0 });
-    expect(await readFile(join(bookRoot, '更新前保存', '未丢失内容.md'), 'utf8')).toBe(text);
+    expect(await readFile(join(bookRoot, 'preserved.md'), 'utf8')).toBe(text);
     await expect(row.getByRole('status')).toContainText('准备重启');
   } finally { await instance.close(); await rm(directory, { recursive: true, force: true }); }
 });

@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import tokens from '../../src/shared/design-tokens.json';
-import { defaults } from '../../src/shared/contracts';
+import { legacySettingsFixture as defaults } from '../fixtures/legacy-settings';
 import { launchDesktop } from '../helpers/desktop';
 
 test('appearance synchronizes windows, preserves settings identity and old Markdown, follows system and survives restart', async () => {
@@ -12,6 +12,7 @@ test('appearance synchronizes windows, preserves settings identity and old Markd
   const storage = join(directory, 'app'); const location = join(directory, 'books'); await mkdir(location);
   await mkdir('test-results/v2-appearance', { recursive: true });
   const options = { args: ['.', `--user-data-dir=${storage}`], env: { ...process.env, SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } };
+  await mkdir(storage); await writeFile(join(storage, 'settings.json'), JSON.stringify({ settings: defaults }));
   const app = await launchDesktop(options);
   let closed = false;
   try {

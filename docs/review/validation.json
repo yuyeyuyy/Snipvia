@@ -1,0 +1,239 @@
+{
+  "baseline": "3cf4498",
+  "branch": "refactor/snipvia-v2",
+  "scope": "approved A-D code and documentation cleanup",
+  "approval": "Human explicitly approved the exact A-D list after prior broad command was rejected; no commands executed from the rejected request.",
+  "removedFiles": 375,
+  "removedDocumentationAndPrototypeFiles": 344,
+  "removedCodeToolAndFixtureFiles": 31,
+  "removedBytes": 43434200,
+  "unchangedCoreFiles": [
+    "src/main/capture/CaptureModeRouter.ts",
+    "src/main/capture/capture-engine.ts",
+    "src/main/capture/capture-health.ts",
+    "src/main/capture/capture-readiness.ts",
+    "src/main/capture/electron-capture-backend.ts",
+    "src/main/storage/ScreenshotStore.ts",
+    "src/main/storage/ScreenshotCollection.ts",
+    "src/main/storage/CollectionExporter.ts",
+    "src/main/storage/CapturePreferencesStore.ts",
+    "src/main/legacy/LegacyDataService.ts",
+    "src/main/windows/ShelfWindow.ts",
+    "src/main/windows/capture-overlay-window.ts",
+    "src/main/windows/screenshot-to-all-window.ts",
+    "src/renderer/src/capture/CaptureOverlay.tsx",
+    "src/renderer/src/capture/editor/ScreenshotEditor.tsx",
+    "src/renderer/src/capture/editor/model.ts",
+    "src/renderer/src/capture/editor/draw.ts",
+    "src/renderer/src/collection/ScreenshotShelf.tsx",
+    "src/renderer/src/collection/merge-images.ts",
+    "src/shared/capture-preferences.ts",
+    "src/shared/collection.ts",
+    "src/shared/collection-output.ts",
+    "scripts/macos-release/common.cjs",
+    "scripts/macos-release/hooks.cjs",
+    "scripts/macos-release/preflight.cjs",
+    "scripts/macos-release/publish.cjs",
+    "scripts/macos-release/release.cjs",
+    "scripts/macos-release/update-metadata.cjs",
+    "scripts/macos-release/verify.cjs",
+    "src/main/updates/ElectronUpdateInstaller.ts",
+    "src/main/updates/UpdateCheckService.ts",
+    "src/main/updates/UpdateInstaller.ts"
+  ],
+  "nativeCaptureServiceExactMatch": true,
+  "businessCodeChanged": true,
+  "changedTrackedBusinessAndBuildFiles": [
+    ".github/workflows/windows-internal.yml",
+    "native/screen-capture-kit-helper/main.swift",
+    "package.json",
+    "pnpm-lock.yaml",
+    "scripts/build-native-helper.sh",
+    "scripts/evaluate-web-search.mjs",
+    "scripts/macos-release/test-update.cjs",
+    "scripts/package-friend.sh",
+    "scripts/package-release.sh",
+    "scripts/package-windows-friend.sh",
+    "scripts/test-native-helper.mjs",
+    "src/main/appearance.ts",
+    "src/main/capture/screen-capture-kit-backend.ts",
+    "src/main/index.ts",
+    "src/main/performance/screenshot-performance.ts",
+    "src/main/storage/settings.ts",
+    "src/preload/index.ts",
+    "src/renderer/src/capture/editor/EditorIcon.tsx",
+    "src/renderer/src/components/Icon.tsx",
+    "src/renderer/src/design/controls.css",
+    "src/shared/api-key.ts",
+    "src/shared/appearance.ts",
+    "src/shared/contracts.ts",
+    "src/shared/model-endpoint.ts",
+    "src/shared/performance.ts",
+    "src/shared/providers.ts",
+    "src/shared/schedule-calendar.ts",
+    "src/shared/schedule-time.ts",
+    "src/shared/screenshot-understanding.ts",
+    "tests/fixtures/mcp/server.mjs",
+    "tests/fixtures/schedule-manual/01-wechat-tomorrow.png",
+    "tests/fixtures/schedule-manual/02-feishu-two-kinds.png",
+    "tests/fixtures/schedule-manual/03-dingtalk-deadlines.png",
+    "tests/fixtures/schedule-manual/04-mail-timezone.png",
+    "tests/fixtures/schedule-manual/05-wechat-old-message.png",
+    "tests/fixtures/schedule-manual/06-feishu-reschedule.png",
+    "tests/fixtures/schedule-manual/07-dingtalk-uncertain.png",
+    "tests/fixtures/schedule-manual/08-mail-conflicting-weekday.png",
+    "tests/fixtures/schedule-manual/09-wechat-no-event.png",
+    "tests/fixtures/schedule-manual/10-dingtalk-cross-year.png",
+    "tests/fixtures/schedule-manual/11-feishu-multi-day.png",
+    "tests/fixtures/schedule-manual/README.md",
+    "tests/fixtures/schedule-manual/generate.mjs",
+    "tests/fixtures/schedule-manual/overview.png",
+    "tests/fixtures/schedule-manual/schedule-test-pack.zip",
+    "tests/integration/appearance.spec.ts",
+    "tests/integration/performance.spec.ts",
+    "tests/integration/screenshot-editor.spec.ts",
+    "tests/integration/v2-sck-light.spec.ts",
+    "tests/integration/v2-settings.spec.ts",
+    "tests/unit/appearance.test.ts",
+    "tests/unit/contracts.test.ts",
+    "tests/unit/model-endpoint.test.ts",
+    "tests/unit/performance.test.ts",
+    "tests/unit/providers.test.ts",
+    "tests/unit/schedule-calendar.test.ts",
+    "tests/unit/schedule-time.test.ts",
+    "tests/unit/screenshot-editor.test.ts",
+    "tests/unit/settings.test.ts"
+  ],
+  "newBusinessFiles": [
+    "tests/fixtures/legacy-settings.ts"
+  ],
+  "checks": {
+    "offlineLockfileUpdate": {
+      "command": "pnpm install --lockfile-only --offline --ignore-scripts",
+      "exitCode": 0,
+      "downloaded": 0
+    },
+    "offlineFrozenInstall": {
+      "command": "pnpm install --frozen-lockfile --offline --ignore-scripts",
+      "exitCode": 0,
+      "removedPackages": [
+        "@js-temporal/polyfill",
+        "jsbi",
+        "jsqr"
+      ]
+    },
+    "lint": {
+      "command": "pnpm lint",
+      "exitCode": 0,
+      "initialUnusedImportFixed": true
+    },
+    "typecheck": {
+      "command": "pnpm typecheck",
+      "exitCode": 0
+    },
+    "unit": {
+      "command": "pnpm test",
+      "exitCode": 0,
+      "files": 30,
+      "passed": 168
+    },
+    "build": {
+      "command": "pnpm build",
+      "exitCode": 0,
+      "productionLicenseVersions": 122,
+      "missingLicenseFiles": 0,
+      "warnings": "Two pre-existing Rollup annotation warnings from zod"
+    },
+    "native": {
+      "command": "DEVELOPER_DIR=/Library/Developer/CommandLineTools pnpm native:test",
+      "exitCode": 0,
+      "architectures": [
+        "arm64",
+        "x86_64"
+      ],
+      "checks": [
+        "ping",
+        "session ID echo",
+        "removed OCR rejected",
+        "unknown command rejected",
+        "cancel sleep",
+        "dispose"
+      ]
+    },
+    "smoke": {
+      "command": "pnpm exec playwright test",
+      "reusedBuild": "immediately preceding successful pnpm build; same runtime source",
+      "exitCode": 0,
+      "passed": 21,
+      "optInNotRun": 11
+    },
+    "realSck": {
+      "command": "SNIPVIA_REAL_SCREEN=1 pnpm exec playwright test tests/integration/v2-sck-light.spec.ts",
+      "status": "failed; pending local TCC verification",
+      "attempts": [
+        {
+          "attempt": 1,
+          "at": "2026-10-23T09:03:21.945Z",
+          "status": "failed",
+          "reason": "SCK expected, Electron fallback used",
+          "captureFallbackReason": null,
+          "rawPath": ".dev-runtime/review-cleanup-3cf4498/sck-light-attempt1.json",
+          "rawSha256": "12410a3d9eb7e4ba04be0f11533363fd7906c27fc4a3085b9ade550ac3570b58",
+          "privatePixelsPersisted": false,
+          "clipboardMocked": true
+        },
+        {
+          "attempt": 2,
+          "at": "2026-10-23T09:04:39.439Z",
+          "status": "failed",
+          "reason": "SCK expected, Electron fallback used",
+          "captureFallbackReason": "用户拒绝了应用程序、窗口、显示器捕捉的TCC",
+          "rawPath": ".dev-runtime/review-cleanup-3cf4498/sck-light-attempt2.json",
+          "rawSha256": "00038d14f534bcaa2570b51aa267a50ef57b2ae48a225aed9f3bc31a99af2a74",
+          "privatePixelsPersisted": false,
+          "clipboardMocked": true
+        }
+      ],
+      "observedError": "用户拒绝了应用程序、窗口、显示器捕捉的TCC",
+      "timeoutCount": 0,
+      "assertionsOrTimeoutsRelaxed": false,
+      "permissionsChanged": false,
+      "systemClipboardWritten": false
+    },
+    "removedFilesMatchBaselineHashes": true,
+    "removedPathsHaveNoProductionReferences": true,
+    "windowsCiTestPathsExist": true,
+    "markdownRelativeLinks": {
+      "passed": true,
+      "files": 23,
+      "brokenLinks": 0
+    },
+    "diffWhitespace": {
+      "passed": true,
+      "exitCode": 0
+    },
+    "syntheticUiReviewed": [
+      "settings-phase2-dark.png",
+      "shelf-light.png"
+    ],
+    "trackedUiRestoredAfterTest": [
+      "docs/ui/v2/settings-phase2-light.png",
+      "docs/ui/v2/settings-phase2-dark.png",
+      "docs/ui/v2/shelf-dark.png"
+    ]
+  },
+  "testsRerun": true,
+  "priorValidationReused": false,
+  "remoteOperations": false,
+  "committed": false,
+  "remainingLimitations": [
+    "Real SCK TCC denial requires manual permission review; no claim of native end-to-end pass",
+    "Windows runner and installed-app/mixed-DPI/multi-display tests not executed",
+    "Phase 2 intermittent Collect overlay tail latency remains; no new performance SLA claim"
+  ],
+  "recovery": [
+    ".dev-runtime/review-cleanup-3cf4498/source.tar",
+    ".dev-runtime/review-cleanup-3cf4498/before-code-cleanup.tar",
+    ".dev-runtime/review-cleanup-3cf4498/native-before-ocr-removal/"
+  ]
+}

@@ -1,10 +1,7 @@
 import { Buffer } from 'node:buffer';
 import { spawn } from 'node:child_process';
-import { execFileSync } from 'node:child_process';
 import console from 'node:console';
 import { randomUUID } from 'node:crypto';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { clearTimeout, setTimeout } from 'node:timers';
@@ -14,7 +11,6 @@ const child = spawn(helperPath, [], { stdio: ['pipe', 'pipe', 'pipe'] });
 let buffered = Buffer.alloc(0);
 let stderr = '';
 const pending = new Map();
-const temporaryDirectory = mkdtempSync(resolve(tmpdir(), 'snipvia-helper-test-'));
 
 function request(command, values = {}, timeoutMs = 2000) {
   const requestId = randomUUID();
@@ -67,13 +63,9 @@ try {
   const isolated = await request('ping', { captureSessionId: isolatedSessionId }).promise;
   if (isolated.captureSessionId !== isolatedSessionId) throw new Error('captureSessionId was not preserved by the helper protocol');
 
-  const jpegFixture = resolve(temporaryDirectory, 'ocr.jpg');
-  execFileSync('/usr/bin/sips', ['-s', 'format', 'jpeg', resolve('tests/fixtures/schedule-manual/01-wechat-tomorrow.png'), '--out', jpegFixture], { stdio: 'ignore' });
-  const fixture = readFileSync(jpegFixture).toString('base64');
-  const ocr = await request('ocr', { imageBase64: fixture }, 5000).promise;
-  if (typeof ocr.recognizedText !== 'string' || typeof ocr.ocrConfidence !== 'number' || !Number.isInteger(ocr.ocrLineCount) || typeof ocr.ocrAvailable !== 'boolean') {
-    throw new Error('ocr did not return structured recognition metadata');
-  }
+  let ocrRejected = false;
+  try { await request('ocr').promise; } catch (error) { ocrRejected = error.message.includes('Unknown command: ocr'); }
+  if (!ocrRejected) throw new Error('retired OCR command was not rejected');
 
   let unknownRejected = false;
   try { await request('not-a-command').promise; } catch { unknownRejected = true; }
@@ -92,5 +84,4 @@ try {
   console.info('ScreenCaptureKit helper protocol tests passed');
 } finally {
   if (!child.killed && child.exitCode === null) child.kill();
-  rmSync(temporaryDirectory, { recursive: true, force: true });
 }

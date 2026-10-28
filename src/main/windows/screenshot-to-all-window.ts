@@ -14,6 +14,7 @@ export class ScreenshotToAllWindow {
   private visiblePromise: Promise<boolean> | null = null;
   private resolveVisible: ((visible: boolean) => void) | null = null;
   private destroying = false;
+  private suspended = false;
 
   constructor(
     private readonly webPreferences: WebPreferences,
@@ -34,7 +35,7 @@ export class ScreenshotToAllWindow {
       frame: false,
       transparent: true,
       show: false,
-      resizable: false,
+      resizable: true,
       maximizable: false,
       fullscreenable: false,
       movable: true,
@@ -57,7 +58,9 @@ export class ScreenshotToAllWindow {
     window.on('closed', () => {
       if (this.window === window) this.window = null;
       this.finishVisible(false);
+      if (!this.destroying) this.onClose();
     });
+    window.webContents.on('render-process-gone', () => { if (!this.destroying) { this.destroy(); this.onClose(); } });
     this.readyPromise = new Promise((resolve) => { this.resolveReady = resolve; });
     screenshotPerformance.mark(this.preloadSessionId, 'pin_load_start');
     window.webContents.once('did-finish-load', () => screenshotPerformance.mark(this.preloadSessionId, 'pin_did_finish_load'));
@@ -84,6 +87,8 @@ export class ScreenshotToAllWindow {
     const window = this.getWindow();
     this.hide();
     this.activeSessionId = sessionId;
+    window.setMinimumSize(Math.min(96, bounds.width), Math.min(64, bounds.height));
+    window.setAspectRatio(bounds.width / bounds.height);
     window.setBounds(bounds);
     window.setAlwaysOnTop(true, 'floating');
     screenshotPerformance.mark(sessionId, 'screenshot_window_reuse_start');
@@ -103,8 +108,7 @@ export class ScreenshotToAllWindow {
     if (this.renderedSessionId === sessionId) return true;
     this.renderedSessionId = sessionId;
     const window = this.getWindow();
-    window.show();
-    window.focus();
+    if (!this.suspended) { window.show(); window.focus(); }
     // The chat must not depend on two renderer animation frames being delivered
     // while macOS is switching spaces or the screenshot is temporarily occluded.
     // The later visibility acknowledgement still records its performance marks.
@@ -122,10 +126,22 @@ export class ScreenshotToAllWindow {
     this.finishVisible(false);
     this.activeSessionId = null;
     this.renderedSessionId = null;
+    this.suspended = false;
     const window = this.window;
     if (!window || window.isDestroyed()) return;
     window.hide();
     window.webContents.send('pin:reset-session');
+  }
+
+  suspend() {
+    if (this.suspended) return;
+    this.suspended = true;
+    this.peekWindow()?.hide();
+  }
+
+  resume() {
+    this.suspended = false;
+    if (this.activeSessionId && this.renderedSessionId === this.activeSessionId) this.peekWindow()?.showInactive();
   }
 
   isSessionActive(sessionId: string) {

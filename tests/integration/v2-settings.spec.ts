@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
-import { defaults } from '../../src/shared/contracts';
+import { legacySettingsFixture as defaults } from '../fixtures/legacy-settings';
 import { launchDesktop } from '../helpers/desktop';
 
 test('V2 boots offline into settings, protects old data and credentials, and captures without a Conversation', async () => {

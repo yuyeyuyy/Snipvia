@@ -67,3 +67,5 @@ kbd { font-family: inherit; }
 .config-checkbox input:disabled + span { cursor: not-allowed; opacity: .5; }
 .config-checkbox input:checked + span { background: var(--accent); }
 .config-checkbox input:focus-visible + span { outline-color: var(--focus); }
+
+html.shelf-window, html.shelf-window body, html.shelf-window #root { background: transparent; }

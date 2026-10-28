@@ -47,7 +47,7 @@ export async function waitForCaptureReadiness(options: CaptureReadinessOptions) 
   if (window.isVisible()) window.once('hide', markHidden);
   const fixedDelay = strategy === 'fixed' ? wait(fallbackDelayMs) : null;
   onHideCalled();
-  window.hide();
+  if (window.isVisible()) window.hide();
   if (!window.isVisible()) markHidden();
 
   if (strategy === 'fixed') {

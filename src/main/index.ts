@@ -1,4 +1,5 @@
 import { app, BrowserWindow, clipboard, ClipboardItem, desktopCapturer, dialog, globalShortcut, ipcMain, Menu, nativeImage, powerMonitor, screen, shell, Tray, type IpcMainInvokeEvent, type NativeImage } from 'electron';
+import { monitorEventLoopDelay } from 'node:perf_hooks';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { writeFile, rename, unlink } from 'node:fs/promises';
@@ -11,13 +12,17 @@ import { type ScreenshotItem } from '../shared/screenshot';
 import { performanceMarkSchema, performanceSessionIdSchema } from '../shared/performance';
 import { editorFinishSchema, validateEditorPng } from '../shared/screenshot-editor';
 import { cropRectangle } from '../shared/geometry';
-import { loadSettings, publicSettings } from './storage/settings';
+import { loadSettings, legacyCaptureShortcuts } from './storage/settings';
 import { CapturePreferencesStore } from './storage/CapturePreferencesStore';
 import { capturePreferencesSchema, captureShortcutKeys, acceleratorIdentity, type CapturePreferences } from '../shared/capture-preferences';
 import { ScreenshotCollection } from './storage/ScreenshotCollection';
+import { ShelfPreferencesStore } from './storage/ShelfPreferencesStore';
+import { ScreenshotDragFiles } from './storage/ScreenshotDragFiles';
+import { shelfResizeSchema, shelfPreferencesSchema } from '../shared/shelf-preferences';
 import { ShelfWindow } from './windows/ShelfWindow';
 import { collectionOutputSchema, mergeOptionsSchema, mergeLayout, orderedOutputIds } from '../shared/collection-output';
 import { exportCollectionPng } from './storage/CollectionExporter';
+import { copyCollectionImages } from './storage/CollectionClipboard';
 import { collectionOrderSchema } from '../shared/collection';
 import { ScreenshotStore } from './storage/ScreenshotStore';
 import { LegacyDataService } from './legacy/LegacyDataService';
@@ -25,13 +30,19 @@ import { AppearanceService } from './appearance';
 import { platform, screenPermissionInfo } from './platform';
 import { getLoginItemState, launchedAtLogin, setLoginItem } from './platform/login-item';
 import { screenshotPerformance } from './performance/screenshot-performance';
+import { DevCaptureLatencyLog } from './performance/DevCaptureLatencyLog';
 import { CaptureOverlayWindow } from './windows/capture-overlay-window';
-import { ScreenshotToAllWindow } from './windows/screenshot-to-all-window';
+import { PinnedCaptureWindows } from './windows/PinnedCaptureWindows';
 import { captureReadinessStrategies, type CaptureReadinessStrategy } from './capture/capture-readiness';
 import { CaptureEngine } from './capture/capture-engine';
+import { CaptureOutputQueue } from './capture/CaptureOutputQueue';
+import { CapturePngEncoder } from './capture/CapturePngEncoder';
 import { CaptureModeRouter } from './capture/CaptureModeRouter';
+import { dispatchCaptureHotkey } from './capture/dispatch-capture-hotkey';
 import { ElectronCaptureBackend } from './capture/electron-capture-backend';
 import { ScreenCaptureKitBackend } from './capture/screen-capture-kit-backend';
+import type { Rectangle } from 'electron';
+import type { CaptureSession } from '../shared/capture-mode';
 import type { CapturedFrame } from './capture/types';
 import { UpdateCheckService } from './updates/UpdateCheckService';
 import { ElectronUpdateInstaller } from './updates/ElectronUpdateInstaller';
@@ -40,10 +51,13 @@ import { version as sourceVersion } from '../../package.json';
 let mainWindow: BrowserWindow;
 let updates: UpdateCheckService;
 let capturePreferences: CapturePreferencesStore;
+let shelfPreferences: ShelfPreferencesStore;
+let dragFiles: ScreenshotDragFiles | null = null;
 export const appearance = new AppearanceService(() => mainWindow);
 let captureOverlayWindow: CaptureOverlayWindow | null = null;
 let shelfWindow: ShelfWindow | null = null;
-let screenshotToAllWindow: ScreenshotToAllWindow | null = null;
+let screenshotToAllWindow: PinnedCaptureWindows | null = null;
+let captureOverlayPreloaded = false;
 let resolveCaptureOverlayReady: (() => void) | null = null;
 let rejectCaptureOverlayReady: ((error: unknown) => void) | null = null;
 const captureOverlayReady = new Promise<void>((resolve, reject) => { resolveCaptureOverlayReady = resolve; rejectCaptureOverlayReady = reject; });
@@ -61,7 +75,7 @@ let captureController: AbortController | null = null;
 let capturePermissionGranted = false;
 let quitting = false;
 let activeShortcuts: CapturePreferences | null = null;
-let localPin: { item: ScreenshotItem; performanceSessionId: string } | null = null;
+const localPins = new Map<string, { item: ScreenshotItem; performanceSessionId: string }>();
 const editorFinishing = new Set<string>();
 let desktopCaptureWarmupPromise: Promise<void> | null = null;
 let captureEngine: CaptureEngine | null = null;
@@ -80,31 +94,35 @@ if (developmentSession) {
   mkdirSync(developmentData, { recursive: true });
   app.setPath('userData', developmentData);
 }
+const captureLatencyLog = developmentSession && (process.env.SNIPVIA_CAPTURE_LATENCY_LOG === '1'
+  || existsSync(join(app.getAppPath(), '.dev-runtime/capture-latency.enabled')))
+  ? new DevCaptureLatencyLog(join(app.getAppPath(), '.dev-runtime/capture-latency.json')) : null;
+function logCaptureLatency(sessionId: string | null | undefined, stage: string) {
+  if (sessionId && captureLatencyLog) captureLatencyLog.record(screenshotPerformance.report(sessionId), stage);
+}
 if (process.platform === 'win32') app.setAppUserModelId('com.snipvia.desktop');
 const webPreferences = { preload: join(__dirname, '../preload/index.js'), sandbox: true, contextIsolation: true, nodeIntegration: false };
 export const screenshots = new ScreenshotStore(join(app.getPath('userData'), 'screenshots'));
 export const collection = new ScreenshotCollection(screenshots);
 export const legacyData = new LegacyDataService(app.getPath('userData'));
-type RoutedImage = { image: NativeImage; selection: Selection; display: CaptureDisplay; action?: 'copy' | 'save' | 'pin' };
+const captureDiagnostics = process.env.SNIPVIA_CAPTURE_DIAGNOSTICS === '1' || ['1', 'trace'].includes(process.env.SNIPVIA_PERF ?? '');
+const captureLoopDelay = captureDiagnostics ? monitorEventLoopDelay({ resolution: 10 }) : null;
+captureLoopDelay?.enable();
+const captureDeviceMetadata = { platform: process.platform, architecture: process.arch, osRelease: release(), cpu: cpus()[0]?.model ?? 'unknown', electron: process.versions.electron };
+const pngEncoder = new CapturePngEncoder();
+const outputQueue = new CaptureOutputQueue({
+  changed: state => { if (tray && !quitting) tray.setToolTip(state.failed ? '截然 — 复制/收纳失败，请在菜单中重试' : state.pending ? '截然 — 正在处理 ' + state.pending + ' 张截图' : '截然 — 轻量截图'); },
+  failed: (id, error) => {
+    screenshotPerformance.mark(id, 'output_failed');
+    if (mainWindow && !quitting && !mainWindow.isDestroyed()) mainWindow.webContents.send('capture:error', (error instanceof Error ? error.message : '截图输出失败') + '；任务已保留，可在菜单中重试或放弃；原始帧失效时需重新截图');
+  }
+});
+type RoutedImage = ({ image: NativeImage; action?: 'copy' | 'save' | 'pin' } | { frame: CapturedFrame; rect: Rectangle }) & { selection: Selection; display: CaptureDisplay };
 const modeRouter = new CaptureModeRouter<RoutedImage>({
-  quick: async (result, session) => {
-    const png = result.value.image.toPNG();
-    await clipboard.write([new ClipboardItem({ 'image/png': new Blob([new Uint8Array(png)], { type: 'image/png' }) })]);
-    screenshotPerformance.mark(session.id, 'clipboard_committed');
-    session.signal.throwIfAborted();
-    if (modeRouter.current(session.id)) cleanupOverlay(false);
-  },
-  collect: async (result, session) => {
-    session.signal.throwIfAborted();
-    const { image, display, selection } = result.value;
-    const item = screenshots.create(image.toPNG(), { ...image.getSize(), mimeType: 'image/png' });
-    try { collection.append(item.id); } catch (error) { screenshots.release(item.id); throw error; }
-    screenshotPerformance.mark(session.id, 'collection_updated');
-    cleanupOverlay(false);
-    const completedGeneration = generation;
-    setImmediate(() => { if (generation === completedGeneration) shelfWindow?.collected(display, selection, item.id, session.id); else shelfWindow?.publish(); });
-  },
+  quick: async (result, session) => { enqueueOutput(result.value, session); },
+  collect: async (result, session) => { enqueueOutput(result.value, session); },
   edit: async (result, session) => {
+    if (!('image' in result.value)) throw new Error('编辑截图数据无效');
     const { image, selection, display, action } = result.value;
     if (!action) throw new Error('请从编辑工具栏完成截图');
     const png = image.toPNG();
@@ -131,25 +149,83 @@ const modeRouter = new CaptureModeRouter<RoutedImage>({
   }
 });
 
+function enqueueOutput(value: RoutedImage, session: CaptureSession) {
+  session.signal.throwIfAborted();
+  if (!('frame' in value)) throw new Error('截图原始帧无效');
+  const { frame, rect, selection, display } = value;
+  const pixels = frame.width * frame.height, selectedPixels = rect.width * rect.height;
+  const bytes = pixels * (frame.original ? 4 : 8) + selectedPixels * 8 + 1024 * 1024;
+  outputQueue.assertCapacity(bytes);
+  let png: Buffer | undefined, originalReleased = false, feedbackGeneration = 0;
+  const releaseOriginal = () => {
+    if (originalReleased) return; originalReleased = true; frame.original?.release();
+    frame.buffer = undefined; frame.image = undefined; frame.preview = undefined;
+  };
+  outputQueue.enqueue({
+    id: session.id, bytes,
+    run: async signal => {
+      signal.throwIfAborted();
+      if (!png) {
+        screenshotPerformance.mark(session.id, 'output_encode_start');
+        if (frame.original) png = await frame.original.png(rect, signal);
+        else {
+          const bitmap = frame.format === 'bgra' && frame.buffer ? frame.buffer : resolveCapturedFrameImage(frame, session.id).toBitmap();
+          png = await pngEncoder.encode({ bytes: bitmap, width: frame.width, height: frame.height, rect }, signal);
+        }
+        screenshotPerformance.mark(session.id, 'output_encode_end'); releaseOriginal();
+      }
+      signal.throwIfAborted();
+      if (session.mode === 'quick') {
+        screenshotPerformance.mark(session.id, 'clipboard_write_start');
+        await clipboard.write([new ClipboardItem({ 'image/png': new Blob([new Uint8Array(png)], { type: 'image/png' }) })]);
+        screenshotPerformance.mark(session.id, 'clipboard_committed');
+      } else {
+        const item = screenshots.create(png, { width: rect.width, height: rect.height, mimeType: 'image/png' });
+        try { collection.append(item.id); } catch (error) { screenshots.release(item.id); throw error; }
+        screenshotPerformance.mark(session.id, 'collection_updated');
+        if (generation === feedbackGeneration) shelfWindow?.collected(display, selection, item.id, session.id); else shelfWindow?.publish();
+      }
+    },
+    release: () => { releaseOriginal(); png = undefined; }
+  });
+  // Transfer frame ownership to the accepted output before resetting the live session.
+  capturedFrame = null;
+  screenshotPerformance.mark(session.id, 'output_queued');
+  const timing = cleanupOverlay(false, session.mode !== 'collect');
+  screenshotPerformance.updateMetadata(session.id, timing);
+  modeRouter.detach(session.id);
+  feedbackGeneration = generation;
+}
+
 async function copyScreenshot(id: string) {
   const { bytes, item } = screenshots.image(id);
   await clipboard.write([new ClipboardItem({ [item.mimeType]: new Blob([new Uint8Array(bytes)], { type: item.mimeType }) })]);
 }
-function closePinnedFlow() {
-  const pin = localPin;
-  localPin = null;
-  screenshotToAllWindow?.hide();
-  if (pin) { screenshots.unretain(pin.item.id, 'pin'); screenshotPerformance.mark(pin.performanceSessionId, 'capture_closed'); }
+function closePinnedFlow(sessionId?: string) {
+  const ids = sessionId ? [sessionId] : [...localPins.keys()];
+  for (const id of ids) {
+    const pin = localPins.get(id);
+    localPins.delete(id);
+    screenshotToAllWindow?.close(id);
+    if (pin) { screenshots.unretain(pin.item.id, 'pin:' + id); screenshotPerformance.mark(id, 'capture_closed'); }
+  }
+}
+async function presentPin(item: ScreenshotItem, selection: Selection, display: CaptureDisplay, sessionId: string) {
+  if (!screenshotToAllWindow) throw new Error('钉图窗口尚未就绪');
+  const { bytes } = screenshots.image(item.id);
+  screenshots.retain(item.id, 'pin:' + sessionId);
+  localPins.set(sessionId, { item, performanceSessionId: sessionId });
+  try {
+    await screenshotToAllWindow.present(sessionId, pinnedBounds(selection, display), {
+      performanceSessionId: sessionId,
+      capture: { id: item.id, width: item.width, height: item.height, createdAt: item.createdAt, dataUrl: 'data:' + item.mimeType + ';base64,' + bytes.toString('base64') }
+    });
+  } catch (error) { closePinnedFlow(sessionId); throw error; }
 }
 async function presentLocalPin(item: ScreenshotItem, selection: Selection, display: CaptureDisplay, sessionId: string) {
-  if (!screenshotToAllWindow || !modeRouter.current(sessionId)) throw new Error('截图会话已结束');
-  closePinnedFlow();
-  const { bytes } = screenshots.image(item.id);
-  screenshots.retain(item.id, 'pin');
-  localPin = { item, performanceSessionId: sessionId };
-  const preview = { id: item.id, width: item.width, height: item.height, createdAt: item.createdAt, dataUrl: 'data:' + item.mimeType + ';base64,' + bytes.toString('base64'), performanceSessionId: sessionId };
+  if (!modeRouter.current(sessionId)) throw new Error('截图会话已结束');
   cleanupOverlay(false);
-  await screenshotToAllWindow.present(sessionId, pinnedBounds(selection, display), { capture: preview, localOnly: true, chatActive: false, performanceSessionId: sessionId });
+  await presentPin(item, selection, display, sessionId);
 }
 function webPreferencesFor(performanceSessionId?: string | null): Electron.WebPreferences {
   return performanceSessionId
@@ -291,7 +367,7 @@ function setupCaptureEngine() {
       // The native path may already be showing a transparent response overlay.
       // Hide it before desktopCapturer runs so the fallback never captures Snipvia itself.
       captureOverlayWindow?.suspendForCapture();
-      if (screenshotToAllWindow?.isActive()) closePinnedFlow();
+      screenshotToAllWindow?.suspend();
     },
     onFallback: (sessionId, reason) => {
       screenshotPerformance.mark(sessionId, 'capture_backend_fallback', 'main', { from: 'screen-capture-kit', to: 'electron', reason });
@@ -355,6 +431,7 @@ function restoreDock() {
   if (app.dock?.isVisible()) { applyDevelopmentDockIcon(); return; }
   // setVisibleOnAllWorkspaces can temporarily change the macOS process type.
   // Restore a normal Dock application after the capture overlay goes away.
+  developmentDockIconApplied = false;
   app.setActivationPolicy('regular');
   void app.dock?.show().then(applyDevelopmentDockIcon).catch(() => { /* The tray remains available if Dock activation fails. */ });
 }
@@ -381,17 +458,21 @@ function trayIconImage() {
   throw new Error('菜单栏图标资源缺失');
 }
 
+let developmentDockIconApplied = false;
 function applyDevelopmentDockIcon() {
+  if (developmentDockIconApplied) return;
   if (process.platform !== 'darwin' || app.isPackaged) return;
   // NativeImage cannot decode ICNS; use the PNG exported from the same Mac source.
   // System permission dialogs use bundle resources, independently of this Dock override.
   const icon = nativeImage.createFromPath(join(app.getAppPath(), 'src', 'renderer', 'src', 'assets', 'snipvia-app-icon.png'));
-  if (!icon.isEmpty()) app.dock?.setIcon(icon);
+  if (!icon.isEmpty() && app.dock) { app.dock.setIcon(icon); developmentDockIconApplied = true; }
 }
 
 function showMain() { restoreDock(); mainWindow.show(); mainWindow.focus(); }
-function cleanupOverlay(cancelSession = true) {
+function cleanupOverlay(cancelSession = true, resumeShelf = true) {
   const performanceSessionId = activeCapturePerformanceSessionId;
+  const captureMode = performanceSessionId ? modeRouter.current(performanceSessionId)?.mode : undefined;
+  const overlayWasActive = captureOverlayWindow?.isActive();
   generation++;
   captureController?.abort(new Error('截图已取消'));
   captureController = null;
@@ -400,12 +481,27 @@ function cleanupOverlay(cancelSession = true) {
     captureBenchmarkFrames.delete(performanceSessionId);
     if (cancelSession) modeRouter.cancel(performanceSessionId);
   }
+  const closeStarted = performance.now();
+  // Hiding a window does not deactivate its macOS application. Quick/Collect
+  // have no foreground surface after exit: release the app before showing
+  // the non-activating Shelf feedback. Edit/Pin keep their existing focus path.
+  if (process.platform === 'darwin' && !quitting && overlayWasActive
+    && (captureMode === 'quick' || captureMode === 'collect') && !mainWindow.isVisible()) app.hide();
+  else shelfWindow?.hideSuspendedWindow();
+  const shelfHiddenAt = performance.now();
   captureOverlayWindow?.hide();
+  const overlayHiddenAt = performance.now();
+  capturedFrame?.original?.release();
   capturedFrame = null;
   captureDisplay = null;
   preparing = false;
-  shelfWindow?.resume();
+  if (resumeShelf) shelfWindow?.resume();
+  if (!quitting) screenshotToAllWindow?.resume();
+  const frameReleasedAt = performance.now();
   restoreDock();
+  screenshotPerformance.mark(performanceSessionId, 'overlay_closed');
+  logCaptureLatency(performanceSessionId, 'closed');
+  return { shelfNativeHideOnExitMs: shelfHiddenAt - closeStarted, overlayCloseMs: overlayHiddenAt - shelfHiddenAt, frameReleaseMs: frameReleasedAt - overlayHiddenAt, dockRestoreMs: performance.now() - frameReleasedAt };
 }
 function announceError(error: unknown) {
   const message = error instanceof Error ? error.message : '截图失败';
@@ -432,30 +528,32 @@ function pinnedBounds(selection: { x: number; y: number; width: number; height: 
 
 type CaptureTrigger = 'hotkey' | 'menu' | 'tray' | 'main';
 
-async function startCapture(trigger: CaptureTrigger = 'main', mode: CaptureMode = 'quick') {
-  if (mode === 'collect') void shelfWindow?.prepare();
+async function startCapture(trigger: CaptureTrigger = 'main', mode: CaptureMode = 'quick', requestedAt = performance.now()) {
   const performanceSessionId = screenshotPerformance.startSession({
     trigger,
     captureMode: mode,
-    platform: process.platform,
-    architecture: process.arch,
-    osRelease: release(),
-    cpu: cpus()[0]?.model ?? 'unknown',
-    electron: process.versions.electron,
+    ...captureDeviceMetadata,
     mode: process.env.ELECTRON_RENDERER_URL ? 'DEV' : app.isPackaged ? 'PROD' : 'PROD build preview'
-  });
+  }, requestedAt);
   // Local capture never waits for model or network configuration.
   if (trigger === 'hotkey') screenshotPerformance.mark(performanceSessionId, 'hotkey_pressed');
   screenshotPerformance.mark(performanceSessionId, 'capture_start');
-  screenshotPerformance.updateMetadata(performanceSessionId, { captureMode: mode });
+  screenshotPerformance.updateMetadata(performanceSessionId, { nativeHotkeyDispatchMs: performance.now() - requestedAt, overlayPreloadedAtEntry: captureOverlayPreloaded, applicationHiddenAtCaptureStart: process.platform === 'darwin' && app.isHidden() });
+  logCaptureLatency(performanceSessionId, 'start');
+  screenshotPerformance.updateMetadata(performanceSessionId, { captureMode: mode, ...(captureLoopDelay ? { mainEventLoopDelayMaxMs: captureLoopDelay.max / 1e6 } : {}) });
+  captureLoopDelay?.reset();
   if (preparing || captureOverlayWindow?.isActive()) {
     screenshotPerformance.mark(activeCapturePerformanceSessionId, 'capture_cancelled', 'main', { reason: 'superseded' });
     cleanupOverlay();
   }
-  shelfWindow?.suspend();
+  screenshotToAllWindow?.suspend();
+  const shelfTiming = shelfWindow?.suspend();
+  if (shelfTiming) screenshotPerformance.updateMetadata(performanceSessionId, shelfTiming);
   modeRouter.begin(performanceSessionId, mode);
   activeCapturePerformanceSessionId = performanceSessionId;
-  await captureOverlayReady;
+  const overlayReadyStarted = performance.now();
+  if (!captureOverlayPreloaded) await captureOverlayReady;
+  screenshotPerformance.updateMetadata(performanceSessionId, { overlayReadyWaitMs: performance.now() - overlayReadyStarted });
   if (activeCapturePerformanceSessionId !== performanceSessionId) return;
   screenshotPerformance.mark(performanceSessionId, 'permission_check_start');
   const permissionCached = capturePermissionGranted;
@@ -511,14 +609,12 @@ async function startCapture(trigger: CaptureTrigger = 'main', mode: CaptureMode 
     const result = await captureEngine.captureDisplay({
       display: { id: String(display.id), bounds: display.bounds, size: display.size, scaleFactor: display.scaleFactor },
       performanceSessionId,
+      retainOriginal: mode !== 'edit',
       mainWindowWasVisible,
       signal: activeCaptureController.signal
     });
     if (captureController === activeCaptureController) captureController = null;
-    if (session !== generation) return;
-    if (result.backend === 'screen-capture-kit' && screenshotToAllWindow?.isActive()) {
-      closePinnedFlow();
-    }
+    if (session !== generation) { result.frame.original?.release(); return; }
     capturedFrame = result.frame;
     view = display.size;
     screenshotPerformance.updateMetadata(performanceSessionId, {
@@ -536,6 +632,7 @@ async function startCapture(trigger: CaptureTrigger = 'main', mode: CaptureMode 
       : await captureOverlayWindow.present(performanceSessionId, display.bounds, true, mode);
     if (session !== generation || !visible) return;
     preparing = false;
+    if (mode === 'collect') void shelfWindow?.prepare();
   } catch (error) {
     if (captureController === activeCaptureController) captureController = null;
     // A cancelled session must never tear down a newer capture window.
@@ -553,10 +650,12 @@ function registerShortcuts(settings: CapturePreferences) {
   const previous = activeShortcuts, keys = captureShortcutKeys;
   if (previous && keys.every(key => settings[key] === previous[key])) return;
   if (new Set(keys.map(key => acceleratorIdentity(settings[key], process.platform))).size !== keys.length) throw new Error('快捷键不能相同（包含 Ctrl / Control 等别名）');
+  const captureHotkey = (mode: CaptureMode) => dispatchCaptureHotkey(mode,
+    (selectedMode, requestedAt) => startCapture('hotkey', selectedMode, requestedAt), announceError);
   const callbacks = {
-    shortcut: () => { void startCapture('hotkey', 'quick').catch(announceError); },
-    editorShortcut: () => { void startCapture('hotkey', 'edit').catch(announceError); },
-    collectShortcut: () => { void startCapture('hotkey', 'collect').catch(announceError); },
+    shortcut: () => captureHotkey('quick'),
+    editorShortcut: () => captureHotkey('edit'),
+    collectShortcut: () => captureHotkey('collect'),
     collectionShortcut: () => { void shelfWindow?.toggle().catch(error => mainWindow.webContents.send('capture:error', String(error))); },
     clearCollectionShortcut: () => { void confirmClearCollection().catch(error => mainWindow.webContents.send('capture:error', String(error))); }
   };
@@ -613,7 +712,7 @@ function windowForRole(role: WindowRole) {
 function senderAllowed(event: IpcMainInvokeEvent | Electron.IpcMainEvent, role: WindowRole | WindowRole[]) {
   const roles = Array.isArray(role) ? role : [role];
   return roles.some((item) => {
-    const window = windowForRole(item);
+    const window = item === 'pin' ? screenshotToAllWindow?.forSender(event.sender)?.peekWindow() : windowForRole(item);
     return window && !window.isDestroyed() && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame;
   });
 }
@@ -625,6 +724,13 @@ function handle(channel: string, role: WindowRole | WindowRole[], action: (value
       return { ok: true, value: await action(value, event) };
     } catch (error) { return { ok: false, error: error instanceof Error ? error.message : '操作失败' }; }
   });
+}
+
+function screenshotThumbnail(id: string) {
+  const image = nativeImage.createFromBuffer(screenshots.image(id).bytes);
+  if (image.isEmpty()) throw new Error('截图无法预览');
+  const size = image.getSize(), scale = Math.min(1, 768 / size.width, 512 / size.height);
+  return image.resize({ width: Math.max(1, Math.round(size.width * scale)), height: Math.max(1, Math.round(size.height * scale)) }).toDataURL();
 }
 
 async function confirmClearCollection() {
@@ -640,9 +746,39 @@ function selectedCollection(value: unknown) {
   return { ids: orderedOutputIds(snapshot.items.map(item => item.id), request.ids), revision: snapshot.revision };
 }
 function setupIPC() {
+  handle('collection:configure', 'main', async value => {
+    const configuration = shelfPreferences.configure(shelfPreferencesSchema.parse(value));
+    const state = await shelfWindow!.configure(configuration);
+    if (!mainWindow.isDestroyed()) mainWindow.webContents.send('collection:changed', state);
+    return state;
+  });
+  handle('collection:widen', 'shelf', value => { z.undefined().parse(value); return shelfWindow!.widen(); });
+  handle('collection:reveal', 'shelf', value => { z.undefined().parse(value); return shelfWindow!.reveal(); });
+  handle('collection:edge-finished', 'shelf', value => shelfWindow!.edgeFinished(z.number().int().nonnegative().parse(value)));
+  handle('collection:open-preview', 'shelf', value => {
+    const request = z.strictObject({ id: z.string().uuid(), source: z.strictObject({
+      x: z.number().finite().min(-20000).max(20000), y: z.number().finite().min(-20000).max(20000),
+      width: z.number().finite().positive().max(20000), height: z.number().finite().positive().max(20000)
+    }) }).parse(value);
+    collection.getItem(request.id); return shelfWindow!.openPreview(request.id, request.source);
+  });
+  handle('collection:close-preview', 'shelf', value => { z.undefined().parse(value); return shelfWindow!.closePreview(); });
+  handle('collection:preview-finished', 'shelf', value => shelfWindow!.previewFinished(z.number().int().nonnegative().parse(value)));
+  handle('collection:interaction', 'shelf', value => shelfWindow!.setPointerInteraction(z.boolean().parse(value)));
+  handle('collection:resize', 'shelf', value => {
+    const { commit, ...size } = shelfResizeSchema.parse(value);
+    if (commit) shelfPreferences.save(size);
+    return shelfWindow!.resize(size);
+  });
   handle('collection:image', 'shelf', value => {
     const id = z.string().uuid().parse(value); collection.getItem(id);
     const image = screenshots.image(id); return { bytes: new Uint8Array(image.bytes), mimeType: image.item.mimeType };
+  });
+  handle('collection:copy-all', 'shelf', async value => {
+    const { revision } = z.strictObject({ revision: z.number().int().nonnegative() }).parse(value);
+    const snapshot = collection.snapshot();
+    if (revision !== snapshot.revision) throw new Error('收纳区已变化，请重试复制');
+    await copyCollectionImages(screenshots, snapshot.items.map(item => item.id), join(app.getPath('userData'), 'clipboard-files'));
   });
   handle('collection:copy-merged', 'shelf', async value => {
     const request = z.strictObject({ ids: z.array(z.string().uuid()).min(1).max(32), revision: z.number().int().nonnegative(), options: mergeOptionsSchema,
@@ -662,6 +798,8 @@ function setupIPC() {
     return exportCollectionPng(screenshots, fresh.ids, result.filePaths[0]);
   });
   handle('collection:rendered', 'shelf', value => shelfWindow!.rendered(z.number().int().nonnegative().parse(value)));
+  handle('collection:feedback-finished', 'shelf', value => shelfWindow!.feedbackFinished(z.number().int().nonnegative().parse(value)));
+  handle('collection:hit-regions', 'shelf', value => { shelfWindow!.setHitRegions(z.array(z.object({ x: z.number().finite().min(-10000).max(10000), y: z.number().finite().min(-10000).max(10000), width: z.number().finite().nonnegative().max(10000), height: z.number().finite().nonnegative().max(10000) }).strict()).max(100).parse(value)); });
   handle('collection:reduced-motion', 'shelf', value => shelfWindow!.setReducedMotion(z.boolean().parse(value)));
   handle('collection:current', ['main', 'shelf'], value => { z.undefined().parse(value); return shelfWindow!.current(); });
   handle('collection:toggle', ['main', 'shelf'], value => { z.undefined().parse(value); return shelfWindow!.toggle(); });
@@ -675,24 +813,31 @@ function setupIPC() {
     shelfWindow?.recordInteraction(id); shelfWindow?.publish(); return shelfWindow!.current();
   });
   handle('collection:clear', ['main', 'shelf'], value => { z.undefined().parse(value); return confirmClearCollection(); });
+  handle('collection:copy', 'shelf', async value => { const id = z.string().uuid().parse(value); collection.getItem(id); await copyScreenshot(id); });
+  handle('collection:start-drag', 'shelf', (value, event) => {
+    const { id, revision } = z.strictObject({ id: z.string().uuid(), revision: z.number().int().nonnegative() }).parse(value);
+    const state = shelfWindow!.current();
+    if (!state.expanded || state.hidden || state.suspended || state.preview || state.feedback || state.edge !== 'shown') throw new Error('请先展开收纳区再拖出图片');
+    if (revision !== state.collection.revision) throw new Error('收纳区已变化，请重新拖动');
+    collection.getItem(id);
+    const icon = nativeImage.createFromDataURL(screenshotThumbnail(id));
+    if (icon.isEmpty()) throw new Error('截图无法拖出');
+    const iconSize = icon.getSize(), scale = Math.min(1, 96 / iconSize.width, 96 / iconSize.height);
+    const dragIcon = icon.resize({ width: Math.max(1, Math.round(iconSize.width * scale)), height: Math.max(1, Math.round(iconSize.height * scale)) });
+    const file = dragFiles!.prepare(id, screenshots);
+    shelfWindow!.setPointerInteraction(true);
+    try { event.sender.startDrag({ file, icon: dragIcon }); }
+    finally { shelfWindow!.setPointerInteraction(false); }
+  });
   handle('collection:thumbnail', 'shelf', value => {
-    const id = z.string().uuid().parse(value); collection.getItem(id);
-    const image = nativeImage.createFromBuffer(screenshots.image(id).bytes);
-    if (image.isEmpty()) throw new Error('截图无法预览');
-    const size = image.getSize(), scale = Math.min(1, 240 / size.width, 160 / size.height);
-    return image.resize({ width: Math.max(1, Math.round(size.width * scale)), height: Math.max(1, Math.round(size.height * scale)) }).toDataURL();
+    const id = z.string().uuid().parse(value); collection.getItem(id); return screenshotThumbnail(id);
   });
   handle('collection:preview', 'shelf', async value => {
     const item = collection.getItem(z.string().uuid().parse(value));
     if (preparing || captureOverlayWindow?.isActive()) throw new Error('请先完成截图');
     const sessionId = screenshotPerformance.startSession({ trigger: 'collection-preview' });
     const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint());
-    const { bytes } = screenshots.image(item.id); closePinnedFlow(); screenshots.retain(item.id, 'pin');
-    localPin = { item, performanceSessionId: sessionId };
-    await screenshotToAllWindow!.present(sessionId, pinnedBounds({ x: 40, y: 80, width: item.width, height: item.height }, display), {
-      localOnly: true, chatActive: false, performanceSessionId: sessionId,
-      capture: { id: item.id, createdAt: item.createdAt, width: item.width, height: item.height, dataUrl: 'data:' + item.mimeType + ';base64,' + bytes.toString('base64') }
-    });
+    await presentPin(item, { x: 40, y: 80, width: item.width, height: item.height }, display, sessionId);
   });
   handle('updates:current', 'main', value => { z.undefined().parse(value); return updates.current(); });
   handle('updates:check', 'main', value => { z.undefined().parse(value); return updates.check(); });
@@ -731,13 +876,14 @@ function setupIPC() {
   ipcMain.on('window:ready', (event, value: unknown) => {
     if (value === 'capture' && senderAllowed(event, 'overlay')) captureOverlayWindow?.markRendererReady();
     if (value === 'shelf' && senderAllowed(event, 'shelf')) shelfWindow?.markReady();
-    if (value === 'pin' && senderAllowed(event, 'pin')) screenshotToAllWindow?.markRendererReady();
+    if (value === 'pin' && senderAllowed(event, 'pin')) screenshotToAllWindow?.markRendererReady(event.sender);
   });
   ipcMain.on('performance:mark', (event, value: unknown) => {
     if (!senderAllowed(event, ['main', 'overlay', 'pin', 'shelf'])) return;
     const parsed = performanceMarkSchema.safeParse(value);
     if (!parsed.success) return;
-    screenshotPerformance.mark(parsed.data.sessionId, parsed.data.event, 'renderer', parsed.data.metadata);
+    screenshotPerformance.mark(parsed.data.sessionId, parsed.data.event, 'renderer', parsed.data.metadata, parsed.data.sourceTimestampMs);
+    if (parsed.data.event === 'capture_overlay_shell_visible') logCaptureLatency(parsed.data.sessionId, 'shell-painted');
   });
   handle('performance:report', ['main', 'overlay', 'pin', 'shelf'], (value) => screenshotPerformance.report(performanceSessionIdSchema.parse(value)));
   handle('performance:startup-report', ['main', 'overlay', 'pin', 'shelf'], () => startupPerformanceSessionId ? screenshotPerformance.report(startupPerformanceSessionId) : null);
@@ -788,9 +934,10 @@ function setupIPC() {
     const transport = captureFrameTransport();
     const visibilityRafCount = captureVisibilityRafCount();
     const size = { width: capturedFrame.width, height: capturedFrame.height };
-    const memoryBeforeEncode = processMemorySnapshot().workingSetKb;
+    const memoryBeforeEncode = captureDiagnostics ? processMemorySnapshot().workingSetKb : 0;
     captureMemoryBefore.set(performanceSessionId, memoryBeforeEncode);
     screenshotPerformance.updateMetadata(performanceSessionId, {
+      captureProcessMetricsEnabled: captureDiagnostics,
       captureFrameTransport: transport,
       captureVisibilityRafCount: visibilityRafCount,
       captureFrameMemoryBeforeEncodeKb: memoryBeforeEncode
@@ -834,7 +981,7 @@ function setupIPC() {
     }
     const encodedBytes = 'dataUrl' in payload ? payload.dataUrl.length * 2 : payload.bytes.byteLength;
     screenshotPerformance.mark(performanceSessionId, 'frame_encode_end', 'main', { transport, encodedBytes });
-    const memoryAfterEncode = processMemorySnapshot().workingSetKb;
+    const memoryAfterEncode = captureDiagnostics ? processMemorySnapshot().workingSetKb : 0;
     screenshotPerformance.updateMetadata(performanceSessionId, {
       captureFrameEncodedBytes: encodedBytes,
       captureFrameMemoryAfterEncodeKb: memoryAfterEncode,
@@ -842,13 +989,18 @@ function setupIPC() {
     });
     return payload;
   });
-  handle('capture:session-shell-rendered', 'overlay', (value) => captureOverlayWindow?.showShellSession(performanceSessionIdSchema.parse(value)) ?? false);
+  handle('capture:session-shell-rendered', 'overlay', (value) => {
+    const sessionId = performanceSessionIdSchema.parse(value);
+    const shown = captureOverlayWindow?.showShellSession(sessionId) ?? false;
+    if (shown) logCaptureLatency(sessionId, 'shell');
+    return shown;
+  });
   handle('capture:session-rendered', 'overlay', (value) => captureOverlayWindow?.showRenderedSession(performanceSessionIdSchema.parse(value)) ?? false);
   handle('capture:session-visible', 'overlay', (value) => {
     const sessionId = performanceSessionIdSchema.parse(value);
     const visible = captureOverlayWindow?.markSessionVisible(sessionId) ?? false;
     if (visible) {
-      const memoryVisible = processMemorySnapshot().workingSetKb;
+      const memoryVisible = captureDiagnostics ? processMemorySnapshot().workingSetKb : 0;
       const memoryBeforeEncode = captureMemoryBefore.get(sessionId);
       const report = screenshotPerformance.report(sessionId);
       const captured = report?.marks.find((mark) => mark.event === 'frame_capture_end');
@@ -862,6 +1014,7 @@ function setupIPC() {
         ...(memoryBeforeEncode === undefined ? {} : { captureFrameMemoryVisibleDeltaKb: memoryVisible - memoryBeforeEncode })
       });
       captureMemoryBefore.delete(sessionId);
+      logCaptureLatency(sessionId, 'visible');
     }
     return visible;
   });
@@ -881,7 +1034,7 @@ function setupIPC() {
     const requestValue = typeof value === 'object' && value !== null ? value as { sessionId?: unknown } : null;
     const requestedSessionId = typeof requestValue?.sessionId === 'string' ? requestValue.sessionId : activeCapturePerformanceSessionId;
     if (!modeRouter.current(requestedSessionId!) || requestedSessionId !== activeCapturePerformanceSessionId) throw new Error('截图会话已失效');
-    const sourceFrame = resolveCapturedFrameImage(capturedFrame, requestedSessionId);
+    const frame = capturedFrame;
     screenshotPerformance.mark(requestedSessionId, 'capture_finish_main_received');
     screenshotPerformance.mark(requestedSessionId, 'selection_validation_start');
     const request = captureFinishSchema.parse(value);
@@ -890,11 +1043,9 @@ function setupIPC() {
     const selection = request.selection;
     const display = captureDisplay;
     screenshotPerformance.mark(request.sessionId, 'coordinate_conversion_start');
-    const rect = cropRectangle(selection, view, sourceFrame.getSize());
+    const rect = cropRectangle(selection, view, { width: frame.width, height: frame.height });
     screenshotPerformance.mark(request.sessionId, 'coordinate_conversion_end');
-    screenshotPerformance.mark(request.sessionId, 'crop_start');
-    const selected = sourceFrame.crop(rect);
-    screenshotPerformance.mark(request.sessionId, 'crop_end', 'main', { width: rect.width, height: rect.height });
+
     screenshotPerformance.updateMetadata(request.sessionId, {
       selectionXDip: selection.x,
       selectionYDip: selection.y,
@@ -903,25 +1054,57 @@ function setupIPC() {
       selectionWidthPx: rect.width,
       selectionHeightPx: rect.height
     });
-    await modeRouter.complete({ sessionId: request.sessionId, value: { image: selected, selection, display } });
+    const mode = modeRouter.current(request.sessionId)!.mode;
+    if (mode !== 'edit') await modeRouter.complete({ sessionId: request.sessionId, value: { frame, rect, selection, display } });
+    else {
+      const sourceFrame = resolveCapturedFrameImage(frame, request.sessionId);
+      screenshotPerformance.mark(request.sessionId, 'crop_start');
+      const selected = sourceFrame.crop(rect);
+      screenshotPerformance.mark(request.sessionId, 'crop_end', 'main', { width: rect.width, height: rect.height });
+      await modeRouter.complete({ sessionId: request.sessionId, value: { image: selected, selection, display } });
+    }
   });
-  handle('pin:current', 'pin', () => {
-    if (!localPin) throw new Error('置顶截图已结束');
-    const { item, bytes } = screenshots.image(localPin.item.id);
-    return { localOnly: true, chatActive: false, performanceSessionId: localPin.performanceSessionId,
+  const requestingPin = (event: IpcMainInvokeEvent) => {
+    const id = screenshotToAllWindow?.sessionForSender(event.sender);
+    const pin = id ? localPins.get(id) : undefined;
+    if (!pin) throw new Error('置顶截图已结束');
+    return pin;
+  };
+  handle('pin:current', 'pin', (_value, event) => {
+    const pin = requestingPin(event), { item, bytes } = screenshots.image(pin.item.id);
+    return { performanceSessionId: pin.performanceSessionId,
       capture: { id: item.id, createdAt: item.createdAt, width: item.width, height: item.height, dataUrl: 'data:' + item.mimeType + ';base64,' + bytes.toString('base64') } };
   });
-  handle('pin:session-rendered', 'pin', value => screenshotToAllWindow?.showRenderedSession(performanceSessionIdSchema.parse(value)) ?? false);
-  handle('pin:session-visible', 'pin', value => screenshotToAllWindow?.markSessionVisible(performanceSessionIdSchema.parse(value)) ?? false);
-  handle('pin:close', 'pin', () => closePinnedFlow());
-  handle('pin:copy', 'pin', async () => {
-    const pin = localPin;
-    if (!pin) throw new Error('置顶截图已结束');
+  handle('pin:session-rendered', 'pin', (value, event) => screenshotToAllWindow?.showRenderedSession(performanceSessionIdSchema.parse(value), event.sender) ?? false);
+  handle('pin:session-visible', 'pin', (value, event) => screenshotToAllWindow?.markSessionVisible(performanceSessionIdSchema.parse(value), event.sender) ?? false);
+  handle('pin:close', 'pin', (_value, event) => closePinnedFlow(requestingPin(event).performanceSessionId));
+  handle('pin:move', 'pin', (value, event) => {
+    const request = z.strictObject({
+      sessionId: performanceSessionIdSchema,
+      x: z.number().finite().min(-100000).max(100000),
+      y: z.number().finite().min(-100000).max(100000)
+    }).parse(value);
+    const pin = requestingPin(event);
+    if (pin.performanceSessionId !== request.sessionId || preparing || captureOverlayWindow?.isActive()) throw new Error('钉图暂时不可移动');
+    const window = screenshotToAllWindow?.forSender(event.sender)?.peekWindow();
+    if (!window) throw new Error('钉图已关闭');
+    const bounds = window.getBounds(), area = screen.getDisplayMatching({ ...bounds, x: Math.round(request.x), y: Math.round(request.y) }).workArea;
+    const visibleWidth = Math.min(32, bounds.width), visibleHeight = Math.min(32, bounds.height);
+    window.setPosition(
+      Math.round(Math.max(area.x - bounds.width + visibleWidth, Math.min(area.x + area.width - visibleWidth, request.x))),
+      Math.round(Math.max(area.y - bounds.height + visibleHeight, Math.min(area.y + area.height - visibleHeight, request.y)))
+    );
+  });
+  handle('pin:copy', 'pin', async (_value, event) => {
+    const pin = requestingPin(event);
     await copyScreenshot(pin.item.id);
-    if (localPin === pin) closePinnedFlow();
+    if (localPins.get(pin.performanceSessionId) === pin) closePinnedFlow(pin.performanceSessionId);
   });
 }
-function senderMayAccessScreenshot(id: string, event: IpcMainInvokeEvent) { return localPin?.item.id === id || senderAllowed(event, 'main') && screenshots.list().some(item => item.id === id); }
+function senderMayAccessScreenshot(id: string, event: IpcMainInvokeEvent) {
+  const sessionId = screenshotToAllWindow?.sessionForSender(event.sender);
+  return Boolean(sessionId && localPins.get(sessionId)?.item.id === id) || senderAllowed(event, 'main') && screenshots.list().some(item => item.id === id);
+}
 const packagedTestInstance = app.isPackaged && process.argv.includes('--snipvia-packaged-test');
 const packagedTestResultPath = packagedTestInstance
   ? process.argv.find((argument) => argument.startsWith('--snipvia-packaged-test-result='))?.slice('--snipvia-packaged-test-result='.length)
@@ -940,9 +1123,12 @@ else {
     if (!developmentSession) app.setName('截然');
     restoreDock();
     let startupError = '';
-    try { loadSettings({ migrateCredentials: false }); } catch { startupError = '设置文件读取失败，已使用默认值；原文件未修改。'; }
-    capturePreferences = new CapturePreferencesStore(join(app.getPath('userData'), 'capture-preferences.json'), existsSync(join(app.getPath('userData'), 'settings.json')) ? publicSettings() : { shortcut: 'Control+1', editorShortcut: 'Control+3' });
+    try { loadSettings(); } catch { startupError = '设置文件读取失败，已使用默认值；原文件未修改。'; }
+    capturePreferences = new CapturePreferencesStore(join(app.getPath('userData'), 'capture-preferences.json'), legacyCaptureShortcuts() ?? { shortcut: 'Control+1', editorShortcut: 'Control+3' });
     try { capturePreferences.load(); } catch { startupError += 'V2 快捷键配置读取失败，使用旧快捷键；原文件未修改。'; }
+    shelfPreferences = new ShelfPreferencesStore(join(app.getPath('userData'), 'shelf-preferences.json'));
+    dragFiles = new ScreenshotDragFiles(app.getPath('temp'));
+    try { shelfPreferences.load(); } catch { startupError += '收纳区尺寸配置损坏，原文件已保留，使用默认尺寸。'; }
     appearance.start();
     writePackagedTestResult({ stage: 'storage-loaded' });
     startupPerformanceSessionId = screenshotPerformance.startSession({
@@ -954,6 +1140,7 @@ else {
       electron: process.versions.electron,
       mode: process.env.ELECTRON_RENDERER_URL ? 'DEV' : app.isPackaged ? 'PROD' : 'PROD build preview'
     });
+    logCaptureLatency(startupPerformanceSessionId, 'app-ready');
     writePackagedTestResult({ stage: 'before-main-window-create' });
     mainWindow = new BrowserWindow({
       width: 920, height: 760, minWidth: 700, minHeight: 560, show: !launchedAtLogin(), title: '截然', backgroundColor: appearance.colors()['bg-window'],
@@ -969,8 +1156,8 @@ else {
     mainWindow.webContents.on('render-process-gone', () => { if (preparing || captureOverlayWindow?.isActive()) cleanupOverlay(); });
     writePackagedTestResult({ stage: 'main-window-handlers-ready' });
     captureOverlayWindow = new CaptureOverlayWindow(webPreferencesFor(startupPerformanceSessionId), loadWindow, startupPerformanceSessionId, () => cleanupOverlay());
-    screenshotToAllWindow = new ScreenshotToAllWindow(webPreferencesFor(startupPerformanceSessionId), loadWindow, startupPerformanceSessionId, () => {}, () => closePinnedFlow());
-    shelfWindow = new ShelfWindow(webPreferences, loadWindow, () => collection.snapshot(), id => { const image = nativeImage.createFromBuffer(screenshots.image(id).bytes); return image.resize({ width: Math.min(320, image.getSize().width) }).toDataURL(); });
+    screenshotToAllWindow = new PinnedCaptureWindows(webPreferences, loadWindow, startupPerformanceSessionId, id => closePinnedFlow(id));
+    shelfWindow = new ShelfWindow(webPreferences, loadWindow, () => collection.snapshot(), id => screenshotThumbnail(id), shelfPreferences.current(), shelfPreferences.configuration());
     writePackagedTestResult({ stage: 'window-managers-ready' });
     updates = new UpdateCheckService({
       currentVersion: app.isPackaged ? app.getVersion() : sourceVersion,
@@ -991,6 +1178,7 @@ else {
         }
       }),
       prepareInstall: async () => {
+        if (outputQueue.state().pending || outputQueue.state().failed) throw new Error('请先等待截图输出完成，或处理失败输出');
         if (preparing || captureOverlayWindow?.isActive()) throw new Error('请先完成当前截图');
       },
       onChanged: state => {
@@ -1000,6 +1188,8 @@ else {
     setupIPC();
     writePackagedTestResult({ stage: 'ipc-ready' });
     const captureMenu = [
+      { label: '重试失败输出', click: () => outputQueue.retryFailed() },
+      { label: '放弃失败输出…', click: () => { void dialog.showMessageBox({ type: 'warning', message: '放弃未完成的截图输出？', detail: '仅清除本次运行中保留的失败任务，不删除已保存截图。', buttons: ['保留', '放弃'], defaultId: 0, cancelId: 0 }).then(r => { if (r.response === 1) outputQueue.discardFailed(); }); } },
       { label: '快速截图', click: () => { void startCapture('menu', 'quick').catch(announceError); } },
       { label: '收集截图', click: () => { void startCapture('menu', 'collect').catch(announceError); } },
       { label: '截图收纳区', click: () => { void shelfWindow?.toggle(); } },
@@ -1065,6 +1255,8 @@ else {
     ]);
     const overlayReady = reusableWindowTimeout(captureOverlayWindow.create(primaryDisplay.bounds), 'CaptureOverlay')
       .then(() => {
+        captureOverlayPreloaded = true;
+        logCaptureLatency(startupPerformanceSessionId, 'overlay-ready');
         resolveCaptureOverlayReady?.();
         resolveCaptureOverlayReady = null;
         rejectCaptureOverlayReady = null;
@@ -1126,9 +1318,11 @@ else {
     }
     if (startupError) await dialog.showMessageBox(mainWindow, { type: 'warning', message: startupError });
     app.on('activate', () => {
-      // An activation queued before capture must not reopen the hidden window.
-      if (preparing || captureOverlayWindow?.isActive()) return;
-      showMain();
+      // Allow native focus to settle: clicking a floating card must not open Settings.
+      setImmediate(() => {
+        if (quitting || preparing || captureOverlayWindow?.isActive() || shelfWindow?.hasPointerInteraction() || screenshotToAllWindow?.hasPointerInteraction()) return;
+        showMain();
+      });
     });
   }).catch((error: unknown) => {
     if (quitting) return;
@@ -1141,13 +1335,14 @@ else {
 app.on('before-quit', () => {
   quitting = true;
   updates?.dispose();
+  outputQueue.dispose(); pngEncoder.dispose(); captureLoopDelay?.disable();
   if (preparing || captureOverlayWindow?.isActive()) cleanupOverlay();
   modeRouter.cancel();
   closePinnedFlow();
   captureOverlayWindow?.destroy();
   screenshotToAllWindow?.destroy();
   shelfWindow?.destroy();
-  screenshots.dispose();
+  screenshots.dispose(); dragFiles?.dispose();
   void captureEngine?.dispose();
 });
 app.on('will-quit', () => globalShortcut.unregisterAll());

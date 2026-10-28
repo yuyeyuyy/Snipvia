@@ -42,7 +42,7 @@
 
 ## 验证与发布边界
 
-本次业务源码、原生代码、测试和依赖没有变化。沿用 Phase 1 已完成的 lint、typecheck、build、58 个文件的 929 项单元测试，以及独立候选同一次运行的 8 项关键 Electron 验收。完整 Electron 旧状态断言的修正和复验范围见 [Phase 1 报告](PHASE1_REPORT.md)，未将有条件跳过的测试算作通过。本次没有为仓库元数据和文档变更重复运行这些业务测试。
+本次业务源码、原生代码、测试和依赖没有变化。沿用 Phase 1 已完成的 lint、typecheck、build、58 个文件的 929 项单元测试，以及独立候选同一次运行的 8 项关键 Electron 验收。完整 Electron 旧状态断言的修正和复验范围见 Phase 1 报告（历史文件可用 git show 3cf4498:docs/opensource/PHASE1_REPORT.md 查看），未将有条件跳过的测试算作通过。本次没有为仓库元数据和文档变更重复运行这些业务测试。
 
 新增验证包括：新旧仓库 ID 与 Private 状态、私有归档标志、所有远程引用、旧协作/Release 元数据、新远程独立镜像与 `git fsck`、全部可达树检查、凭据模式扫描、源码一致性和可离线恢复的 bundle 校验。
 

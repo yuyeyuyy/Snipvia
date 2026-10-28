@@ -21,3 +21,5 @@
 }
 
 .settings-shell .preference-value { font-size: 12px; }
+
+.shelf-setting-number { width: 100px; padding: 7px 9px; border: 1px solid var(--border-default); border-radius: var(--radius-control); background: var(--bg-input); color: var(--text-primary); font-size: 13px; font-variant-numeric: tabular-nums; }

@@ -2,7 +2,7 @@
 
 Snipvia 原创代码采用 [Apache License 2.0](LICENSE)。第三方组件继续适用各自许可证，本文件不重新授权这些组件或商标。
 
-`pnpm build` 在 `out/licenses/` 生成当前安装的 production 依赖清单、原始 LICENSE / COPYING / NOTICE / COPYRIGHT / AUTHORS 文本，以及 Electron 自带的 LICENSE 和 Chromium 完整声明。打包配置将本文件、项目 LICENSE / NOTICE 和这些生成文件保留在应用包中。清单覆盖生产依赖图，可能多于最终包体使用的依赖；开发工具清单另见 `docs/opensource/dependency-licenses.json`。
+`pnpm build` 在 `out/licenses/` 生成当前安装的 production 依赖清单、原始 LICENSE / COPYING / NOTICE / COPYRIGHT / AUTHORS 文本，以及 Electron 自带的 LICENSE 和 Chromium 完整声明。打包配置将本文件、项目 LICENSE / NOTICE 和这些生成文件保留在应用包中。清单覆盖生产依赖图，可能多于最终包体使用的依赖；开发工具的历史审计快照另见 `docs/opensource/dependency-licenses.json`；它不代表清理后的安装状态，当前生产依赖以本次构建生成的清单为准。
 
 `node-forge` 按其可选的 BSD-3-Clause 许可使用。其余包保留实际声明和原始通知，不根据名称猜测许可证。生成清单中的 `missingLicenseFiles` 必须人工核实，不能对未知缺失项仅凭 package.json 中的 license 字段放行。Electron/Chromium 与随依赖分发的原生工具也不因项目采用 Apache 2.0 而改变许可。
 

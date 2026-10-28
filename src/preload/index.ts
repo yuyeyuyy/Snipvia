@@ -12,9 +12,8 @@ function applyTheme(value: ThemeSnapshot) {
   if (document.documentElement) {
     document.documentElement.dataset.theme = value.resolved;
     document.documentElement.dataset.themeMode = value.mode;
-    const size = value.chatFontSize ?? 15;
-    if (Number.isInteger(size) && size >= 12 && size <= 24) document.documentElement.style.setProperty('--chat-font-size', `${size}px`);
     if (location.hash === '#pin') document.documentElement.classList.add('floating-window');
+    if (location.hash === '#shelf') document.documentElement.classList.add('shelf-window');
     if (location.hash === '#capture') document.documentElement.classList.add('capture-window');
   }
   for (const listener of themeListeners) listener(value);
@@ -34,7 +33,19 @@ if (initialPerformanceSessionId) {
 
 const api: SnipviaAPI = {
   collection: {
+    configure: value => ipcRenderer.invoke('collection:configure', value),
+    widen: () => ipcRenderer.invoke('collection:widen'),
+    reveal: () => ipcRenderer.invoke('collection:reveal'),
+    edgeFinished: presentation => ipcRenderer.invoke('collection:edge-finished', presentation),
+    openPreview: value => ipcRenderer.invoke('collection:open-preview', value),
+    closePreview: () => ipcRenderer.invoke('collection:close-preview'),
+    previewFinished: presentation => ipcRenderer.invoke('collection:preview-finished', presentation),
+    resize: value => ipcRenderer.invoke('collection:resize', value),
+    interaction: active => ipcRenderer.invoke('collection:interaction', active),
+    feedbackFinished: value => ipcRenderer.invoke('collection:feedback-finished', value),
+    hitRegions: value => ipcRenderer.invoke('collection:hit-regions', value),
     image: id => ipcRenderer.invoke('collection:image', id),
+    copyAll: value => ipcRenderer.invoke('collection:copy-all', value),
     copyMerged: value => ipcRenderer.invoke('collection:copy-merged', value),
     export: value => ipcRenderer.invoke('collection:export', value),
     rendered: value => ipcRenderer.invoke('collection:rendered', value),
@@ -46,6 +57,8 @@ const api: SnipviaAPI = {
     remove: id => ipcRenderer.invoke('collection:remove', id),
     reorder: value => ipcRenderer.invoke('collection:reorder', value),
     clear: () => ipcRenderer.invoke('collection:clear'),
+    copy: id => ipcRenderer.invoke('collection:copy', id),
+    startDrag: value => ipcRenderer.invoke('collection:start-drag', value),
     thumbnail: id => ipcRenderer.invoke('collection:thumbnail', id),
     preview: id => ipcRenderer.invoke('collection:preview', id),
     onChanged: callback => {
@@ -130,6 +143,7 @@ const api: SnipviaAPI = {
   pin: {
     current: () => ipcRenderer.invoke('pin:current'), close: () => ipcRenderer.invoke('pin:close'),
     copy: () => ipcRenderer.invoke('pin:copy'),
+    move: value => ipcRenderer.invoke('pin:move', value),
     sessionRendered: (sessionId) => ipcRenderer.invoke('pin:session-rendered', sessionId),
     sessionVisible: (sessionId) => ipcRenderer.invoke('pin:session-visible', sessionId),
     onSession: (callback) => {
@@ -160,7 +174,7 @@ const api: SnipviaAPI = {
   performance: {
     initialSessionId: initialPerformanceSessionId,
     mark: (sessionId, event, metadata) => {
-      if (sessionId) ipcRenderer.send('performance:mark', { sessionId, event, metadata });
+      if (sessionId) ipcRenderer.send('performance:mark', { sessionId, event, metadata, sourceTimestampMs: performance.timeOrigin + performance.now() });
     },
     report: (sessionId) => ipcRenderer.invoke('performance:report', sessionId),
     startupReport: () => ipcRenderer.invoke('performance:startup-report'),

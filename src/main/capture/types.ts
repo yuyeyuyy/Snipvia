@@ -19,6 +19,7 @@ export type CapturedFrame = {
   buffer?: Buffer;
   format: CapturedFrameFormat;
   bytesPerRow?: number;
+  original?: { png(rect: Rectangle, signal: AbortSignal): Promise<Buffer>; release(): void };
   image?: NativeImage;
   preview?: {
     bytes: Buffer;
@@ -31,6 +32,7 @@ export type CaptureBackendRequest = {
   display: CaptureDisplay;
   performanceSessionId: string;
   mainWindowWasVisible: boolean;
+  retainOriginal?: boolean;
   signal?: AbortSignal;
 };
 

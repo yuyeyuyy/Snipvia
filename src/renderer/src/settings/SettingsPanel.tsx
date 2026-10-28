@@ -8,6 +8,7 @@ import { UpdateSettings } from './UpdateSettings';
 import { ShortcutRecorder } from './ShortcutRecorder';
 import { LegacyDataPanel } from './LegacyDataPanel';
 import { ScreenPermissionCard } from '../permissions/ScreenPermissionCard';
+import { ShelfSettings } from './ShelfSettings';
 import './settings.css';
 import './v2-settings.css';
 
@@ -50,6 +51,7 @@ export function SettingsPanel({ settings, onSaved }: { settings: CapturePreferen
       <div className="preference-row"><div className="preference-copy"><strong>图片格式与质量</strong><span>标注和导出保留选区原始分辨率；预览不影响保存质量</span></div><span className="preference-value">原图输出</span></div></div>
       <ScreenPermissionCard />
     </section>
+    <ShelfSettings />
     <section className="preference-section" aria-labelledby="storage-settings-title"><h2 id="storage-settings-title">存储</h2>
       <div className="preference-card"><div className="preference-row"><div className="preference-copy"><strong>本地数据目录</strong><span>截图保存在本机；升级保留原有记录和笔记</span></div><Button onClick={() => { void window.snipvia.storage.reveal().then(result => { if (!result.ok) setStatus(result.error); }); }}>打开数据目录</Button></div>
       <LegacyDataPanel /></div>

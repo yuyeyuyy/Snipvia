@@ -1,5 +1,5 @@
 import type { EditorTool } from './model';
-export type EditorIconName = EditorTool | 'undo' | 'redo' | 'pin' | 'save' | 'copy' | 'close' | 'ai';
+export type EditorIconName = EditorTool | 'undo' | 'redo' | 'pin' | 'save' | 'copy' | 'close';
 const paths: Record<EditorIconName, React.ReactNode> = {
   select: <path d="m5 3 14 10-7 1-3 7Z" />,
   rectangle: <rect x="4" y="5" width="16" height="14" rx="2" />,
@@ -15,8 +15,7 @@ const paths: Record<EditorIconName, React.ReactNode> = {
   pin: <path d="m9 3 12 12-4 1-3 5-4-4-6 5 5-6-4-4 5-3Z" />,
   save: <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />,
   copy: <><rect x="8" y="8" width="13" height="13" rx="2" /><path d="M16 8V3H3v13h5" /></>,
-  close: <path d="m6 6 12 12M6 18 18 6" />,
-  ai: <><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z" /><path d="M20 2v4m-2-2h4" /></>
+  close: <path d="m6 6 12 12M6 18 18 6" />
 };
 export function EditorIcon({ name }: { name: EditorIconName }) {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;

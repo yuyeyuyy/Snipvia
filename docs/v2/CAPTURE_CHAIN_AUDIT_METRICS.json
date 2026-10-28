@@ -1,0 +1,256 @@
+{
+  "date": "2026-10-24",
+  "scope": "pnpm dev / Command+1 Quick directly copies",
+  "productionCodeChanged": false,
+  "previousProductionFingerprintsStillMatch": true,
+  "existingIndexPreserved": true,
+  "cpuOnlyBenchmark": {
+    "at": "2026-10-24T06:06:10.747Z",
+    "kind": "CPU microbenchmark; no BrowserWindow; no screen capture; no clipboard access",
+    "electron": "44.4.1",
+    "dimensions": {
+      "width": 3456,
+      "height": 2234
+    },
+    "results": [
+      {
+        "label": "small",
+        "index": 0,
+        "width": 400,
+        "height": 280,
+        "jpegBytes": 2668794,
+        "jpegDecodeMs": 32.45679200000001,
+        "cropMs": 1.1864170000000058,
+        "pngEncodeMs": 9.845041999999978,
+        "pngBytes": 86691,
+        "blobCopyMs": 0.2937090000000353,
+        "getAppMetricsMs": 0.27729199999998855
+      },
+      {
+        "label": "small",
+        "index": 1,
+        "width": 400,
+        "height": 280,
+        "jpegBytes": 2668794,
+        "jpegDecodeMs": 33.764166999999986,
+        "cropMs": 0.016624999999976353,
+        "pngEncodeMs": 8.833292000000029,
+        "pngBytes": 86691,
+        "blobCopyMs": 0.0625419999999508,
+        "getAppMetricsMs": 0.21158299999996188
+      },
+      {
+        "label": "small",
+        "index": 2,
+        "width": 400,
+        "height": 280,
+        "jpegBytes": 2668794,
+        "jpegDecodeMs": 33.02445800000004,
+        "cropMs": 0.037916999999993095,
+        "pngEncodeMs": 10.268208000000016,
+        "pngBytes": 86691,
+        "blobCopyMs": 0.09058299999998098,
+        "getAppMetricsMs": 0.2011669999999981
+      },
+      {
+        "label": "large",
+        "index": 0,
+        "width": 2400,
+        "height": 1500,
+        "jpegBytes": 2668794,
+        "jpegDecodeMs": 32.761000000000024,
+        "cropMs": 0.0206670000000031,
+        "pngEncodeMs": 301.060167,
+        "pngBytes": 3415293,
+        "blobCopyMs": 0.8529579999999441,
+        "getAppMetricsMs": 0.2131249999999909
+      },
+      {
+        "label": "large",
+        "index": 1,
+        "width": 2400,
+        "height": 1500,
+        "jpegBytes": 2668794,
+        "jpegDecodeMs": 36.49087499999996,
+        "cropMs": 0.016458999999940715,
+        "pngEncodeMs": 308.169166,
+        "pngBytes": 3415293,
+        "blobCopyMs": 0.845540999999912,
+        "getAppMetricsMs": 0.19695900000010624
+      },
+      {
+        "label": "large",
+        "index": 2,
+        "width": 2400,
+        "height": 1500,
+        "jpegBytes": 2668794,
+        "jpegDecodeMs": 33.16433299999994,
+        "cropMs": 0.031083999999964362,
+        "pngEncodeMs": 307.758458,
+        "pngBytes": 3415293,
+        "blobCopyMs": 0.8484169999999267,
+        "getAppMetricsMs": 0.23183300000005147
+      },
+      {
+        "label": "nearFull",
+        "index": 0,
+        "width": 3200,
+        "height": 1900,
+        "jpegBytes": 2668794,
+        "jpegDecodeMs": 32.744042000000036,
+        "cropMs": 0.10487499999999272,
+        "pngEncodeMs": 657.9585830000003,
+        "pngBytes": 7923424,
+        "blobCopyMs": 2.1010419999997794,
+        "getAppMetricsMs": 0.2224580000001879
+      },
+      {
+        "label": "nearFull",
+        "index": 1,
+        "width": 3200,
+        "height": 1900,
+        "jpegBytes": 2668794,
+        "jpegDecodeMs": 32.50045799999998,
+        "cropMs": 0.018708999999944353,
+        "pngEncodeMs": 634.0089579999999,
+        "pngBytes": 7923424,
+        "blobCopyMs": 2.1074579999999514,
+        "getAppMetricsMs": 0.24137500000006185
+      },
+      {
+        "label": "nearFull",
+        "index": 2,
+        "width": 3200,
+        "height": 1900,
+        "jpegBytes": 2668794,
+        "jpegDecodeMs": 32.65908300000001,
+        "cropMs": 0.021917000000030384,
+        "pngEncodeMs": 835.3945829999998,
+        "pngBytes": 7923424,
+        "blobCopyMs": 6.687999999999647,
+        "getAppMetricsMs": 0.2419159999999465
+      }
+    ]
+  },
+  "cpuSummary": [
+    {
+      "label": "small",
+      "widthPx": 400,
+      "heightPx": 280,
+      "samples": 3,
+      "jpegDecodeMs": [
+        32.46,
+        33.76
+      ],
+      "pngEncodeMs": [
+        8.83,
+        10.27
+      ]
+    },
+    {
+      "label": "large",
+      "widthPx": 2400,
+      "heightPx": 1500,
+      "samples": 3,
+      "jpegDecodeMs": [
+        32.76,
+        36.49
+      ],
+      "pngEncodeMs": [
+        301.06,
+        308.17
+      ]
+    },
+    {
+      "label": "nearFull",
+      "widthPx": 3200,
+      "heightPx": 1900,
+      "samples": 3,
+      "jpegDecodeMs": [
+        32.5,
+        32.74
+      ],
+      "pngEncodeMs": [
+        634.01,
+        835.39
+      ]
+    }
+  ],
+  "reusedPreviousRealSckSamples": [
+    {
+      "mode": "quick",
+      "createdAt": "2026-10-24T05:09:12.969Z",
+      "backend": "screen-capture-kit",
+      "metrics": {
+        "captureStartToOverlayVisibleMs": 387.1088749999999,
+        "captureStartToOverlayShellVisibleMs": 25.604125000000067
+      },
+      "sckCaptureMs": 283.977875,
+      "sckEncodeMs": 66.429125,
+      "clipboardMocked": true,
+      "selectionWidthPx": 400,
+      "selectionHeightPx": 280
+    },
+    {
+      "mode": "collect",
+      "createdAt": "2026-10-24T05:09:13.507Z",
+      "backend": "screen-capture-kit",
+      "metrics": {
+        "captureStartToOverlayVisibleMs": 123.6639160000002,
+        "captureStartToOverlayShellVisibleMs": 7.8185000000000855
+      },
+      "sckCaptureMs": 76.765,
+      "sckEncodeMs": 21.638833,
+      "clipboardMocked": true,
+      "selectionWidthPx": 400,
+      "selectionHeightPx": 280
+    },
+    {
+      "mode": "quick",
+      "createdAt": "2026-10-24T05:09:13.749Z",
+      "backend": "screen-capture-kit",
+      "metrics": {
+        "captureStartToOverlayVisibleMs": 162.32799999999997,
+        "captureStartToOverlayShellVisibleMs": 41.61695899999995
+      },
+      "sckCaptureMs": 88.888958,
+      "sckEncodeMs": 21.542791,
+      "clipboardMocked": true,
+      "selectionWidthPx": 400,
+      "selectionHeightPx": 280
+    },
+    {
+      "mode": "collect",
+      "createdAt": "2026-10-24T05:09:14.002Z",
+      "backend": "screen-capture-kit",
+      "metrics": {
+        "captureStartToOverlayVisibleMs": 160.16616599999998,
+        "captureStartToOverlayShellVisibleMs": 13.033625000000029
+      },
+      "sckCaptureMs": 108.8845,
+      "sckEncodeMs": 25.614542,
+      "clipboardMocked": true,
+      "selectionWidthPx": 400,
+      "selectionHeightPx": 280
+    }
+  ],
+  "previousSyntheticOverlayBenchmark": {
+    "source": "TRANSPARENT_SHELF_METRICS.json",
+    "backend": "mocked electron desktopCapturer",
+    "clipboard": "mocked",
+    "P95Ms": 96.54
+  },
+  "newEndToEndMeasurement": {
+    "validRuns": 0,
+    "visibleDiagnosticStopped": true,
+    "clipboardReadOrWriteStageReached": false,
+    "currentAppAndSettingsChanged": false
+  },
+  "limitations": [
+    "CPU operator timings are not end-to-end latency",
+    "Complex synthetic content is not every real screenshot",
+    "Physical Command+1 dispatch and real clipboard latency were not measured",
+    "No percentiles for three CPU samples per category",
+    "No product optimization applied in this audit"
+  ]
+}

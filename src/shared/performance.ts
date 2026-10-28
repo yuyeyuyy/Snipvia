@@ -58,6 +58,12 @@ export const screenshotPerformanceEvents = [
   'selection_start',
   'selection_end',
   'clipboard_committed',
+  'output_queued',
+  'output_encode_start',
+  'output_encode_end',
+  'clipboard_write_start',
+  'output_failed',
+  'overlay_closed',
   'collection_updated',
   'shelf_feedback_visible',
   'shelf_expand_start',
@@ -78,26 +84,6 @@ export const screenshotPerformanceEvents = [
   'jpeg_encode_end',
   'base64_check_start',
   'base64_check_end',
-  'history_create_start',
-  'history_mkdir_start',
-  'history_mkdir_end',
-  'jpeg_disk_write_start',
-  'jpeg_disk_write_end',
-  'jpeg_disk_rename_start',
-  'jpeg_disk_rename_end',
-  'history_json_serialize_start',
-  'history_json_serialize_end',
-  'history_json_write_start',
-  'history_json_write_end',
-  'history_json_rename_start',
-  'history_json_rename_end',
-  'history_read_start',
-  'jpeg_disk_read_start',
-  'jpeg_disk_read_end',
-  'second_base64_start',
-  'second_base64_end',
-  'history_read_end',
-  'history_create_end',
   'pin_window_create_start',
   'pin_window_create_end',
   'pin_load_start',
@@ -107,14 +93,6 @@ export const screenshotPerformanceEvents = [
   'pin_image_load_start',
   'pin_image_load_end',
   'screenshot_to_all_visible',
-  'auto_analysis_start',
-  'local_ocr_start',
-  'local_ocr_end',
-  'vision_classification_start',
-  'vision_classification_end',
-  'auto_analysis_end',
-  'auto_action_selected',
-  'auto_action_start',
   'window_preload_start',
   'window_preload_ready',
   'capture_overlay_reuse_start',
@@ -124,28 +102,6 @@ export const screenshotPerformanceEvents = [
   'capture_overlay_reuse_visible',
   'screenshot_window_reuse_start',
   'screenshot_window_reuse_visible',
-  'quick_chat_window_create_start',
-  'quick_chat_window_create_end',
-  'quick_chat_load_start',
-  'quick_chat_did_finish_load',
-  'quick_chat_visible',
-  'chat_send_clicked',
-  'chat_send_ipc_start',
-  'chat_send_main_received',
-  'message_history_prepare_start',
-  'message_history_prepare_end',
-  'ai_request_start',
-  'fetch_start',
-  'fetch_headers_received',
-  'ai_first_token',
-  'ai_body_parse_start',
-  'ai_body_parse_end',
-  'ai_response_complete',
-  'assistant_message_save_start',
-  'assistant_message_save_end',
-  'chat_ipc_return',
-  'chat_renderer_received',
-  'chat_response_visible',
   'capture_cancelled',
   'capture_closed',
   'capture_error'
@@ -159,6 +115,7 @@ export const performanceSessionIdSchema = z.string().regex(/^capture_\d+_[0-9a-f
 export const performanceMarkSchema = z.object({
   sessionId: performanceSessionIdSchema,
   event: z.enum(screenshotPerformanceEvents),
+  sourceTimestampMs: z.number().finite().positive().optional(),
   metadata: z.record(z.string(), z.union([z.string(), z.number().finite(), z.boolean(), z.null()])).optional()
 });
 
@@ -170,6 +127,7 @@ export type ScreenshotPerformanceMark = {
   source: ScreenshotPerformanceSource;
   atMs: number;
   elapsedMs: number;
+  receivedAtMs?: number;
   metadata?: PerformanceMetadata;
 };
 
@@ -192,8 +150,6 @@ export type ScreenshotPerformanceReport = {
     hotkeyToOverlayVisibleMs?: number;
     captureStartToOverlayVisibleMs?: number;
     captureStartToOverlayShellVisibleMs?: number;
-    aiRequestToCompleteMs?: number;
-    screenshotVisibleToAutoFirstTokenMs?: number;
   };
   measures: ScreenshotPerformanceMeasure[];
   marks: ScreenshotPerformanceMark[];

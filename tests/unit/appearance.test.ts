@@ -5,11 +5,9 @@ import tokens from '../../src/shared/design-tokens.json';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-const runtime = vi.hoisted(() => ({ mode: 'system' as 'system' | 'light' | 'dark', chatFontSize: 15, osDark: false, windows: [] as unknown[], failSave: false }));
+const runtime = vi.hoisted(() => ({ mode: 'system' as 'system' | 'light' | 'dark', osDark: false, windows: [] as unknown[], failSave: false }));
 vi.mock('../../src/main/storage/settings', () => ({
   appearanceMode: () => runtime.mode,
-  chatFontSize: () => runtime.chatFontSize,
-  saveChatFontSize: (size: number) => { if (runtime.failSave) throw new Error('disk unavailable'); runtime.chatFontSize = size; },
   saveAppearanceMode: (mode: typeof runtime.mode) => { if (runtime.failSave) throw new Error('disk unavailable'); runtime.mode = mode; }
 }));
 vi.mock('electron', async () => {
@@ -28,7 +26,7 @@ function createWindow(background = '#ffffff') {
 }
 
 beforeEach(() => {
-  runtime.mode = 'system'; runtime.chatFontSize = 15; runtime.osDark = false; runtime.windows = []; runtime.failSave = false;
+  runtime.mode = 'system'; runtime.osDark = false; runtime.windows = []; runtime.failSave = false;
   app.removeAllListeners(); nativeTheme.removeAllListeners(); nativeTheme.themeSource = 'system';
   Object.defineProperty(nativeTheme, 'shouldUseDarkColors', { configurable: true, get: () => nativeTheme.themeSource === 'dark' || (nativeTheme.themeSource === 'system' && runtime.osDark) });
 });
@@ -67,17 +65,6 @@ describe('main-owned appearance', () => {
     window.webContents.ipc.emit('appearance:initial', foreign); expect(foreign.returnValue).toBeNull();
     window.webContents.emit('did-finish-load');
     expect(window.webContents.send).toHaveBeenLastCalledWith('appearance:changed', service.current());
-  });
-
-  it('synchronizes bounded chat font changes and keeps the previous value after failed saves', () => {
-    const main = createWindow(); runtime.windows = [main];
-    const service = new AppearanceService(() => main as unknown as BrowserWindow); service.start();
-    service.setMode('dark'); service.setChatFontSize(20);
-    expect(service.current()).toMatchObject({ mode: 'dark', chatFontSize: 20 });
-    expect(main.webContents.send).toHaveBeenLastCalledWith('appearance:changed', service.current());
-    for (const invalid of [11, 25, 15.5, NaN, Infinity, '20']) expect(() => service.setChatFontSize(invalid)).toThrow();
-    runtime.failSave = true; expect(() => service.setChatFontSize(18)).toThrow('disk unavailable');
-    expect(service.current().chatFontSize).toBe(20);
   });
 
   it('does not apply an invalid or unsuccessfully persisted preference', () => {

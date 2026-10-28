@@ -1,8 +1,0 @@
-{
-  "endpoint": "https://api.github.com/repos/yuyeyuyy/Snipvia-releases/releases/latest",
-  "authenticated": false,
-  "status": "up-to-date",
-  "currentVersion": "0.2.1",
-  "latestVersion": "0.2.1",
-  "checkedAt": "2026-10-12T08:22:27.550Z"
-}

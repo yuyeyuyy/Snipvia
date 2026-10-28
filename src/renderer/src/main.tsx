@@ -10,6 +10,7 @@ async function bootstrap() {
     ]);
     Component = module.CaptureOverlay;
   } else if (location.hash === '#shelf') {
+    document.documentElement.classList.add('shelf-window');
     await import('./design/base.css');
     await import('./design/controls.css');
     Component = (await import('./collection/ScreenshotShelf')).ScreenshotShelf;

@@ -128,10 +128,12 @@ test('ordinary capture annotates, flattens, copies, saves, pins locally without 
     await overlay.getByRole('button', { name: '定住截图', exact: true }).click();
     await expect.poll(() => visible('#pin')).toBe(true);
     await expect(pinned.getByAltText('置顶截图')).toBeVisible();
-    await expect(pinned.getByRole('button')).toHaveCount(0);
+    await expect(pinned.getByRole('button', { name: '关闭钉图', exact: true })).toHaveCount(1);
+    await expect(pinned.getByRole('button', { name: '复制并关闭钉图', exact: true })).toHaveCount(1);
     expect(await history()).toHaveLength(0);
     const local = await pinned.evaluate(() => window.snipvia.pin.current());
-    expect(local.ok && local.value.localOnly).toBe(true);
+    expect(local.ok).toBe(true);
+    if (local.ok) { expect(local.value.capture.id).toBeTruthy(); expect(local.value).not.toHaveProperty('conversationId'); }
     const id = local.ok ? local.value.capture.id : '';
     expect((await pinned.evaluate(id => window.snipvia.screenshots.save(id), id)).ok).toBe(true);
     expect(await history()).toHaveLength(1);

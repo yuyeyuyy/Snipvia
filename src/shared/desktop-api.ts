@@ -47,6 +47,7 @@ export type DesktopAPI = {
   pin: {
     current(): Promise<Result<PinnedCaptureState>>;
     close(): Promise<Result<void>>;
+    move(value: { sessionId: string; x: number; y: number }): Promise<Result<void>>;
     copy(): Promise<Result<void>>;
     sessionRendered(sessionId: string): Promise<Result<boolean>>;
     sessionVisible(sessionId: string): Promise<Result<boolean>>;

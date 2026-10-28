@@ -10,7 +10,7 @@ input:disabled, select:disabled { background-color: var(--bg-disabled); color: v
 .ui-button-secondary { color: var(--text-primary); background: var(--bg-raised); }
 .ui-button-primary { color: var(--text-on-accent); background: var(--accent); border-color: var(--accent); }
 .ui-button-primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
-.ui-button-primary:active:not(:disabled), .primary:active:not(:disabled), .quick-send:active:not(:disabled), .quick-stop:active:not(:disabled), .send:active:not(:disabled), .agent-inline-actions .agent-allow:active:not(:disabled) { background: var(--accent-active); border-color: var(--accent-active); }
+.ui-button-primary:active:not(:disabled), .primary:active:not(:disabled) { background: var(--accent-active); border-color: var(--accent-active); }
 .ui-button-quiet { color: var(--text-secondary); background: transparent; border-color: transparent; }
 .ui-button-secondary:hover:not(:disabled), .ui-button-quiet:hover:not(:disabled) { background: var(--bg-hover); }
 .ui-button-secondary:active:not(:disabled), .ui-button-quiet:active:not(:disabled), .preference-action:active:not(:disabled), .workspace-action:active:not(:disabled), .secondary:active:not(:disabled) { background: var(--bg-active); }
@@ -27,10 +27,9 @@ input:disabled, select:disabled { background-color: var(--bg-disabled); color: v
 @keyframes ui-spin { to { transform: rotate(360deg); } }
 .error-text { color: var(--danger); }
 .preference-card, .workspace-card { background: var(--bg-panel); }
-.settings-modal, .privacy-modal, .records-modal, .permission-dialog, .schedule-editor { background: var(--bg-raised); }
+.settings-modal, .privacy-modal, .records-modal, .permission-dialog { background: var(--bg-raised); }
 .preference-action, .shortcut-recorder, .secondary, .info-button { color: var(--text-primary); background: var(--bg-raised); border-color: var(--border-default); box-shadow: none; }
-.selected-model-card { background: var(--bg-selected); }
-.composer:focus-within, input:focus, select:focus { box-shadow: 0 0 0 3px var(--focus-ring); }
+input:focus, select:focus { box-shadow: 0 0 0 3px var(--focus-ring); }
 .config-checkbox input + span { background: var(--bg-disabled); }
 .config-checkbox input + span::after { background: var(--control-thumb); }
 .config-checkbox input:checked + span { background: var(--accent); }
@@ -38,26 +37,19 @@ input:disabled, select:disabled { background-color: var(--bg-disabled); color: v
 .config-checkbox input:disabled + span { opacity: .48; cursor: not-allowed; }
 input[type='checkbox'], input[type='radio'], progress { accent-color: var(--accent); }
 option:checked { background: var(--bg-selected); color: var(--text-selected); }
-.provider-option.selected, .records-list button.active { border-color: var(--border-selected); color: var(--text-selected); font-weight: 600; }
-.permission-actions .primary:hover:not(:disabled), .agent-inline-actions .agent-allow:hover:not(:disabled) { background: var(--accent-hover); }
+.permission-actions .primary:hover:not(:disabled) { background: var(--accent-hover); }
 /* Status cues accompany the existing message; screen readers continue to read that message. */
-:is([role='alert'], .notice, .notes-conflict, .permission-status, .permission-risk-review, .permission-risk-dangerous, .preference-status.success, .permission-feedback:not(.error-text))::before {
+:is([role='alert'], .notice, .permission-status, .preference-status.success, .permission-feedback:not(.error-text))::before {
   content: '!' / ''; display: inline-flex; align-items: center; justify-content: center;
   width: 14px; height: 14px; margin-right: 7px; border: 1px solid currentColor; border-radius: 50%;
   font: 600 10px/1 var(--font-ui); flex: 0 0 14px; vertical-align: text-bottom;
 }
-:is([role='alert'], .permission-risk-dangerous)::before { content: '×' / ''; }
+[role='alert']::before { content: '×' / ''; }
 :is(.preference-status.success, .permission-status.granted, .permission-feedback:not(.error-text))::before { content: '✓' / ''; }
 .permission-status.unknown::before { content: '…' / ''; }
-:is(.notice, .notes-conflict, .permission-risk-review) { border-left: 2px solid var(--border-strong); padding-left: 10px; }
-.permission-risk-dangerous { font-weight: 600; border: 1px solid var(--border-strong); }
-.agent-todos .todo-completed .agent-todo-mark { color: var(--text-on-accent); background: var(--accent); border-color: var(--accent); }
-.agent-answer.is-streaming::after, .thinking-dot { background: var(--text-muted); }
+.notice { border-left: 2px solid var(--border-strong); padding-left: 10px; }
 * { scrollbar-width: thin; scrollbar-color: var(--scrollbar) transparent; }
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: var(--radius-control); }
 ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
-.cm-editor .cm-cursor { border-left-color: var(--text-primary); }
-.cm-editor .cm-selectionBackground, .cm-editor.cm-focused .cm-selectionBackground { background: var(--bg-selected); }
-.cm-editor .cm-panels, .cm-editor .cm-tooltip { color: var(--text-primary); background: var(--bg-raised); border-color: var(--border-default); }
 @media (prefers-reduced-motion: reduce) { button { transition: none; } .ui-spinner { animation-duration: 2s; } }

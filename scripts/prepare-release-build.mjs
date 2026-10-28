@@ -88,7 +88,7 @@ export function prepareReleaseBuild({ root = defaultRoot, native = false } = {})
       /^(VITE_|ELECTRON_VITE_|NODE_ENV$|SOURCE_DATE_EPOCH$)/.test(key)).sort(([a], [b]) => a.localeCompare(b))) };
   const build = cachedStep(root, 'desktop', () => [...sourceFiles(root),
     'node_modules/.pnpm/lock.yaml', 'node_modules/.modules.yaml'], () => {
-    for (const name of ['main/index.js', 'preload/index.js', 'renderer/index.html', 'licenses/dependencies.json']) {
+    for (const name of ['main/index.js', 'main/capture-png-worker.js', 'preload/index.js', 'renderer/index.html', 'licenses/dependencies.json']) {
       if (!fs.statSync(path.join(root, 'out', name)).isFile()) throw new Error('Incomplete desktop build.');
     }
     return tree(root, 'out');
@@ -99,7 +99,7 @@ export function prepareReleaseBuild({ root = defaultRoot, native = false } = {})
   const nativeContext = { ...context, developerDir,
     xcode: run(root, '/usr/bin/xcodebuild', ['-version']),
     swift: run(root, '/usr/bin/xcrun', ['swiftc', '--version']) };
-  const helper = cachedStep(root, 'native', () => ['native/screen-capture-kit-helper/main.swift',
+  const helper = cachedStep(root, 'native', () => ['native/screen-capture-kit-helper/main.swift', 'native/screen-capture-kit-helper/FrozenFrameCache.swift',
     'scripts/build-native-helper.sh', 'scripts/prepare-release-build.mjs'],
   () => nativeFiles.map(name => `build/native/${name}`), nativeContext, 'pnpm', ['native:build']);
   return { build, native: helper };

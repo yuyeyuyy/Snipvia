@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useReducer, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { Selection } from '../../../../shared/contracts';
 import type { EditorAction } from '../../../../shared/screenshot-editor';
-import { adjustSelection, annotationBounds, contains, emptyScene, hitTest, moveAnnotation, sceneReducer, type Annotation, type EditorTool, type Point } from './model';
+import { adjustSelection, annotationBounds, contains, emptyScene, hitTest, moveAnnotation, resizeAnnotation, sceneReducer, type Annotation, type EditorTool, type Point } from './model';
 import { drawAnnotations, renderEditedPng } from './draw';
 import { EditorIcon, type EditorIconName } from './EditorIcon';
 
@@ -11,8 +11,9 @@ const tools: Array<{ id: EditorTool; label: string; key: string }> = [
   { id: 'pencil', label: '铅笔', key: 'P' }, { id: 'text', label: '文字', key: 'T' },
   { id: 'number', label: '序号', key: 'N' }, { id: 'mosaic', label: '打码', key: 'M' }, { id: 'erase', label: '删除标注', key: 'D' }
 ];
+const handles = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 const colors = ['#ff453a', '#007aff', '#30b04a', '#ffcc00', '#ffffff', '#000000'];
-type Gesture = { start: Point; rect: Selection; handle?: string; item?: Annotation; moving?: boolean };
+type Gesture = { start: Point; rect: Selection; handle?: string; item?: Annotation; moving?: boolean; annotationHandle?: string };
 
 export function ScreenshotEditor({ frame, initialSelection, sessionId }: { frame: string; initialSelection: Selection; sessionId: string }) {
   const [selection, setSelection] = useState(initialSelection);
@@ -34,6 +35,7 @@ export function ScreenshotEditor({ frame, initialSelection, sessionId }: { frame
   const toolbarDrag = useRef<{ start: Point; position: Point } | null>(null);
   const textInput = useRef<HTMLTextAreaElement>(null);
   const selected = scene.items.find((item) => item.id === selectedId);
+  const selectedBox = selected && !text && ['rectangle', 'ellipse', 'mosaic'].includes(selected.tool) ? annotationBounds(draft?.id === selected.id ? draft : selected) : null;
   const toolbarWidth = Math.min(760, innerWidth - 24);
   const toolbar = toolbarPosition ?? {
     x: Math.max(12, Math.min(innerWidth - toolbarWidth - 12, selection.x + selection.width - toolbarWidth)),
@@ -70,12 +72,18 @@ export function ScreenshotEditor({ frame, initialSelection, sessionId }: { frame
   }, [image, selection, scene.items, draft, selected, selectedId, text?.id]);
 
   function commitText(): Annotation[] {
-    const items = text ? [...scene.items.filter((item) => item.id !== text.id), ...(text.text?.trim() ? [text] : [])] : scene.items;
-    if (text) { dispatch({ type: 'commit', items }); setText(null); }
+    if (!text) return scene.items;
+    const original = scene.items.find(item => item.id === text.id);
+    const unchanged = original && original.text === text.text && original.color === text.color && original.size === text.size;
+    const items = unchanged || (!original && !text.text?.trim()) ? scene.items
+      : original ? scene.items.flatMap(item => item.id === text.id ? text.text?.trim() ? [text] : [] : [item])
+      : [...scene.items, text];
+    if (items !== scene.items) dispatch({ type: 'commit', items });
+    setText(null);
     return items;
   }
   function editText(item: Annotation) {
-    setText(item); setSelectedId(item.id);
+    setText(item); setSelectedId(item.id); setColor(item.color); setSize(item.size);
     requestAnimationFrame(() => { textInput.current?.focus(); textInput.current?.select(); });
   }
   function chooseTool(next: EditorTool) {
@@ -131,14 +139,21 @@ export function ScreenshotEditor({ frame, initialSelection, sessionId }: { frame
     event.stopPropagation();
     if (busy || event.button !== 0) return;
     const p = point(event);
-    const handle = (event.target as HTMLElement).dataset.handle;
+    const target = event.target as HTMLElement;
+    const handle = target.closest<HTMLElement>('[data-handle]')?.dataset.handle;
+    const annotationHandle = target.closest<HTMLElement>('[data-annotation-handle]')?.dataset.annotationHandle;
     if (!handle && !contains(selection, { x: event.clientX, y: event.clientY })) return;
     const items = commitText();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    if (handle) { gesture.current = { start: { x: event.clientX, y: event.clientY }, rect: selection, handle }; return; }
+    if (annotationHandle && selected) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+      gesture.current = { start: p, rect: selection, item: selected, annotationHandle }; return;
+    }
+    if (handle) { event.currentTarget.setPointerCapture(event.pointerId); gesture.current = { start: { x: event.clientX, y: event.clientY }, rect: selection, handle }; return; }
     const hit = hitTest(items, p);
     if (tool === 'erase') { if (hit) dispatch({ type: 'commit', items: items.filter((item) => item.id !== hit.id) }); setSelectedId(null); return; }
+    if (tool === 'text' && hit?.tool === 'text') { editText(hit); return; }
     if (tool === 'select') {
+      event.currentTarget.setPointerCapture(event.pointerId);
       setSelectedId(hit?.id ?? null);
       if (hit) { setColor(hit.color); setSize(hit.size); }
       gesture.current = hit ? { start: p, rect: selection, item: hit, moving: true } : { start: p, rect: selection, handle: 'move' };
@@ -151,6 +166,7 @@ export function ScreenshotEditor({ frame, initialSelection, sessionId }: { frame
       item.number = Math.max(0, ...items.filter((mark) => mark.tool === 'number').map((mark) => mark.number ?? 0)) + 1;
       dispatch({ type: 'commit', items: [...items, item] }); return;
     }
+    event.currentTarget.setPointerCapture(event.pointerId);
     gesture.current = { start: p, rect: selection, item }; setDraft(item);
   }
   function move(event: ReactPointerEvent<HTMLDivElement>) {
@@ -160,7 +176,8 @@ export function ScreenshotEditor({ frame, initialSelection, sessionId }: { frame
       setSelection(adjustSelection(current.rect, current.handle, event.clientX - current.start.x, event.clientY - current.start.y, { width: innerWidth, height: innerHeight }));
     } else if (current.item) {
       const p = point(event);
-      if (current.moving) setDraft(moveAnnotation(current.item, p.x - current.start.x, p.y - current.start.y));
+      if (current.annotationHandle) setDraft(resizeAnnotation(current.item, current.annotationHandle, p.x - current.start.x, p.y - current.start.y, current.rect));
+      else if (current.moving) setDraft(moveAnnotation(current.item, p.x - current.start.x, p.y - current.start.y));
       else {
         const points = current.item.tool === 'pencil' ? [...current.item.points, p] : [current.start, p];
         // Bound path size without recording mouse moves in IPC or performance logs.
@@ -171,15 +188,18 @@ export function ScreenshotEditor({ frame, initialSelection, sessionId }: { frame
   }
   function end(event: ReactPointerEvent<HTMLDivElement>) {
     const current = gesture.current; gesture.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     if (current?.handle) setSelection(adjustSelection(current.rect, current.handle, event.clientX - current.start.x, event.clientY - current.start.y, { width: innerWidth, height: innerHeight }));
     if (current?.item) {
       // Commit from the pointer gesture, not the last React paint: pointerup can arrive before a render.
       const p = point(event);
-      const completed = current.moving ? moveAnnotation(current.item, p.x - current.start.x, p.y - current.start.y)
+      const completed = current.annotationHandle ? resizeAnnotation(current.item, current.annotationHandle, p.x - current.start.x, p.y - current.start.y, current.rect) : current.moving ? moveAnnotation(current.item, p.x - current.start.x, p.y - current.start.y)
         : current.item.tool === 'pencil' ? current.item : { ...current.item, points: [current.start, p] };
       const bounds = annotationBounds(completed);
-      if (current.moving || completed.tool === 'pencil' || bounds.width >= 2 || bounds.height >= 2) {
-        dispatch({ type: 'commit', items: current.moving ? scene.items.map((item) => item.id === completed.id ? completed : item) : [...scene.items, completed] });
+      const transformed = current.moving || current.annotationHandle;
+      const changed = Math.hypot(p.x - current.start.x, p.y - current.start.y) >= 1;
+      if (transformed ? changed : completed.tool === 'pencil' || bounds.width >= 2 || bounds.height >= 2) {
+        dispatch({ type: 'commit', items: transformed ? scene.items.map((item) => item.id === completed.id ? completed : item) : [...scene.items, completed] });
       }
     }
     setDraft(null);
@@ -196,8 +216,12 @@ export function ScreenshotEditor({ frame, initialSelection, sessionId }: { frame
     <canvas ref={canvas} className="editor-preview" style={{ left: selection.x, top: selection.y, width: selection.width, height: selection.height }} />
     <div className="editor-selection" style={{ left: selection.x, top: selection.y, width: selection.width, height: selection.height }}>
       <span className="editor-dimensions" style={{ top: selection.y < 34 ? 10 : -32 }}>{Math.round(selection.width)} × {Math.round(selection.height)} <small>DIP</small></span>
-      {['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'].map((handle) => <div key={handle} data-handle={handle} className={`editor-handle handle-${handle}`} aria-label={`调整选区 ${handle}`} />)}
+      {['n', 'e', 's', 'w'].map(handle => <div key={handle} data-handle={handle} className={'editor-resize-edge edge-' + handle} />)}
+      {handles.map(handle => <div key={handle} data-handle={handle} className={'editor-handle handle-' + handle} aria-label={'调整选区 ' + handle} />)}
     </div>
+    {selectedBox && <div className="editor-annotation-selection" style={{ left: selectedBox.x, top: selectedBox.y, width: selectedBox.width, height: selectedBox.height }}>
+      {handles.map(handle => <div key={handle} data-annotation-handle={handle} className={'editor-handle handle-' + handle} aria-label={'调整标注 ' + handle} />)}
+    </div>}
     {text && <textarea ref={textInput} className="editor-text" aria-label="标注文字" value={text.text ?? ''} maxLength={4000} placeholder="输入文字" style={{ left: text.points[0].x, top: text.points[0].y, color: text.color, fontSize: text.size * 6 + 12, maxWidth: Math.max(80, innerWidth - text.points[0].x - 12), maxHeight: Math.max(50, innerHeight - text.points[0].y - 12) }} onPointerDown={(event) => event.stopPropagation()} onChange={(event) => setText({ ...text, text: event.target.value })} onKeyDown={(event) => {
       event.stopPropagation();
       if (event.key === 'Escape') { event.preventDefault(); setText(null); }

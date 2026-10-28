@@ -1,16 +1,15 @@
 import { app, BrowserWindow, nativeTheme, type IpcMainEvent } from 'electron';
-import { appearanceMode, chatFontSize, saveAppearanceMode, saveChatFontSize } from './storage/settings';
-import { chatFontSizeSchema, defaultChatFontSize, themeModeSchema, type ThemeMode, type ThemeSnapshot } from '../shared/appearance';
+import { appearanceMode, saveAppearanceMode } from './storage/settings';
+import { themeModeSchema, type ThemeMode, type ThemeSnapshot } from '../shared/appearance';
 import tokens from '../shared/design-tokens.json';
 
 /** Main owns the preference and resolution. No model settings or window roles are exposed. */
 export class AppearanceService {
-  private snapshot: ThemeSnapshot = { mode: 'system', resolved: 'light', revision: 0, chatFontSize: defaultChatFontSize };
+  private snapshot: ThemeSnapshot = { mode: 'system', resolved: 'light', revision: 0 };
   constructor(private readonly mainWindow: () => BrowserWindow | undefined) {}
 
   start() {
     this.snapshot.mode = appearanceMode();
-    this.snapshot.chatFontSize = chatFontSize();
     nativeTheme.themeSource = this.snapshot.mode;
     this.resolve();
     nativeTheme.on('updated', () => this.resolve());
@@ -24,14 +23,6 @@ export class AppearanceService {
     saveAppearanceMode(mode); // Apply only after the existing atomic store succeeds.
     this.snapshot.mode = mode;
     nativeTheme.themeSource = mode;
-    this.resolve();
-    return this.current();
-  }
-
-  setChatFontSize(value: unknown) {
-    const size = chatFontSizeSchema.parse(value);
-    saveChatFontSize(size);
-    this.snapshot.chatFontSize = size;
     this.resolve();
     return this.current();
   }

@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-24",
+  "kind": "synthetic-no-window-worker",
+  "physicalHotkeySamples": 0,
+  "realSckSamples": 0,
+  "realClipboardSamples": 0,
+  "workerSamples": [
+    {
+      "width": 2400,
+      "height": 1500,
+      "pixelsEqual": true,
+      "pngBytes": 12327047,
+      "elapsedMs": 558.179958,
+      "mainTimerSamples": 98,
+      "maximumMainTimerDelayMs": 1.10575,
+      "windows": 0,
+      "scope": "isolated workspace, first final implementation run"
+    },
+    {
+      "width": 2400,
+      "height": 1500,
+      "pixelsEqual": true,
+      "pngBytes": 12327047,
+      "elapsedMs": 542.743417,
+      "mainTimerSamples": 96,
+      "maximumMainTimerDelayMs": 0.9098750000000564,
+      "windows": 0,
+      "scope": "isolated workspace, final Worker cleanup"
+    },
+    {
+      "width": 2400,
+      "height": 1500,
+      "pixelsEqual": true,
+      "pngBytes": 12327047,
+      "elapsedMs": 576.5635,
+      "mainTimerSamples": 101,
+      "maximumMainTimerDelayMs": 1.367999999999995,
+      "windows": 0,
+      "scope": "actual workspace, final build"
+    }
+  ],
+  "limitations": [
+    "Different synthetic content from prior CPU audit: do not compare total encode duration as a speedup ratio",
+    "Main timer delay is not end-to-end clipboard latency",
+    "No Windows or mixed-DPI hardware test in this run"
+  ],
+  "validation": {
+    "lint": "passed",
+    "typecheck": "passed (pnpm build -> pnpm typecheck)",
+    "unitFiles": 33,
+    "unitTests": 179,
+    "hiddenElectronTests": 2,
+    "fullBuild": "passed",
+    "nativeUniversalArchitectures": [
+      "arm64",
+      "x86_64"
+    ],
+    "nativeProtocol": "passed",
+    "frozenFrameComponent": "passed",
+    "visibleOrRealHardwareTests": "not run"
+  }
+}

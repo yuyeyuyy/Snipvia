@@ -13,6 +13,7 @@ export class CaptureModeRouter<T> {
     return session;
   }
   current(id: string) { return this.active?.session.id === id ? this.active.session : null; }
+  detach(id: string) { if (this.active?.session.id === id) this.active = null; }
   cancel(id?: string) {
     if (id && this.active?.session.id !== id) return;
     this.active?.controller.abort(new Error('截图会话已结束'));

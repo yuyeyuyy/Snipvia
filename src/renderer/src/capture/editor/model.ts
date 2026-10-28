@@ -66,3 +66,16 @@ export function adjustSelection(rect: Selection, handle: string, dx: number, dy:
   if (handle.includes('s')) height = Math.max(3, Math.min(viewport.height - y, height + dy));
   return { x, y, width, height };
 }
+
+/** Resize box annotations in screen DIP; retain corner orientation and the source object. */
+export function resizeAnnotation(item: Annotation, handle: string, dx: number, dy: number, viewport: Selection): Annotation {
+  if (!['rectangle', 'ellipse', 'mosaic'].includes(item.tool)) return item;
+  const before = annotationBounds(item);
+  if (!before.width || !before.height) return item;
+  const local = { ...before, x: before.x - viewport.x, y: before.y - viewport.y };
+  const after = adjustSelection(local, handle, dx, dy, viewport);
+  return { ...item, points: item.points.map(point => ({
+    x: viewport.x + after.x + (point.x - before.x) / before.width * after.width,
+    y: viewport.y + after.y + (point.y - before.y) / before.height * after.height
+  })) };
+}

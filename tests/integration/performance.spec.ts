@@ -129,7 +129,7 @@ test('collects startup preload and direct Quick capture performance', async () =
       expect(scenario.report.marks.some((mark) => mark.event === 'overlay_window_create_start')).toBe(false);
       expect(scenario.report.marks.some((mark) => mark.event === 'pin_window_create_start')).toBe(false);
     }
-    expect(scenarios.every(scenario => !scenario.report.marks.some(mark => mark.event === 'history_create_start' || mark.event === 'chat_send_main_received'))).toBe(true);
+    expect(scenarios.every(scenario => !scenario.report.marks.some(mark => String(mark.event) === 'history_create_start' || String(mark.event) === 'chat_send_main_received'))).toBe(true);
 
     await pinned.evaluate(() => window.snipvia.pin.close());
     await expect(pinned.getByAltText('置顶截图')).toHaveCount(0);

@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { constants } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { performance } from 'node:perf_hooks';
-import { nativeImage } from 'electron';
+import { nativeImage, type Rectangle } from 'electron';
 import { CaptureHealth, type CaptureHelperState } from './capture-health';
 import type { CaptureBackend, CaptureBackendRequest, CapturedFrame } from './types';
 
@@ -34,6 +34,8 @@ export function mapScreenCaptureKitDisplay(displays: HelperDisplay[], display: C
 
 type HelperHeader = {
   kind: 'event' | 'response' | 'protocol-error';
+  capabilities?: string[];
+  frameToken?: string;
   requestId?: string;
   captureSessionId?: string;
   command?: string;
@@ -58,11 +60,6 @@ type HelperHeader = {
   rawEncodeMs?: number;
   jpegEncodeMs?: number;
   displayCacheGeneration?: number;
-  recognizedText?: string;
-  ocrConfidence?: number;
-  ocrLineCount?: number;
-  ocrMs?: number;
-  ocrAvailable?: boolean;
 };
 
 type HelperResponse = { header: HelperHeader; payload: Buffer };
@@ -129,6 +126,7 @@ export class ScreenCaptureKitBackend implements CaptureBackend {
   private healthy = false;
   private excludedApplicationFound = false;
   private helperPid: number | undefined;
+  private nativeCropSupported = false;
   private initializePromise: Promise<void> | null = null;
   private restartTimer: NodeJS.Timeout | null = null;
   private circuitProbeTimer: NodeJS.Timeout | null = null;
@@ -188,6 +186,7 @@ export class ScreenCaptureKitBackend implements CaptureBackend {
       mapped = mapScreenCaptureKitDisplay(this.displays, request.display);
     }
     if (!mapped) throw new Error('ScreenCaptureKit display mapping failed');
+    if (request.retainOriginal && !this.nativeCropSupported) throw new Error("Capture helper needs rebuilding for lossless output");
     const format = this.options.outputFormat();
     const command = !process.env.SNIPVIA_SCK_TEST_FAILURE
       ? 'capture'
@@ -206,7 +205,7 @@ export class ScreenCaptureKitBackend implements CaptureBackend {
     let response: HelperResponse;
     try {
       response = await this.request(command, {
-        displayId: Number(mapped.id), format, quality: 0.95,
+        displayId: Number(mapped.id), format, quality: 0.95, retainOriginal: request.retainOriginal ?? false,
         ...(command === 'sleep' ? { delayMs: 1000 } : {})
       }, this.options.timeoutMs ?? 500, (name) => {
         const event = eventMap[name as keyof typeof eventMap];
@@ -217,92 +216,97 @@ export class ScreenCaptureKitBackend implements CaptureBackend {
     } catch (error) {
       if (request.signal?.aborted) throw error;
       const failure = error instanceof Error ? error : new Error('ScreenCaptureKit capture failed');
+      // Cache pressure is backpressure, not a broken helper. Preserve accepted outputs.
+      if (failure.message === 'Frozen-frame cache is full') throw failure;
       const circuitOpened = this.health.recordFailure(failure.message, failure.message.includes('timed out'));
       if (circuitOpened) this.openCircuit();
       else this.fail(failure);
       throw failure;
     }
-    const captureDurationMs = performance.now() - captureStarted;
-    this.health.recordSuccess(captureDurationMs);
-    this.options.mark(request.performanceSessionId, 'sck_request_received');
-    this.options.mark(request.performanceSessionId, 'sck_bridge_end', { bytes: response.payload.byteLength });
-    const header = response.header;
-    if (!header.width || !header.height || !header.format || !header.capturedAtEpochMs) throw new Error('ScreenCaptureKit returned incomplete frame metadata');
-    let frameBytes = response.payload;
-    let previewBytes: Buffer | undefined;
-    if (header.format === 'comparison') {
-      const rawLength = header.rawBytesLength ?? 0;
-      const jpegLength = header.jpegBytesLength ?? 0;
-      if (rawLength <= 0 || jpegLength <= 0 || rawLength + jpegLength !== response.payload.byteLength) {
-        throw new Error('ScreenCaptureKit comparison payload is inconsistent');
+    let adopted = false;
+    try {
+      const captureDurationMs = performance.now() - captureStarted;
+      this.health.recordSuccess(captureDurationMs);
+      this.options.mark(request.performanceSessionId, 'sck_request_received');
+      this.options.mark(request.performanceSessionId, 'sck_bridge_end', { bytes: response.payload.byteLength });
+      const header = response.header;
+      if (!header.width || !header.height || !header.format || !header.capturedAtEpochMs) throw new Error('ScreenCaptureKit returned incomplete frame metadata');
+      let frameBytes = response.payload;
+      let previewBytes: Buffer | undefined;
+      if (header.format === 'comparison') {
+        const rawLength = header.rawBytesLength ?? 0;
+        const jpegLength = header.jpegBytesLength ?? 0;
+        if (rawLength <= 0 || jpegLength <= 0 || rawLength + jpegLength !== response.payload.byteLength) {
+          throw new Error('ScreenCaptureKit comparison payload is inconsistent');
+        }
+        frameBytes = response.payload.subarray(0, rawLength);
+        previewBytes = response.payload.subarray(rawLength);
       }
-      frameBytes = response.payload.subarray(0, rawLength);
-      previewBytes = response.payload.subarray(rawLength);
-    }
-    const image = header.format === 'bgra' || header.format === 'comparison'
-      ? nativeImage.createFromBitmap(frameBytes, { width: header.width, height: header.height, scaleFactor: 1 })
-      : undefined;
-    if (image?.isEmpty()) throw new Error('ScreenCaptureKit returned an invalid image');
-    if (image) {
-      const actualSize = image.getSize();
-      if (actualSize.width !== header.width || actualSize.height !== header.height) throw new Error('ScreenCaptureKit frame dimensions are inconsistent');
-    } else if (frameBytes.byteLength < 4 || frameBytes[0] !== 0xff || frameBytes[1] !== 0xd8) {
-      throw new Error('ScreenCaptureKit returned an invalid JPEG frame');
-    }
-    const expectedWidth = Math.round(request.display.size.width * request.display.scaleFactor);
-    const expectedHeight = Math.round(request.display.size.height * request.display.scaleFactor);
-    if (header.width !== expectedWidth || header.height !== expectedHeight) throw new Error('ScreenCaptureKit frame does not match the selected Retina display');
-    this.options.mark(request.performanceSessionId, 'sck_frame_ready', { width: header.width, height: header.height, format: header.format });
-    this.options.updateMetadata(request.performanceSessionId, {
-      captureBackend: this.name,
-      screenCaptureKitRequestId: requestId,
-      screenCaptureKitHelperPid: this.helperPid ?? -1,
-      screenCaptureKitHelperRestarts: this.helperRestarts,
-      screenCaptureKitRequestDurationMs: captureDurationMs,
-      screenCaptureKitDisplayCacheGeneration: header.displayCacheGeneration ?? -1,
-      screenCaptureKitDisplayId: mapped.id,
-      screenCaptureKitDisplayMapping: mapped.id === request.display.id ? 'verified-direct-id' : 'verified-unique-geometry',
-      screenCaptureKitCaptureMs: header.captureMs ?? -1,
-      screenCaptureKitEncodeMs: header.encodeMs ?? -1,
-      screenCaptureKitPayloadBytes: response.payload.byteLength,
-      screenCaptureKitFormat: header.format,
-      ...(header.rawBytesLength ? { screenCaptureKitRawBytes: header.rawBytesLength } : {}),
-      ...(header.jpegBytesLength ? { screenCaptureKitJpegBytes: header.jpegBytesLength } : {}),
-      ...(header.rawEncodeMs === undefined ? {} : { screenCaptureKitRawEncodeMs: header.rawEncodeMs }),
-      ...(header.jpegEncodeMs === undefined ? {} : { screenCaptureKitJpegEncodeMs: header.jpegEncodeMs })
-    });
-    const frame: CapturedFrame = {
-      width: header.width,
-      height: header.height,
-      scaleFactor: request.display.scaleFactor,
-      displayId: request.display.id,
-      capturedAt: header.capturedAtEpochMs,
-      buffer: frameBytes,
-      format: header.format === 'comparison' ? 'bgra' : header.format,
-      ...(header.bytesPerRow ? { bytesPerRow: header.bytesPerRow } : {}),
-      ...(image ? { image } : {}),
-      ...(header.format === 'jpeg' || previewBytes ? {
-        preview: { bytes: previewBytes ?? response.payload, mimeType: 'image/jpeg' as const, transport: 'jpeg-95' as const }
-      } : {})
-    };
-    if (this.options.processStrategy?.() === 'per-capture') this.recycleHelper();
-    return frame;
-  }
-
-  async recognizeText(jpeg: Buffer, signal?: AbortSignal, captureSessionId?: string) {
-    await this.initialize();
-    const response = await this.request('ocr', { imageBase64: jpeg.toString('base64') }, 8_000, undefined, signal, captureSessionId);
-    const { recognizedText, ocrConfidence, ocrLineCount, ocrMs } = response.header;
-    if (typeof recognizedText !== 'string' || typeof ocrConfidence !== 'number' || typeof ocrLineCount !== 'number') {
-      throw new Error('本地 OCR 返回的数据不完整');
-    }
-    return {
-      text: recognizedText,
-      confidence: Math.max(0, Math.min(1, ocrConfidence)),
-      lineCount: Math.max(0, Math.round(ocrLineCount)),
-      available: response.header.ocrAvailable !== false,
-      ...(typeof ocrMs === 'number' ? { durationMs: ocrMs } : {})
-    };
+      const image = header.format === 'bgra' || header.format === 'comparison'
+        ? nativeImage.createFromBitmap(frameBytes, { width: header.width, height: header.height, scaleFactor: 1 })
+        : undefined;
+      if (image?.isEmpty()) throw new Error('ScreenCaptureKit returned an invalid image');
+      if (image) {
+        const actualSize = image.getSize();
+        if (actualSize.width !== header.width || actualSize.height !== header.height) throw new Error('ScreenCaptureKit frame dimensions are inconsistent');
+      } else if (frameBytes.byteLength < 4 || frameBytes[0] !== 0xff || frameBytes[1] !== 0xd8) {
+        throw new Error('ScreenCaptureKit returned an invalid JPEG frame');
+      }
+      const expectedWidth = Math.round(request.display.size.width * request.display.scaleFactor);
+      const expectedHeight = Math.round(request.display.size.height * request.display.scaleFactor);
+      if (header.width !== expectedWidth || header.height !== expectedHeight) throw new Error('ScreenCaptureKit frame does not match the selected Retina display');
+      this.options.mark(request.performanceSessionId, 'sck_frame_ready', { width: header.width, height: header.height, format: header.format });
+      this.options.updateMetadata(request.performanceSessionId, {
+        captureBackend: this.name,
+        screenCaptureKitRequestId: requestId,
+        screenCaptureKitHelperPid: this.helperPid ?? -1,
+        screenCaptureKitHelperRestarts: this.helperRestarts,
+        screenCaptureKitRequestDurationMs: captureDurationMs,
+        screenCaptureKitDisplayCacheGeneration: header.displayCacheGeneration ?? -1,
+        screenCaptureKitDisplayId: mapped.id,
+        screenCaptureKitDisplayMapping: mapped.id === request.display.id ? 'verified-direct-id' : 'verified-unique-geometry',
+        screenCaptureKitCaptureMs: header.captureMs ?? -1,
+        screenCaptureKitEncodeMs: header.encodeMs ?? -1,
+        screenCaptureKitPayloadBytes: response.payload.byteLength,
+        screenCaptureKitFormat: header.format,
+        ...(header.rawBytesLength ? { screenCaptureKitRawBytes: header.rawBytesLength } : {}),
+        ...(header.jpegBytesLength ? { screenCaptureKitJpegBytes: header.jpegBytesLength } : {}),
+        ...(header.rawEncodeMs === undefined ? {} : { screenCaptureKitRawEncodeMs: header.rawEncodeMs }),
+        ...(header.jpegEncodeMs === undefined ? {} : { screenCaptureKitJpegEncodeMs: header.jpegEncodeMs })
+      });
+      const token = header.frameToken, child = this.child;
+      if (request.retainOriginal && (!token || !/^[0-9a-f-]{36}$/i.test(token))) throw new Error("Capture helper did not retain the original frame");
+      let released = false;
+      const frame: CapturedFrame = {
+        width: header.width,
+        height: header.height,
+        scaleFactor: request.display.scaleFactor,
+        displayId: request.display.id,
+        capturedAt: header.capturedAtEpochMs,
+        ...(token && request.retainOriginal ? { original: {
+          png: async (rect: Rectangle, signal: AbortSignal) => {
+            if (released || this.child !== child) throw new Error('截图原始帧已失效');
+            const result = await this.request('crop', { frameToken: token, cropX: rect.x, cropY: rect.y, cropWidth: rect.width, cropHeight: rect.height }, 10_000, undefined, signal, request.performanceSessionId);
+            const png = result.payload;
+            if (result.header.width !== rect.width || result.header.height !== rect.height || png.length < 24 || png.length > 64 * 1024 * 1024
+              || !png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])) || png.readUInt32BE(16) !== rect.width || png.readUInt32BE(20) !== rect.height) throw new Error('原图 PNG 输出无效');
+            this.options.updateMetadata(request.performanceSessionId, { nativePngEncodeMs: result.header.encodeMs ?? -1, nativePngBytes: png.length });
+            return png;
+          },
+          release: () => { if (released) return; released = true; if (this.child === child) this.releaseOriginal(token, request.performanceSessionId); }
+        } } : {}),
+        buffer: frameBytes,
+        format: header.format === 'comparison' ? 'bgra' : header.format,
+        ...(header.bytesPerRow ? { bytesPerRow: header.bytesPerRow } : {}),
+        ...(image ? { image } : {}),
+        ...(header.format === 'jpeg' || previewBytes ? {
+          preview: { bytes: previewBytes ?? response.payload, mimeType: 'image/jpeg' as const, transport: 'jpeg-95' as const }
+        } : {})
+      };
+      if (!request.retainOriginal && this.options.processStrategy?.() === 'per-capture') this.recycleHelper();
+      adopted = true;
+      return frame;
+    } finally { if (!adopted && response.header.frameToken) this.releaseOriginal(response.header.frameToken, request.performanceSessionId); }
   }
 
   async invalidateDisplays() {
@@ -382,6 +386,7 @@ export class ScreenCaptureKitBackend implements CaptureBackend {
   private acceptInitialization(header: HelperHeader) {
     if (!header.excludedApplicationFound) throw new Error('ScreenCaptureKit could not identify Snipvia for application exclusion');
     if (!Array.isArray(header.displays) || header.displays.length === 0) throw new Error('ScreenCaptureKit did not return any displays');
+    this.nativeCropSupported = header.capabilities?.includes("frozen-frame-png") ?? false;
     this.displays = header.displays;
     this.excludedApplicationFound = true;
     this.helperPid = header.helperPid;
@@ -497,10 +502,15 @@ export class ScreenCaptureKitBackend implements CaptureBackend {
     return result;
   }
 
+  private releaseOriginal(token: string, sessionId: string) {
+    const child = this.child;
+    if (child && !child.killed) child.stdin.write(JSON.stringify({ version: 1, command: 'release', requestId: randomUUID(), frameToken: token, captureSessionId: sessionId }) + '\n', () => {});
+  }
+
   private dispatch(header: HelperHeader, payload: Buffer) {
     if (!header.requestId) return;
     const pending = this.pending.get(header.requestId);
-    if (!pending) return;
+    if (!pending) { if (header.frameToken && header.captureSessionId) this.releaseOriginal(header.frameToken, header.captureSessionId); return; }
     if (!matchesPendingResponse(pending, header)) return;
     if (header.kind === 'event') {
       if (header.name) pending.onEvent?.(header.name);

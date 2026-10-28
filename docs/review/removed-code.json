@@ -1,0 +1,188 @@
+[
+  {
+    "path": "src/shared/schedule-calendar.ts",
+    "bytes": 2410,
+    "sha256": "9d2756ec332b3e883f6a0001cfc8994f484e41f26c301f8315a4006812ad5c35",
+    "stage": "A"
+  },
+  {
+    "path": "src/shared/schedule-time.ts",
+    "bytes": 566,
+    "sha256": "1bcbd59d397748b36f950b3a13e8f8e7c51fd33dc6f725ab0ef79e0953331c6a",
+    "stage": "A"
+  },
+  {
+    "path": "src/shared/model-endpoint.ts",
+    "bytes": 557,
+    "sha256": "765bf3a42e1d3f3f64b86d9bfe2c13fc91279831d2b537f0a6933fea90072f68",
+    "stage": "A"
+  },
+  {
+    "path": "tests/unit/schedule-calendar.test.ts",
+    "bytes": 1351,
+    "sha256": "01b115c267fe5e34ebb4397d3091951846f9e571aa794e3f5fc31482cb49137c",
+    "stage": "A"
+  },
+  {
+    "path": "tests/unit/schedule-time.test.ts",
+    "bytes": 683,
+    "sha256": "4b77e40b11cd069cc8cfb59b300a149a1ba367096f327d89b98044301deef73b",
+    "stage": "A"
+  },
+  {
+    "path": "tests/unit/model-endpoint.test.ts",
+    "bytes": 859,
+    "sha256": "39a7462b1c1ea0ce4ac8993fb0d2b444d74edba28be581acb037687ab57b9aa1",
+    "stage": "A"
+  },
+  {
+    "path": "scripts/evaluate-web-search.mjs",
+    "bytes": 2269,
+    "sha256": "693cc4f2bf8e7ab27af4f3a9cec4dd6e404631424d6fc6dcee11cd2ba9bdba64",
+    "stage": "A"
+  },
+  {
+    "path": "tests/fixtures/mcp/server.mjs",
+    "bytes": 2689,
+    "sha256": "de684183927551f9aa7ab7e2ec1fdad707392e183c3823b50221245658525616",
+    "stage": "A"
+  },
+  {
+    "path": "src/shared/providers.ts",
+    "bytes": 9329,
+    "sha256": "08d18a728bc238efd79efd5c03ab3282d2888de402eda11d91d52c9085d0ea9a",
+    "stage": "B"
+  },
+  {
+    "path": "src/shared/api-key.ts",
+    "bytes": 272,
+    "sha256": "6e8db409eaba43ee3501d66536f953977e670d3a766166b3aeed1ae01b472d49",
+    "stage": "B"
+  },
+  {
+    "path": "src/shared/screenshot-understanding.ts",
+    "bytes": 4970,
+    "sha256": "6f89476df2a6394ecc6088fe250cafadc1a5afbcc643f4b30a579a62e44be3b0",
+    "stage": "B"
+  },
+  {
+    "path": "tests/unit/providers.test.ts",
+    "bytes": 3534,
+    "sha256": "79f96e7bcf5301302f64005242c9ed06a34bb3270ac492111aafb7d4ba46b34f",
+    "stage": "B"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/01-wechat-tomorrow.png",
+    "bytes": 125459,
+    "sha256": "d018de841d6e8228aa5e4196f972ab3ef5aec8a0780e4c7809e1a052c2b0b7c9",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/02-feishu-two-kinds.png",
+    "bytes": 134843,
+    "sha256": "6876387e7753f5b804b8df0cb9a8f255f13364c2a79b97436e2453d3f60da592",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/03-dingtalk-deadlines.png",
+    "bytes": 123661,
+    "sha256": "f84224ceac69310261af581dae636ed3c4ba8e21d73a8095e1258d3f0d7d3b4c",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/04-mail-timezone.png",
+    "bytes": 112459,
+    "sha256": "af3e1d94ed69171dff7ccd11417aaf9e5fe74e4151b92d7c079efd125739a2cb",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/05-wechat-old-message.png",
+    "bytes": 117115,
+    "sha256": "8f3f409465c1f43ee86c03cbefb0de5d055e25439cdd8bc1d6f4fcb60e82cdc8",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/06-feishu-reschedule.png",
+    "bytes": 126421,
+    "sha256": "76659318403185a7d2bc2528ae3d58d1cd7ef0b2c2d2ca058ac07eb34e6ac734",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/07-dingtalk-uncertain.png",
+    "bytes": 124055,
+    "sha256": "1fb7a069872e6651d5dc5b38c1cb7b756967b0afc90a12e8c4f27493bfe3ac48",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/08-mail-conflicting-weekday.png",
+    "bytes": 112166,
+    "sha256": "4a3f3e1805cf9549963d1ac316912e594fd5bf74a86d4fa1d964ce7f50588d03",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/09-wechat-no-event.png",
+    "bytes": 112927,
+    "sha256": "fd63eb6746f7beb123008e3533fcc954e889fe7d702578e209c6a0023edb8302",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/10-dingtalk-cross-year.png",
+    "bytes": 117401,
+    "sha256": "eb01592a7baad74d0c91db53364874cd3601e686fc57830aa2c726f7a252e7b8",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/11-feishu-multi-day.png",
+    "bytes": 125931,
+    "sha256": "ca5dc5d869f67074a287d3acbb7d5810b99cf6a0c3a6e3b7925cc75bd1312ecd",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/README.md",
+    "bytes": 3290,
+    "sha256": "8cc83a4bcbe64d3130c5b1149dd651fe8912b112d55dd58ff38f56624fa98cc3",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/generate.mjs",
+    "bytes": 15877,
+    "sha256": "cbfe4a9a98f644b22aa7a80b21a549ec6287af0b2a3d6b3c677745e7805a9ed3",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/overview.png",
+    "bytes": 1773603,
+    "sha256": "e395152235d0af96eb14786085fdf0a7b56d095a47fc4afb63cebb0fe1ff96c0",
+    "stage": "C"
+  },
+  {
+    "path": "tests/fixtures/schedule-manual/schedule-test-pack.zip",
+    "bytes": 3040828,
+    "sha256": "b757adb9ed6164139db263184a035b00d44d370550079eaf74f368883a0bfbe9",
+    "stage": "C"
+  },
+  {
+    "path": "scripts/package-friend.sh",
+    "bytes": 1415,
+    "sha256": "a6dffe7d4b934f813b81230e824a779111b739528fd89f169843ee04063c5ea3",
+    "stage": "D"
+  },
+  {
+    "path": "scripts/package-windows-friend.sh",
+    "bytes": 1086,
+    "sha256": "86d5c2046901a4c6438017a92fc4c9099732a17f272a4e484a989474f34e04f9",
+    "stage": "D"
+  },
+  {
+    "path": "scripts/package-release.sh",
+    "bytes": 1562,
+    "sha256": "c6222194b05bb7d486e960cab549a7310f5538e1ce427c598711d71c6c835133",
+    "stage": "D"
+  },
+  {
+    "path": "scripts/macos-release/test-update.cjs",
+    "bytes": 15142,
+    "sha256": "bee3d1e6a2ba1811ff8436fc671c7dd84431c510d9056814133bc388d5dd71d5",
+    "stage": "D"
+  }
+]

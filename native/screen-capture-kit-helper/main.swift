@@ -5,7 +5,6 @@ import Foundation
 import ImageIO
 @preconcurrency import ScreenCaptureKit
 import UniformTypeIdentifiers
-import Vision
 
 private struct Request: Decodable, Sendable {
     let version: Int
@@ -18,14 +17,12 @@ private struct Request: Decodable, Sendable {
     let quality: Double?
     let delayMs: UInt64?
     let targetRequestId: String?
-    let imageBase64: String?
-}
-
-private struct RecognizedText: Sendable {
-    let text: String
-    let confidence: Double
-    let lineCount: Int
-    let durationMs: Double
+    let retainOriginal: Bool?
+    let frameToken: String?
+    let cropX: Int?
+    let cropY: Int?
+    let cropWidth: Int?
+    let cropHeight: Int?
 }
 
 private struct DisplayDescriptor: Sendable {
@@ -47,6 +44,7 @@ private struct DisplayDescriptor: Sendable {
 }
 
 private struct EncodedCapture: Sendable {
+    let frameToken: String?
     let data: Data
     let width: Int
     let height: Int
@@ -102,14 +100,22 @@ private final class FrameWriter: @unchecked Sendable {
 
 @available(macOS 14.0, *)
 private actor CaptureService {
+    private let frames: FrozenFrameCache
+    init(frames: FrozenFrameCache) { self.frames = frames }
     private var shareableContent: SCShareableContent?
     private var excludedApplication: SCRunningApplication?
     private var excludedPid: Int32 = -1
     private var topologyFingerprint: String?
     private var displayCacheGeneration = 0
+    private var displayDescriptors: [DisplayDescriptor] = []
+    private var captureContexts: [UInt32: (SCContentFilter, SCStreamConfiguration)] = [:]
 
     func initialize(excludedPid: Int32, force: Bool = false) async throws -> ([DisplayDescriptor], Bool, Int) {
+        if !force, shareableContent != nil, self.excludedPid == excludedPid {
+            return (displayDescriptors, excludedApplication != nil, displayCacheGeneration)
+        }
         if force || shareableContent == nil || self.excludedPid != excludedPid {
+            captureContexts.removeAll()
             shareableContent = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
             self.excludedPid = excludedPid
             excludedApplication = shareableContent?.applications.first(where: { $0.processID == excludedPid })
@@ -131,6 +137,7 @@ private actor CaptureService {
                 scaleFactor: scale
             )
         }
+        displayDescriptors = displays
         return (displays, excludedApplication != nil, displayCacheGeneration)
     }
 
@@ -138,9 +145,11 @@ private actor CaptureService {
         shareableContent = nil
         excludedApplication = nil
         topologyFingerprint = nil
+        displayDescriptors.removeAll()
+        captureContexts.removeAll()
     }
 
-    func capture(displayId: UInt32, format: String, quality: Double, requestId: String, captureSessionId: String?, writer: FrameWriter) async throws -> EncodedCapture {
+    func capture(displayId: UInt32, format: String, retainOriginal: Bool, quality: Double, requestId: String, captureSessionId: String?, writer: FrameWriter) async throws -> EncodedCapture {
         _ = try await initialize(excludedPid: excludedPid)
         if topologyFingerprint != currentDisplayTopologyFingerprint() {
             _ = try await initialize(excludedPid: excludedPid, force: true)
@@ -155,22 +164,29 @@ private actor CaptureService {
             guard let refreshed = shareableContent?.displays.first(where: { $0.displayID == displayId }) else {
                 throw helperError("ScreenCaptureKit display not found")
             }
-            return try await captureImage(display: refreshed, format: format, quality: quality, requestId: requestId, captureSessionId: captureSessionId, writer: writer)
+            return try await captureImage(display: refreshed, format: format, retainOriginal: retainOriginal, quality: quality, requestId: requestId, captureSessionId: captureSessionId, writer: writer)
         }
-        return try await captureImage(display: display, format: format, quality: quality, requestId: requestId, captureSessionId: captureSessionId, writer: writer)
+        return try await captureImage(display: display, format: format, retainOriginal: retainOriginal, quality: quality, requestId: requestId, captureSessionId: captureSessionId, writer: writer)
     }
 
-    private func captureImage(display: SCDisplay, format: String, quality: Double, requestId: String, captureSessionId: String?, writer: FrameWriter) async throws -> EncodedCapture {
+    private func captureImage(display: SCDisplay, format: String, retainOriginal: Bool, quality: Double, requestId: String, captureSessionId: String?, writer: FrameWriter) async throws -> EncodedCapture {
         guard let application = excludedApplication else { throw helperError("Snipvia application could not be resolved for self exclusion") }
-        let filter = SCContentFilter(display: display, excludingApplications: [application], exceptingWindows: [])
-        let scale = max(1, Double(filter.pointPixelScale))
-        let configuration = SCStreamConfiguration()
-        configuration.width = Int((Double(display.width) * scale).rounded())
-        configuration.height = Int((Double(display.height) * scale).rounded())
-        configuration.scalesToFit = false
-        configuration.pixelFormat = kCVPixelFormatType_32BGRA
-        configuration.showsCursor = false
-        configuration.queueDepth = 1
+        let filter: SCContentFilter
+        let configuration: SCStreamConfiguration
+        if let context = captureContexts[display.displayID] {
+            filter = context.0; configuration = context.1
+        } else {
+            filter = SCContentFilter(display: display, excludingApplications: [application], exceptingWindows: [])
+            let scale = max(1, Double(filter.pointPixelScale))
+            configuration = SCStreamConfiguration()
+            configuration.width = Int((Double(display.width) * scale).rounded())
+            configuration.height = Int((Double(display.height) * scale).rounded())
+            configuration.scalesToFit = false
+            configuration.pixelFormat = kCVPixelFormatType_32BGRA
+            configuration.showsCursor = false
+            configuration.queueDepth = 1
+            captureContexts[display.displayID] = (filter, configuration)
+        }
 
         try Task.checkCancellation()
         writer.event(requestId: requestId, captureSessionId: captureSessionId, name: "capture-start")
@@ -216,7 +232,9 @@ private actor CaptureService {
         let encodeMs = milliseconds(encodeStarted.duration(to: ContinuousClock.now))
         writer.event(requestId: requestId, captureSessionId: captureSessionId, name: "encode-end")
         try Task.checkCancellation()
+        let token = retainOriginal ? try frames.insert(image, session: captureSessionId ?? requestId) : nil
         return EncodedCapture(
+            frameToken: token,
             data: payload,
             width: image.width,
             height: image.height,
@@ -265,9 +283,10 @@ private actor CaptureService {
 
 private final class CommandCoordinator: @unchecked Sendable {
     private let writer: FrameWriter
+    private let frames = FrozenFrameCache()
     private let lock = NSLock()
     private var tasks: [String: Task<Void, Never>] = [:]
-    @available(macOS 14.0, *) private lazy var service = CaptureService()
+    @available(macOS 14.0, *) private lazy var service = CaptureService(frames: frames)
 
     init(writer: FrameWriter) { self.writer = writer }
 
@@ -304,6 +323,7 @@ private final class CommandCoordinator: @unchecked Sendable {
                     writer.success(requestId: request.requestId, captureSessionId: request.captureSessionId, command: request.command, values: [
                         "displays": result.0.map(\.json), "excludedApplicationFound": result.1,
                         "helperPid": ProcessInfo.processInfo.processIdentifier,
+                        "capabilities": ["frozen-frame-png"],
                         "displayCacheGeneration": result.2
                     ])
                 case "capture", "sleep":
@@ -314,13 +334,19 @@ private final class CommandCoordinator: @unchecked Sendable {
                     let output = try await service.capture(
                         displayId: displayId,
                         format: request.format == "bgra" || request.format == "comparison" ? request.format! : "jpeg",
+                        retainOriginal: request.retainOriginal ?? false,
                         quality: min(1, max(0, request.quality ?? 0.95)),
                         requestId: request.requestId,
                         captureSessionId: request.captureSessionId,
                         writer: writer
                     )
+                    if Task.isCancelled {
+                        if let token = output.frameToken { frames.release(token, session: request.captureSessionId ?? request.requestId) }
+                        throw CancellationError()
+                    }
                     writer.event(requestId: request.requestId, captureSessionId: request.captureSessionId, name: "bridge-start")
                     writer.success(requestId: request.requestId, captureSessionId: request.captureSessionId, command: request.command, values: [
+                        "frameToken": output.frameToken as Any,
                         "displayId": String(displayId), "width": output.width, "height": output.height,
                         "format": output.format, "mimeType": output.mimeType,
                         "capturedAtEpochMs": output.capturedAtEpochMs,
@@ -335,31 +361,22 @@ private final class CommandCoordinator: @unchecked Sendable {
                         if value is NSNull { return nil }
                         return value
                     }, payload: output.data)
-                case "ocr":
-                    guard let encoded = request.imageBase64,
-                          let data = Data(base64Encoded: encoded, options: [.ignoreUnknownCharacters]) else {
-                        throw helperError("imageBase64 is required")
+                case "crop":
+                    guard let token = request.frameToken, let session = request.captureSessionId,
+                          let x = request.cropX, let y = request.cropY, let width = request.cropWidth, let height = request.cropHeight else {
+                        throw helperError("Frozen-frame crop parameters are required")
                     }
-                    do {
-                        let result = try await recognizeText(data)
-                        try Task.checkCancellation()
-                        writer.success(requestId: request.requestId, captureSessionId: request.captureSessionId, command: request.command, values: [
-                            "recognizedText": result.text,
-                            "ocrConfidence": result.confidence,
-                            "ocrLineCount": result.lineCount,
-                            "ocrMs": result.durationMs,
-                            "ocrAvailable": true
-                        ])
-                    } catch {
-                        try Task.checkCancellation()
-                        writer.success(requestId: request.requestId, captureSessionId: request.captureSessionId, command: request.command, values: [
-                            "recognizedText": "",
-                            "ocrConfidence": 0,
-                            "ocrLineCount": 0,
-                            "ocrAvailable": false,
-                            "ocrError": error.localizedDescription
-                        ])
-                    }
+                    let frame = try frames.frame(token, session: session)
+                    let started = ContinuousClock.now
+                    let png = try await Task.detached(priority: .userInitiated) {
+                        try frame.png(x: x, y: y, width: width, height: height)
+                    }.value
+                    try Task.checkCancellation()
+                    writer.success(requestId: request.requestId, captureSessionId: session, command: request.command,
+                        values: ["format": "png", "width": width, "height": height, "encodeMs": milliseconds(started.duration(to: ContinuousClock.now))], payload: png)
+                case "release":
+                    if let token = request.frameToken, let session = request.captureSessionId { frames.release(token, session: session) }
+                    writer.success(requestId: request.requestId, captureSessionId: request.captureSessionId, command: request.command)
                 case "invalidate":
                     await service.invalidate()
                     writer.success(requestId: request.requestId, captureSessionId: request.captureSessionId, command: request.command)
@@ -410,65 +427,6 @@ private func currentDisplayTopologyFingerprint() -> String {
 
 private func milliseconds(_ duration: Duration) -> Double {
     Double(duration.components.seconds) * 1000 + Double(duration.components.attoseconds) / 1_000_000_000_000_000
-}
-
-private func makeVisionPixelBuffer(_ image: CGImage) throws -> CVPixelBuffer {
-    let attributes: [CFString: Any] = [
-        kCVPixelBufferCGImageCompatibilityKey: true,
-        kCVPixelBufferCGBitmapContextCompatibilityKey: true
-    ]
-    var buffer: CVPixelBuffer?
-    let status = CVPixelBufferCreate(
-        kCFAllocatorDefault, image.width, image.height, kCVPixelFormatType_32BGRA,
-        attributes as CFDictionary, &buffer
-    )
-    guard status == kCVReturnSuccess, let buffer else { throw helperError("OCR pixel buffer could not be created") }
-    CVPixelBufferLockBaseAddress(buffer, [])
-    defer { CVPixelBufferUnlockBaseAddress(buffer, []) }
-    guard let address = CVPixelBufferGetBaseAddress(buffer),
-          let context = CGContext(
-            data: address, width: image.width, height: image.height,
-            bitsPerComponent: 8, bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
-            space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
-          ) else { throw helperError("OCR bitmap context could not be created") }
-    context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
-    return buffer
-}
-
-@available(macOS 14.0, *)
-private func recognizeText(_ data: Data) async throws -> RecognizedText {
-    return try autoreleasepool {
-        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
-            throw helperError("OCR image could not be decoded")
-        }
-        let buffer = try makeVisionPixelBuffer(image)
-        let started = ContinuousClock.now
-        let request = VNRecognizeTextRequest()
-        // OCR supplies routing hints; the selected crop goes to the vision model
-        // for full understanding. Fast recognition avoids expensive ANE model
-        // initialization delaying the prediction flow on a cold helper.
-        request.recognitionLevel = .fast
-        request.usesLanguageCorrection = false
-        try VNImageRequestHandler(cvPixelBuffer: buffer, orientation: .up, options: [:]).perform([request])
-        let observations = (request.results ?? []).sorted { left, right in
-            if abs(left.boundingBox.midY - right.boundingBox.midY) > 0.015 {
-                return left.boundingBox.midY > right.boundingBox.midY
-            }
-            return left.boundingBox.minX < right.boundingBox.minX
-        }
-        let candidates = observations.compactMap { $0.topCandidates(1).first }
-        let limited = candidates.prefix(2_000)
-        let text = String(limited.map(\.string).joined(separator: "\n").prefix(200_000))
-        let confidence = limited.isEmpty ? 0 : limited.reduce(0.0) { $0 + Double($1.confidence) } / Double(limited.count)
-        return RecognizedText(
-            text: text,
-            confidence: confidence,
-            lineCount: limited.count,
-            durationMs: milliseconds(started.duration(to: ContinuousClock.now))
-        )
-    }
 }
 
 @main

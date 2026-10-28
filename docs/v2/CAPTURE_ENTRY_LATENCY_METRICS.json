@@ -1,0 +1,932 @@
+{
+  "date": "2026-10-24",
+  "kind": "user-operated-physical-shortcut-numeric-only",
+  "beforeDispatchFix": [
+    {
+      "sessionId": "capture_1792828420269_8aee89e5",
+      "createdAt": "2026-10-24T07:53:40.269Z",
+      "stage": "closed",
+      "backend": "screen-capture-kit",
+      "metadata": {
+        "applicationHiddenAtCaptureStart": false,
+        "overlayNativeWakeMs": 21.655250000003434,
+        "overlayFocusedAtShellAck": true,
+        "captureFallbackUsed": false,
+        "screenCaptureKitCaptureMs": 289.941708,
+        "screenCaptureKitEncodeMs": 32.977042,
+        "screenCaptureKitRequestDurationMs": 332.174125000005,
+        "overlayReadyWaitMs": 3292.808624999998
+      },
+      "marks": [
+        {
+          "event": "hotkey_pressed",
+          "elapsedMs": 0.40691700000024866
+        },
+        {
+          "event": "capture_start",
+          "elapsedMs": 0.4612919999999576
+        },
+        {
+          "event": "capture_overlay_reuse_start",
+          "elapsedMs": 3303.9292080000014
+        },
+        {
+          "event": "sck_request_sent",
+          "elapsedMs": 3326.6072920000006
+        },
+        {
+          "event": "sck_capture_start",
+          "elapsedMs": 3426.9324999999953
+        },
+        {
+          "event": "frame_capture_start",
+          "elapsedMs": 3426.957083000001
+        },
+        {
+          "event": "capture_overlay_shell_show_called",
+          "elapsedMs": 3427.39675
+        },
+        {
+          "event": "capture_overlay_shell_show_returned",
+          "elapsedMs": 3427.5314999999973
+        },
+        {
+          "event": "capture_overlay_shell_visible",
+          "elapsedMs": 3432.2588896406232,
+          "deliveryDelayMs": 2.9429023593766033
+        },
+        {
+          "event": "sck_capture_end",
+          "elapsedMs": 3633.0040420000005
+        },
+        {
+          "event": "frame_capture_end",
+          "elapsedMs": 3633.0187919999953
+        },
+        {
+          "event": "sck_encode_start",
+          "elapsedMs": 3633.0539169999975
+        },
+        {
+          "event": "sck_encode_end",
+          "elapsedMs": 3656.7918329999957
+        },
+        {
+          "event": "sck_bridge_end",
+          "elapsedMs": 3658.8743749999994
+        },
+        {
+          "event": "capture_frame_request",
+          "elapsedMs": 3659.2588896406232,
+          "deliveryDelayMs": 0.41356835937767755
+        },
+        {
+          "event": "capture_frame_ipc_return",
+          "elapsedMs": 3662.2588896406232,
+          "deliveryDelayMs": 0.34081835937831784
+        },
+        {
+          "event": "frame_image_decode_end",
+          "elapsedMs": 3668.0586943281232,
+          "deliveryDelayMs": 0.2837636718759313
+        },
+        {
+          "event": "capture_overlay_show_called",
+          "elapsedMs": 3668.486124999996
+        },
+        {
+          "event": "capture_overlay_show_returned",
+          "elapsedMs": 3668.5604170000006
+        },
+        {
+          "event": "capture_overlay_visible",
+          "elapsedMs": 3673.0586943281232,
+          "deliveryDelayMs": 0.35605567187303677
+        }
+      ]
+    },
+    {
+      "sessionId": "capture_1792828498535_9f3a3ae8",
+      "createdAt": "2026-10-24T07:54:58.535Z",
+      "stage": "closed",
+      "backend": "screen-capture-kit",
+      "metadata": {
+        "applicationHiddenAtCaptureStart": true,
+        "overlayNativeWakeMs": 17.86029199999757,
+        "overlayFocusedAtShellAck": true,
+        "captureFallbackUsed": false,
+        "screenCaptureKitCaptureMs": 122.514416,
+        "screenCaptureKitEncodeMs": 46.014667,
+        "screenCaptureKitRequestDurationMs": 253.9196660000016,
+        "overlayReadyWaitMs": 214.2276660000207
+      },
+      "marks": [
+        {
+          "event": "hotkey_pressed",
+          "elapsedMs": 0.7262500000069849
+        },
+        {
+          "event": "capture_start",
+          "elapsedMs": 0.7562089999846648
+        },
+        {
+          "event": "capture_overlay_reuse_start",
+          "elapsedMs": 216.8695000000007
+        },
+        {
+          "event": "sck_request_sent",
+          "elapsedMs": 235.0319169999857
+        },
+        {
+          "event": "sck_capture_start",
+          "elapsedMs": 464.7504170000029
+        },
+        {
+          "event": "frame_capture_start",
+          "elapsedMs": 464.76108399999794
+        },
+        {
+          "event": "sck_capture_end",
+          "elapsedMs": 464.7856669999892
+        },
+        {
+          "event": "frame_capture_end",
+          "elapsedMs": 464.79187499999534
+        },
+        {
+          "event": "sck_encode_start",
+          "elapsedMs": 464.79629199998453
+        },
+        {
+          "event": "sck_encode_end",
+          "elapsedMs": 464.8001670000085
+        },
+        {
+          "event": "capture_overlay_shell_show_called",
+          "elapsedMs": 485.4156249999942
+        },
+        {
+          "event": "capture_overlay_shell_show_returned",
+          "elapsedMs": 485.4983749999956
+        },
+        {
+          "event": "capture_overlay_shell_visible",
+          "elapsedMs": 486.5212089843699,
+          "deliveryDelayMs": 0.37845801562070847
+        },
+        {
+          "event": "sck_bridge_end",
+          "elapsedMs": 489.02887499998906
+        },
+        {
+          "event": "capture_frame_request",
+          "elapsedMs": 489.1213066406199,
+          "deliveryDelayMs": 0.2908183593826834
+        },
+        {
+          "event": "capture_frame_ipc_return",
+          "elapsedMs": 490.7211601562449,
+          "deliveryDelayMs": 0.23358984375954606
+        },
+        {
+          "event": "frame_image_decode_end",
+          "elapsedMs": 500.1213066406199,
+          "deliveryDelayMs": 0.23748535936465487
+        },
+        {
+          "event": "capture_overlay_show_called",
+          "elapsedMs": 500.461833999987
+        },
+        {
+          "event": "capture_overlay_show_returned",
+          "elapsedMs": 500.5268749999814
+        },
+        {
+          "event": "capture_overlay_visible",
+          "elapsedMs": 502.8212578124949,
+          "deliveryDelayMs": 0.2641591874998994
+        }
+      ]
+    },
+    {
+      "sessionId": "capture_1792828500232_05a6714c",
+      "createdAt": "2026-10-24T07:55:00.232Z",
+      "stage": "closed",
+      "backend": "screen-capture-kit",
+      "metadata": {
+        "applicationHiddenAtCaptureStart": true,
+        "overlayNativeWakeMs": 12.39670899999328,
+        "overlayFocusedAtShellAck": true,
+        "captureFallbackUsed": false,
+        "screenCaptureKitCaptureMs": 78.708125,
+        "screenCaptureKitEncodeMs": 69.473958,
+        "screenCaptureKitRequestDurationMs": 176.1842079999915,
+        "overlayReadyWaitMs": 3492.5271249999932
+      },
+      "marks": [
+        {
+          "event": "hotkey_pressed",
+          "elapsedMs": 0.1387080000131391
+        },
+        {
+          "event": "capture_start",
+          "elapsedMs": 0.14700000002630986
+        },
+        {
+          "event": "capture_overlay_reuse_start",
+          "elapsedMs": 3493.7177920000104
+        },
+        {
+          "event": "sck_request_sent",
+          "elapsedMs": 3506.320667000022
+        },
+        {
+          "event": "capture_overlay_shell_show_called",
+          "elapsedMs": 3569.366625000024
+        },
+        {
+          "event": "capture_overlay_shell_show_returned",
+          "elapsedMs": 3569.458417000016
+        },
+        {
+          "event": "sck_capture_start",
+          "elapsedMs": 3573.4314170000143
+        },
+        {
+          "event": "frame_capture_start",
+          "elapsedMs": 3573.4432080000115
+        },
+        {
+          "event": "capture_overlay_shell_visible",
+          "elapsedMs": 3569.9271669843874,
+          "deliveryDelayMs": 3.759875015617581
+        },
+        {
+          "event": "sck_capture_end",
+          "elapsedMs": 3612.1765000000014
+        },
+        {
+          "event": "frame_capture_end",
+          "elapsedMs": 3612.188833000022
+        },
+        {
+          "event": "sck_encode_start",
+          "elapsedMs": 3612.195667000022
+        },
+        {
+          "event": "sck_encode_end",
+          "elapsedMs": 3681.3552080000227
+        },
+        {
+          "event": "sck_bridge_end",
+          "elapsedMs": 3682.5275420000253
+        },
+        {
+          "event": "capture_frame_request",
+          "elapsedMs": 3682.6271181562624,
+          "deliveryDelayMs": 0.2061318437627051
+        },
+        {
+          "event": "capture_frame_ipc_return",
+          "elapsedMs": 3684.1271181562624,
+          "deliveryDelayMs": 0.23550684374640696
+        },
+        {
+          "event": "frame_image_decode_end",
+          "elapsedMs": 3686.8270693281374,
+          "deliveryDelayMs": 0.23563867187476717
+        },
+        {
+          "event": "capture_overlay_show_called",
+          "elapsedMs": 3687.1536250000063
+        },
+        {
+          "event": "capture_overlay_show_returned",
+          "elapsedMs": 3687.225833000004
+        },
+        {
+          "event": "capture_overlay_visible",
+          "elapsedMs": 3690.2272158125124,
+          "deliveryDelayMs": 0.28365918749477714
+        }
+      ]
+    }
+  ],
+  "afterDispatchFix": [
+    {
+      "sessionId": "capture_1792829070717_2a056f48",
+      "createdAt": "2026-10-24T08:04:30.717Z",
+      "stage": "closed",
+      "backend": "screen-capture-kit",
+      "metadata": {
+        "nativeHotkeyDispatchMs": 2.3230839999741875,
+        "overlayPreloadedAtEntry": true,
+        "applicationHiddenAtCaptureStart": false,
+        "overlayNativeWakeMs": 13.904291999991983,
+        "overlayFocusedAtShellAck": true,
+        "captureFallbackUsed": false,
+        "screenCaptureKitCaptureMs": 230.06575,
+        "screenCaptureKitEncodeMs": 29.38975,
+        "screenCaptureKitRequestDurationMs": 270.14925000001676,
+        "overlayReadyWaitMs": 0.001500000013038516
+      },
+      "marks": [
+        {
+          "event": "hotkey_pressed",
+          "elapsedMs": 2.2307090000249445
+        },
+        {
+          "event": "capture_start",
+          "elapsedMs": 2.267833999998402
+        },
+        {
+          "event": "capture_overlay_reuse_start",
+          "elapsedMs": 9.334250000014435
+        },
+        {
+          "event": "sck_request_sent",
+          "elapsedMs": 24.725875000003725
+        },
+        {
+          "event": "capture_overlay_shell_show_called",
+          "elapsedMs": 72.11191699997289
+        },
+        {
+          "event": "capture_overlay_shell_show_returned",
+          "elapsedMs": 74.24183399998583
+        },
+        {
+          "event": "sck_capture_start",
+          "elapsedMs": 75.26325000001816
+        },
+        {
+          "event": "frame_capture_start",
+          "elapsedMs": 75.26912499999162
+        },
+        {
+          "event": "capture_overlay_shell_visible",
+          "elapsedMs": 79.79503515624674,
+          "deliveryDelayMs": 0.24758984375512227
+        },
+        {
+          "event": "sck_capture_end",
+          "elapsedMs": 263.4192499999772
+        },
+        {
+          "event": "frame_capture_end",
+          "elapsedMs": 263.4316669999971
+        },
+        {
+          "event": "sck_encode_start",
+          "elapsedMs": 263.45649999997113
+        },
+        {
+          "event": "sck_encode_end",
+          "elapsedMs": 292.7742919999873
+        },
+        {
+          "event": "sck_bridge_end",
+          "elapsedMs": 294.93975000001956
+        },
+        {
+          "event": "capture_frame_request",
+          "elapsedMs": 295.39513281249674,
+          "deliveryDelayMs": 0.22861718747299165
+        },
+        {
+          "event": "capture_frame_ipc_return",
+          "elapsedMs": 297.79503515624674,
+          "deliveryDelayMs": 0.24200684373499826
+        },
+        {
+          "event": "frame_image_decode_end",
+          "elapsedMs": 303.59508398437174,
+          "deliveryDelayMs": 0.1815830155974254
+        },
+        {
+          "event": "capture_overlay_show_called",
+          "elapsedMs": 303.91258399997605
+        },
+        {
+          "event": "capture_overlay_show_returned",
+          "elapsedMs": 303.98037499998463
+        },
+        {
+          "event": "capture_overlay_visible",
+          "elapsedMs": 308.29503515624674,
+          "deliveryDelayMs": 0.10254884377354756
+        }
+      ]
+    },
+    {
+      "sessionId": "capture_1792829072256_e4f7bac9",
+      "createdAt": "2026-10-24T08:04:32.256Z",
+      "stage": "closed",
+      "backend": "screen-capture-kit",
+      "metadata": {
+        "nativeHotkeyDispatchMs": 0.95474999997532,
+        "overlayPreloadedAtEntry": true,
+        "applicationHiddenAtCaptureStart": true,
+        "overlayNativeWakeMs": 16.970208999991883,
+        "overlayFocusedAtShellAck": true,
+        "captureFallbackUsed": false,
+        "screenCaptureKitCaptureMs": 63.575958,
+        "screenCaptureKitEncodeMs": 31.622125,
+        "screenCaptureKitRequestDurationMs": 97.7359169999836,
+        "overlayReadyWaitMs": 0.0024170000106096268
+      },
+      "marks": [
+        {
+          "event": "hotkey_pressed",
+          "elapsedMs": 0.9406659999513067
+        },
+        {
+          "event": "capture_start",
+          "elapsedMs": 0.9497909999918193
+        },
+        {
+          "event": "capture_overlay_reuse_start",
+          "elapsedMs": 1.651207999966573
+        },
+        {
+          "event": "sck_request_sent",
+          "elapsedMs": 18.829165999952238
+        },
+        {
+          "event": "capture_overlay_shell_show_called",
+          "elapsedMs": 87.555457999988
+        },
+        {
+          "event": "capture_overlay_shell_show_returned",
+          "elapsedMs": 87.66533299995353
+        },
+        {
+          "event": "sck_capture_start",
+          "elapsedMs": 90.92745799996192
+        },
+        {
+          "event": "frame_capture_start",
+          "elapsedMs": 90.9352910000016
+        },
+        {
+          "event": "sck_capture_end",
+          "elapsedMs": 90.94958299997961
+        },
+        {
+          "event": "frame_capture_end",
+          "elapsedMs": 90.9512499999837
+        },
+        {
+          "event": "sck_encode_start",
+          "elapsedMs": 90.9579579999554
+        },
+        {
+          "event": "capture_overlay_shell_visible",
+          "elapsedMs": 88.27602732810192,
+          "deliveryDelayMs": 2.7934306718525477
+        },
+        {
+          "event": "sck_encode_end",
+          "elapsedMs": 114.90179099998204
+        },
+        {
+          "event": "sck_bridge_end",
+          "elapsedMs": 116.67449999996461
+        },
+        {
+          "event": "capture_frame_request",
+          "elapsedMs": 116.97622264060192,
+          "deliveryDelayMs": 0.09252735937479883
+        },
+        {
+          "event": "capture_frame_ipc_return",
+          "elapsedMs": 118.57607615622692,
+          "deliveryDelayMs": 0.1873818437452428
+        },
+        {
+          "event": "frame_image_decode_end",
+          "elapsedMs": 121.27602732810192,
+          "deliveryDelayMs": 0.12222267186734825
+        },
+        {
+          "event": "capture_overlay_show_called",
+          "elapsedMs": 121.50220799999079
+        },
+        {
+          "event": "capture_overlay_show_returned",
+          "elapsedMs": 121.57429099996807
+        },
+        {
+          "event": "capture_overlay_visible",
+          "elapsedMs": 125.37612498435192,
+          "deliveryDelayMs": 0.16816601564642042
+        }
+      ]
+    },
+    {
+      "sessionId": "capture_1792829073701_cf53465c",
+      "createdAt": "2026-10-24T08:04:33.701Z",
+      "stage": "closed",
+      "backend": "screen-capture-kit",
+      "metadata": {
+        "nativeHotkeyDispatchMs": 0.5670839999802411,
+        "overlayPreloadedAtEntry": true,
+        "applicationHiddenAtCaptureStart": true,
+        "overlayNativeWakeMs": 11.373874999990221,
+        "overlayFocusedAtShellAck": false,
+        "captureFallbackUsed": false,
+        "screenCaptureKitCaptureMs": 62.582291,
+        "screenCaptureKitEncodeMs": 28.26525,
+        "screenCaptureKitRequestDurationMs": 92.68550000002142,
+        "overlayReadyWaitMs": 0.0023750000400468707
+      },
+      "marks": [
+        {
+          "event": "hotkey_pressed",
+          "elapsedMs": 0.5542089999653399
+        },
+        {
+          "event": "capture_start",
+          "elapsedMs": 0.5623340000165626
+        },
+        {
+          "event": "capture_overlay_reuse_start",
+          "elapsedMs": 2.626209000009112
+        },
+        {
+          "event": "sck_request_sent",
+          "elapsedMs": 14.211084000009578
+        },
+        {
+          "event": "capture_overlay_shell_show_called",
+          "elapsedMs": 14.966291999968234
+        },
+        {
+          "event": "capture_overlay_shell_show_returned",
+          "elapsedMs": 15.01500000001397
+        },
+        {
+          "event": "sck_capture_start",
+          "elapsedMs": 15.315999999991618
+        },
+        {
+          "event": "frame_capture_start",
+          "elapsedMs": 15.31983399996534
+        },
+        {
+          "event": "capture_overlay_shell_visible",
+          "elapsedMs": 15.401535156241152,
+          "deliveryDelayMs": 68.91171484376537
+        },
+        {
+          "event": "sck_capture_end",
+          "elapsedMs": 84.49150000000373
+        },
+        {
+          "event": "frame_capture_end",
+          "elapsedMs": 84.49575000000186
+        },
+        {
+          "event": "sck_encode_start",
+          "elapsedMs": 84.4996669999673
+        },
+        {
+          "event": "sck_encode_end",
+          "elapsedMs": 106.10991699999431
+        },
+        {
+          "event": "sck_bridge_end",
+          "elapsedMs": 106.91633400000865
+        },
+        {
+          "event": "capture_frame_request",
+          "elapsedMs": 107.10148632811615,
+          "deliveryDelayMs": 0.10763867187779397
+        },
+        {
+          "event": "capture_frame_ipc_return",
+          "elapsedMs": 108.60148632811615,
+          "deliveryDelayMs": 0.0672636718954891
+        },
+        {
+          "event": "frame_image_decode_end",
+          "elapsedMs": 110.90153515624115,
+          "deliveryDelayMs": 0.01196484372485429
+        },
+        {
+          "event": "capture_overlay_show_called",
+          "elapsedMs": 111.00575000001118
+        },
+        {
+          "event": "capture_overlay_show_returned",
+          "elapsedMs": 111.06891699996777
+        },
+        {
+          "event": "capture_overlay_visible",
+          "elapsedMs": 116.90153515624115,
+          "deliveryDelayMs": 0.223048843734432
+        }
+      ]
+    },
+    {
+      "sessionId": "capture_1792829075116_4021438a",
+      "createdAt": "2026-10-24T08:04:35.116Z",
+      "stage": "closed",
+      "backend": "screen-capture-kit",
+      "metadata": {
+        "nativeHotkeyDispatchMs": 1.4600830000126734,
+        "overlayPreloadedAtEntry": true,
+        "applicationHiddenAtCaptureStart": true,
+        "overlayNativeWakeMs": 17.241624999966007,
+        "overlayFocusedAtShellAck": false,
+        "captureFallbackUsed": false,
+        "screenCaptureKitCaptureMs": 62.814042,
+        "screenCaptureKitEncodeMs": 34.586666,
+        "screenCaptureKitRequestDurationMs": 98.8887499999837,
+        "overlayReadyWaitMs": 0.0018749999580904841
+      },
+      "marks": [
+        {
+          "event": "hotkey_pressed",
+          "elapsedMs": 1.445125000027474
+        },
+        {
+          "event": "capture_start",
+          "elapsedMs": 1.4533750000409782
+        },
+        {
+          "event": "capture_overlay_reuse_start",
+          "elapsedMs": 2.072667000000365
+        },
+        {
+          "event": "sck_request_sent",
+          "elapsedMs": 19.525542000017595
+        },
+        {
+          "event": "capture_overlay_shell_show_called",
+          "elapsedMs": 20.28945800004294
+        },
+        {
+          "event": "capture_overlay_shell_show_returned",
+          "elapsedMs": 20.334625000017695
+        },
+        {
+          "event": "sck_capture_start",
+          "elapsedMs": 20.615083000040613
+        },
+        {
+          "event": "frame_capture_start",
+          "elapsedMs": 20.617250000010245
+        },
+        {
+          "event": "capture_overlay_shell_visible",
+          "elapsedMs": 20.651465812523384,
+          "deliveryDelayMs": 0.21599218749906868
+        },
+        {
+          "event": "sck_capture_end",
+          "elapsedMs": 86.70716700004414
+        },
+        {
+          "event": "frame_capture_end",
+          "elapsedMs": 86.71670800005086
+        },
+        {
+          "event": "sck_encode_start",
+          "elapsedMs": 86.72291700000642
+        },
+        {
+          "event": "sck_encode_end",
+          "elapsedMs": 117.56975000002421
+        },
+        {
+          "event": "sck_bridge_end",
+          "elapsedMs": 118.43066700000782
+        },
+        {
+          "event": "capture_frame_request",
+          "elapsedMs": 118.65146581252338,
+          "deliveryDelayMs": 0.14082618750398979
+        },
+        {
+          "event": "capture_frame_ipc_return",
+          "elapsedMs": 121.25131932814838,
+          "deliveryDelayMs": 0.15518067189259455
+        },
+        {
+          "event": "frame_image_decode_end",
+          "elapsedMs": 126.65146581252338,
+          "deliveryDelayMs": 0.4013671875
+        },
+        {
+          "event": "capture_overlay_show_called",
+          "elapsedMs": 127.30783300002804
+        },
+        {
+          "event": "capture_overlay_show_returned",
+          "elapsedMs": 127.43108300003223
+        },
+        {
+          "event": "capture_overlay_visible",
+          "elapsedMs": 128.25131932814838,
+          "deliveryDelayMs": 0.41501367185264826
+        }
+      ]
+    },
+    {
+      "sessionId": "capture_1792829076416_fac03e49",
+      "createdAt": "2026-10-24T08:04:36.416Z",
+      "stage": "closed",
+      "backend": "screen-capture-kit",
+      "metadata": {
+        "nativeHotkeyDispatchMs": 0.4613750000135042,
+        "overlayPreloadedAtEntry": true,
+        "applicationHiddenAtCaptureStart": true,
+        "overlayNativeWakeMs": 10.903708999976516,
+        "overlayFocusedAtShellAck": true,
+        "captureFallbackUsed": false,
+        "screenCaptureKitCaptureMs": 59.819042,
+        "screenCaptureKitEncodeMs": 37.155792,
+        "screenCaptureKitRequestDurationMs": 99.33716699999059,
+        "overlayReadyWaitMs": 0.0021249999990686774
+      },
+      "marks": [
+        {
+          "event": "hotkey_pressed",
+          "elapsedMs": 0.44874999998137355
+        },
+        {
+          "event": "capture_start",
+          "elapsedMs": 0.45645800000056624
+        },
+        {
+          "event": "capture_overlay_reuse_start",
+          "elapsedMs": 1.1504169999971054
+        },
+        {
+          "event": "sck_request_sent",
+          "elapsedMs": 12.244000000006054
+        },
+        {
+          "event": "capture_overlay_shell_show_called",
+          "elapsedMs": 77.57445800001733
+        },
+        {
+          "event": "capture_overlay_shell_show_returned",
+          "elapsedMs": 77.67070800001966
+        },
+        {
+          "event": "sck_capture_start",
+          "elapsedMs": 80.23324999999022
+        },
+        {
+          "event": "frame_capture_start",
+          "elapsedMs": 80.23758299998008
+        },
+        {
+          "event": "sck_capture_end",
+          "elapsedMs": 80.2432920000283
+        },
+        {
+          "event": "frame_capture_end",
+          "elapsedMs": 80.24379199999385
+        },
+        {
+          "event": "sck_encode_start",
+          "elapsedMs": 80.24700000003213
+        },
+        {
+          "event": "capture_overlay_shell_visible",
+          "elapsedMs": 83.14431932813022,
+          "deliveryDelayMs": 0.48013867187546566
+        },
+        {
+          "event": "sck_encode_end",
+          "elapsedMs": 110.24379199999385
+        },
+        {
+          "event": "sck_bridge_end",
+          "elapsedMs": 111.60379199997988
+        },
+        {
+          "event": "capture_frame_request",
+          "elapsedMs": 111.74441698438022,
+          "deliveryDelayMs": 0.2504580156528391
+        },
+        {
+          "event": "capture_frame_ipc_return",
+          "elapsedMs": 113.54446581250522,
+          "deliveryDelayMs": 0.10065918747568503
+        },
+        {
+          "event": "frame_image_decode_end",
+          "elapsedMs": 116.04446581250522,
+          "deliveryDelayMs": 0.1586171875242144
+        },
+        {
+          "event": "capture_overlay_show_called",
+          "elapsedMs": 116.31791699997848
+        },
+        {
+          "event": "capture_overlay_show_returned",
+          "elapsedMs": 116.4041670000297
+        },
+        {
+          "event": "capture_overlay_visible",
+          "elapsedMs": 121.04446581250522,
+          "deliveryDelayMs": 0.13465918751899153
+        }
+      ]
+    }
+  ],
+  "afterFixAcceptance": "user-confirmed-clear-improvement-current-local-cadence",
+  "limits": [
+    "Observed intervals start at native shortcut callback arrival, not keyboard hardware timestamp",
+    "Await interval does not prove actual cold preload: same settled Promise can have delayed continuation",
+    "No automated physical keys, screenshots or system clipboard in this run"
+  ],
+  "validation": {
+    "lint": "passed",
+    "typecheck": "passed within pnpm build",
+    "fullBuild": "passed",
+    "unitFiles": 36,
+    "unitTests": 186,
+    "hiddenEntryIntegration": "passed",
+    "hiddenOutputIntegration": "passed"
+  },
+  "afterFixSummary": {
+    "samples": 5,
+    "nativeDispatchMs": [
+      0.4613750000135042,
+      2.3230839999741875
+    ],
+    "awaitMs": [
+      0.001500000013038516,
+      0.0024170000106096268
+    ],
+    "shellPaintMs": [
+      15.401535156241152,
+      88.27602732810192
+    ],
+    "framePaintMs": [
+      116.90153515624115,
+      308.29503515624674
+    ],
+    "focusedAtShellAckCount": 3,
+    "fallbackCount": 0,
+    "userFeedback": "已完成，明显改善",
+    "scope": "macOS, current pnpm dev instance, user-operated Command+1, one burst; no hardware-keypress timestamps"
+  },
+  "afterFixRows": [
+    {
+      "sample": 1,
+      "nativeDispatchMs": 2.3230839999741875,
+      "awaitMs": 0.001500000013038516,
+      "shellPaintMs": 79.79503515624674,
+      "framePaintMs": 308.29503515624674,
+      "requestMs": 270.14925000001676,
+      "focusedAtShellAck": true,
+      "fallbackUsed": false
+    },
+    {
+      "sample": 2,
+      "nativeDispatchMs": 0.95474999997532,
+      "awaitMs": 0.0024170000106096268,
+      "shellPaintMs": 88.27602732810192,
+      "framePaintMs": 125.37612498435192,
+      "requestMs": 97.7359169999836,
+      "focusedAtShellAck": true,
+      "fallbackUsed": false
+    },
+    {
+      "sample": 3,
+      "nativeDispatchMs": 0.5670839999802411,
+      "awaitMs": 0.0023750000400468707,
+      "shellPaintMs": 15.401535156241152,
+      "framePaintMs": 116.90153515624115,
+      "requestMs": 92.68550000002142,
+      "focusedAtShellAck": false,
+      "fallbackUsed": false
+    },
+    {
+      "sample": 4,
+      "nativeDispatchMs": 1.4600830000126734,
+      "awaitMs": 0.0018749999580904841,
+      "shellPaintMs": 20.651465812523384,
+      "framePaintMs": 128.25131932814838,
+      "requestMs": 98.8887499999837,
+      "focusedAtShellAck": false,
+      "fallbackUsed": false
+    },
+    {
+      "sample": 5,
+      "nativeDispatchMs": 0.4613750000135042,
+      "awaitMs": 0.0021249999990686774,
+      "shellPaintMs": 83.14431932813022,
+      "framePaintMs": 121.04446581250522,
+      "requestMs": 99.33716699999059,
+      "focusedAtShellAck": true,
+      "fallbackUsed": false
+    }
+  ]
+}

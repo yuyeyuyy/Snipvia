@@ -24,12 +24,16 @@ type MeasureDefinition = Omit<ScreenshotPerformanceMeasure, 'durationMs' | 'warn
 };
 
 const measureDefinitions: MeasureDefinition[] = [
+  { id: 'output-queue-wait', label: 'Output Queue Wait', start: 'output_queued', end: 'output_encode_start', category: 'local' },
+  { id: 'selection-output-queued', label: 'Selection → Output Queued', start: 'selection_end', end: 'output_queued', category: 'local' },
+  { id: 'selection-overlay-closed', label: 'Selection → Overlay Closed', start: 'selection_end', end: 'overlay_closed', category: 'local' },
+  { id: 'output-encode', label: 'Output Crop + PNG (off Main)', start: 'output_encode_start', end: 'output_encode_end', category: 'local' },
+  { id: 'clipboard-write', label: 'System Clipboard Commit', start: 'clipboard_write_start', end: 'clipboard_committed', category: 'local' },
   { id: 'selection-collection', label: 'Selection → Collection Updated', start: 'selection_end', end: 'collection_updated', category: 'local' },
   { id: 'selection-shelf', label: 'Selection → Shelf Feedback Visible', start: 'selection_end', end: 'shelf_feedback_visible', category: 'local' },
   { id: 'shelf-expand', label: 'Shelf Expand → Interactive', start: 'shelf_expand_start', end: 'shelf_interactive', category: 'local' },
   { id: 'shelf-reorder', label: 'Shelf Reorder → Updated', start: 'shelf_reorder_start', end: 'shelf_reorder_updated', category: 'local' },
   { id: 'selection-clipboard', label: 'Selection → Clipboard Committed', start: 'selection_end', end: 'clipboard_committed', category: 'local' },
-  { id: 'selection-chat-visible', label: 'Selection → Quick Chat Visible', start: 'selection_end', end: 'quick_chat_visible', category: 'local' },
   { id: 'capture-overlay-preload', label: 'CaptureOverlay Startup Preload', start: 'window_preload_start', startMetadata: { window: 'capture-overlay' }, end: 'window_preload_ready', endMetadata: { window: 'capture-overlay' }, category: 'local' },
   { id: 'screenshot-window-preload', label: 'ScreenshotToAll Startup Preload', start: 'window_preload_start', startMetadata: { window: 'screenshot-to-all' }, end: 'window_preload_ready', endMetadata: { window: 'screenshot-to-all' }, category: 'local' },
   { id: 'main-window-hide', label: 'Main Window Hide', start: 'main_window_hide_called', end: 'main_window_hidden', category: 'local' },
@@ -84,16 +88,6 @@ const measureDefinitions: MeasureDefinition[] = [
   { id: 'resize', label: 'Resize', start: 'resize_start', end: 'resize_end', category: 'local' },
   { id: 'jpeg-encode', label: 'JPEG Encode', start: 'jpeg_encode_start', end: 'jpeg_encode_end', category: 'local' },
   { id: 'base64-check', label: 'Base64 #1', start: 'base64_check_start', end: 'base64_check_end', category: 'local' },
-  { id: 'history-mkdir', label: 'History Directory mkdirSync', start: 'history_mkdir_start', end: 'history_mkdir_end', category: 'local' },
-  { id: 'jpeg-disk-write', label: 'JPEG Disk Write', start: 'jpeg_disk_write_start', end: 'jpeg_disk_write_end', category: 'local' },
-  { id: 'jpeg-disk-rename', label: 'JPEG Disk Rename', start: 'jpeg_disk_rename_start', end: 'jpeg_disk_rename_end', category: 'local' },
-  { id: 'history-json-serialize', label: 'History JSON Serialize', start: 'history_json_serialize_start', end: 'history_json_serialize_end', category: 'local' },
-  { id: 'history-json-write', label: 'History JSON Write', start: 'history_json_write_start', end: 'history_json_write_end', category: 'local' },
-  { id: 'history-json-rename', label: 'History JSON Rename', start: 'history_json_rename_start', end: 'history_json_rename_end', category: 'local' },
-  { id: 'jpeg-disk-read', label: 'JPEG Disk Read', start: 'jpeg_disk_read_start', end: 'jpeg_disk_read_end', category: 'local' },
-  { id: 'second-base64', label: 'Base64 #2', start: 'second_base64_start', end: 'second_base64_end', category: 'local' },
-  { id: 'history-read', label: 'History Read Total', start: 'history_read_start', end: 'history_read_end', category: 'local' },
-  { id: 'history-create', label: 'History Create Total', start: 'history_create_start', end: 'history_create_end', category: 'local' },
   { id: 'pin-window-create', label: 'Pin Window Create', start: 'pin_window_create_start', end: 'pin_window_create_end', category: 'local' },
   { id: 'pin-renderer-load', label: 'Pin Renderer Load', start: 'pin_load_start', end: 'pin_did_finish_load', category: 'local' },
   { id: 'pin-react-mount', label: 'Pin did-finish-load → React', start: 'pin_did_finish_load', end: 'react_mount', endMetadata: { page: 'pin' }, category: 'local' },
@@ -102,21 +96,6 @@ const measureDefinitions: MeasureDefinition[] = [
   { id: 'pin-image-paint', label: 'Pin Image Paint', start: 'pin_image_load_end', end: 'screenshot_to_all_visible', category: 'local' },
   { id: 'pin-react-visible', label: 'Pin React → Screenshot Visible', start: 'react_mount', startMetadata: { page: 'pin' }, end: 'screenshot_to_all_visible', category: 'local' },
   { id: 'screenshot-window-reuse', label: 'ScreenshotToAll Reuse → Visible', start: 'screenshot_window_reuse_start', end: 'screenshot_window_reuse_visible', category: 'local' },
-  { id: 'auto-local-ocr', label: 'Auto Understanding Local OCR', start: 'local_ocr_start', end: 'local_ocr_end', category: 'local' },
-  { id: 'auto-vision-classification', label: 'Auto Understanding Vision Classification', start: 'vision_classification_start', end: 'vision_classification_end', category: 'network' },
-  { id: 'auto-analysis', label: 'Auto Screenshot Analysis', start: 'auto_analysis_start', end: 'auto_analysis_end', category: 'network' },
-  { id: 'auto-action-dispatch', label: 'Auto Action Dispatch', start: 'auto_action_selected', end: 'auto_action_start', category: 'local' },
-  { id: 'auto-action-first-token', label: 'Auto Action → First Token', start: 'auto_action_start', end: 'ai_first_token', category: 'network' },
-  { id: 'quick-chat-window-create', label: 'Quick Chat Window Create', start: 'quick_chat_window_create_start', end: 'quick_chat_window_create_end', category: 'local' },
-  { id: 'quick-chat-renderer-load', label: 'Quick Chat Renderer Load', start: 'quick_chat_load_start', end: 'quick_chat_did_finish_load', category: 'local' },
-  { id: 'quick-chat-react-mount', label: 'Quick Chat did-finish-load → React', start: 'quick_chat_did_finish_load', end: 'react_mount', endMetadata: { page: 'quick-chat' }, category: 'local' },
-  { id: 'chat-send-ipc', label: 'Chat Send IPC', start: 'chat_send_ipc_start', end: 'chat_send_main_received', category: 'local' },
-  { id: 'message-history-prepare', label: 'Message History Prepare', start: 'message_history_prepare_start', end: 'message_history_prepare_end', category: 'local' },
-  { id: 'ai-fetch-headers', label: 'AI Fetch → Headers', start: 'fetch_start', end: 'fetch_headers_received', category: 'network' },
-  { id: 'ai-body-parse', label: 'AI Body Parse', start: 'ai_body_parse_start', end: 'ai_body_parse_end', category: 'local' },
-  { id: 'message-save', label: 'Message Save', start: 'assistant_message_save_start', end: 'assistant_message_save_end', category: 'local' },
-  { id: 'chat-ipc-return', label: 'Chat IPC Return', start: 'chat_ipc_return', end: 'chat_renderer_received', category: 'local' },
-  { id: 'chat-render', label: 'Chat Renderer Visible', start: 'chat_renderer_received', end: 'chat_response_visible', category: 'local' }
 ];
 
 function warningFor(durationMs: number): ScreenshotPerformanceMeasure['warning'] {
@@ -135,9 +114,8 @@ export class ScreenshotPerformanceRecorder {
   private readonly sessions = new Map<string, Session>();
   private readonly output = process.env.SNIPVIA_PERF === 'trace' ? 'trace' : process.env.SNIPVIA_PERF === '1' ? 'summary' : 'none';
 
-  startSession(metadata: PerformanceMetadata = {}) {
+  startSession(metadata: PerformanceMetadata = {}, startedAt = performance.now()) {
     const id = `capture_${Date.now()}_${randomUUID().slice(0, 8)}`;
-    const startedAt = performance.now();
     this.sessions.set(id, {
       id,
       createdAt: new Date().toISOString(),
@@ -150,15 +128,18 @@ export class ScreenshotPerformanceRecorder {
     return id;
   }
 
-  mark(sessionId: string | null | undefined, event: ScreenshotPerformanceEvent, source: ScreenshotPerformanceSource = 'main', metadata?: PerformanceMetadata) {
+  mark(sessionId: string | null | undefined, event: ScreenshotPerformanceEvent, source: ScreenshotPerformanceSource = 'main', metadata?: PerformanceMetadata, sourceTimestampMs?: number) {
     if (!sessionId) return;
     const session = this.sessions.get(sessionId);
     if (!session) return;
-    const atMs = performance.now();
+    const receivedAtMs = performance.now();
+    const origin = sourceTimestampMs === undefined ? receivedAtMs : sourceTimestampMs - performance.timeOrigin;
+    const atMs = Number.isFinite(origin) && origin >= session.startedAt && origin <= receivedAtMs + 50 && receivedAtMs - origin < 60_000 ? Math.min(origin, receivedAtMs) : receivedAtMs;
     const mark: ScreenshotPerformanceMark = {
       event,
       source,
       atMs,
+      ...(sourceTimestampMs === undefined ? {} : { receivedAtMs }),
       elapsedMs: atMs - session.startedAt,
       ...(metadata ? { metadata: { ...metadata } } : {})
     };
@@ -166,8 +147,8 @@ export class ScreenshotPerformanceRecorder {
     if (this.output === 'trace') {
       console.info(`[Snipvia Performance] ${sessionId} ${event} +${mark.elapsedMs.toFixed(2)}ms${metadata ? ` ${JSON.stringify(metadata)}` : ''}`);
     }
+    if (event === 'clipboard_committed') this.printSummary(sessionId, 'clipboard');
     if (event === 'screenshot_to_all_visible') this.printSummary(sessionId, 'screenshot');
-    if (event === 'chat_response_visible') this.printSummary(sessionId, 'ai');
     if (event === 'capture_cancelled' || event === 'capture_error') this.printSummary(sessionId, 'closed');
   }
 
@@ -208,9 +189,7 @@ export class ScreenshotPerformanceRecorder {
         selectionToScreenshotVisibleMs: duration('selection_end', 'screenshot_to_all_visible'),
         hotkeyToOverlayVisibleMs: duration('hotkey_pressed', 'capture_overlay_visible'),
         captureStartToOverlayVisibleMs: duration('capture_start', 'capture_overlay_visible'),
-        captureStartToOverlayShellVisibleMs: duration('capture_start', 'capture_overlay_shell_visible'),
-        aiRequestToCompleteMs: duration('ai_request_start', 'ai_response_complete'),
-        screenshotVisibleToAutoFirstTokenMs: duration('screenshot_to_all_visible', 'ai_first_token')
+        captureStartToOverlayShellVisibleMs: duration('capture_start', 'capture_overlay_shell_visible')
       },
       measures,
       marks: session.marks.map((mark) => ({ ...mark, ...(mark.metadata ? { metadata: { ...mark.metadata } } : {}) }))
@@ -236,8 +215,6 @@ export class ScreenshotPerformanceRecorder {
       metric('Metric A  Selection End → Screenshot Visible', report.metrics.selectionToScreenshotVisibleMs),
       metric('Shortcut Response → Immediate Overlay', report.metrics.captureStartToOverlayShellVisibleMs),
       metric('Metric B  Hotkey → Overlay Visible', report.metrics.hotkeyToOverlayVisibleMs ?? report.metrics.captureStartToOverlayVisibleMs),
-      metric('Metric C  AI Request → Complete', report.metrics.aiRequestToCompleteMs),
-      metric('Auto UI Visible → First Token', report.metrics.screenshotVisibleToAutoFirstTokenMs),
       '--------------------------------------------------'
     ];
     for (const measure of report.measures) {

@@ -9,6 +9,9 @@ export function CaptureOverlay() {
   const [frame, setFrame] = useState('');
   const [performanceSessionId, setPerformanceSessionId] = useState<string | null>(null);
   const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
+  const dragOrigin = useRef<{ x: number; y: number } | null>(null);
+  const dragFrame = useRef(0);
+  const pendingRect = useRef<Selection | null>(null);
   const [rect, setRect] = useState<Selection | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -49,6 +52,7 @@ export function CaptureOverlay() {
       pendingSelection.current = null; decodedSession.current = null;
       setPerformanceSessionId(null);
       setFrame('');
+      dragOrigin.current = null; cancelAnimationFrame(dragFrame.current); dragFrame.current = 0;
       setOrigin(null);
       setRect(null);
       setError('');
@@ -91,6 +95,7 @@ export function CaptureOverlay() {
       setPerformanceSessionId(sessionId);
       setMode(captureMode);
       setFrame('');
+      dragOrigin.current = null; cancelAnimationFrame(dragFrame.current); dragFrame.current = 0;
       setOrigin(null);
       setRect(null);
       setError('');
@@ -111,6 +116,7 @@ export function CaptureOverlay() {
     const key = (event: KeyboardEvent) => { if (event.key === 'Escape' && !editingRef.current) void window.snipvia.capture.cancel(); };
     window.addEventListener('keydown', key);
     return () => {
+      cancelAnimationFrame(dragFrame.current);
       stopSession();
       stopFrameReady();
       stopReset();
@@ -120,10 +126,11 @@ export function CaptureOverlay() {
   }, []);
 
   function selection(x: number, y: number): Selection | null {
-    if (!origin) return null;
+    const start = dragOrigin.current;
+    if (!start) return null;
     const boundedX = Math.max(0, Math.min(innerWidth, x));
     const boundedY = Math.max(0, Math.min(innerHeight, y));
-    return { x: Math.min(origin.x, boundedX), y: Math.min(origin.y, boundedY), width: Math.abs(boundedX - origin.x), height: Math.abs(boundedY - origin.y) };
+    return { x: Math.min(start.x, boundedX), y: Math.min(start.y, boundedY), width: Math.abs(boundedX - start.x), height: Math.abs(boundedY - start.y) };
   }
 
   async function finishSelection(selected: Selection, sessionId: string) {
@@ -154,12 +161,18 @@ export function CaptureOverlay() {
       if (editing || busy || !performanceSessionId || event.button !== 0) return;
       if (performanceSessionId) window.snipvia.performance.mark(performanceSessionId, 'selection_start');
       event.currentTarget.setPointerCapture(event.pointerId);
-      setOrigin({ x: event.clientX, y: event.clientY }); setRect(null); setError('');
+      const point = { x: event.clientX, y: event.clientY }; dragOrigin.current = point;
+      setOrigin(point); setRect(null); setError('');
     }}
-    onPointerMove={(event) => { if (origin) setRect(selection(event.clientX, event.clientY)); }}
+    onPointerMove={(event) => {
+      if (!dragOrigin.current) return;
+      pendingRect.current = selection(event.clientX, event.clientY);
+      if (!dragFrame.current) dragFrame.current = requestAnimationFrame(() => { dragFrame.current = 0; setRect(pendingRect.current); });
+    }}
     onPointerUp={async (event) => {
       if (editing) return;
       const selected = selection(event.clientX, event.clientY);
+      dragOrigin.current = null; cancelAnimationFrame(dragFrame.current); dragFrame.current = 0;
       setOrigin(null);
       if (!selected || selected.width < 3 || selected.height < 3) { setRect(null); return; }
       setBusy(true);

@@ -13,6 +13,8 @@ export class CaptureOverlayWindow {
   private visiblePromise: Promise<boolean> | null = null;
   private resolveVisible: ((visible: boolean) => void) | null = null;
   private destroying = false;
+  private ordered = false;
+  private suspendedForCapture = false;
 
   constructor(
     private readonly webPreferences: WebPreferences,
@@ -39,6 +41,7 @@ export class CaptureOverlayWindow {
       fullscreenable: false,
       enableLargerThanScreen: true,
       transparent: true,
+      acceptFirstMouse: true,
       webPreferences: { ...this.webPreferences, backgroundThrottling: false },
       backgroundColor: '#00000000'
     });
@@ -95,37 +98,47 @@ export class CaptureOverlayWindow {
     const window = this.getWindow();
     this.hide();
     this.activeSessionId = sessionId;
-    window.setBounds(bounds);
-    window.setAlwaysOnTop(true, 'screen-saver');
+    this.suspendedForCapture = false;
+    // Suppress the previous session's pixels/input before waking the native window.
+    window.setOpacity(0); window.setIgnoreMouseEvents(true);
+    const current = window.getBounds();
+    if (current.x !== bounds.x || current.y !== bounds.y || current.width !== bounds.width || current.height !== bounds.height) window.setBounds(bounds);
     screenshotPerformance.mark(sessionId, 'capture_overlay_reuse_start');
     this.visiblePromise = new Promise((resolve) => { this.resolveVisible = resolve; });
     window.webContents.send('capture:new-session', { performanceSessionId: sessionId, frameReady, mode });
+    // The native self-excluding path must not wait for a hidden Renderer or JPEG
+    // before activation. Renderer ACK only reveals the reset shell.
+    if (!frameReady) {
+      const started = performance.now(); window.show(); this.ordered = true;
+      screenshotPerformance.updateMetadata(sessionId, { overlayNativeWakeMs: performance.now() - started });
+    }
   }
 
   showShellSession(sessionId: string) {
-    if (sessionId !== this.activeSessionId) return false;
+    if (sessionId !== this.activeSessionId || this.suspendedForCapture) return false;
     const window = this.getWindow();
     screenshotPerformance.mark(sessionId, 'capture_overlay_shell_show_called');
-    // The shell is informative while the frame is still unavailable. Showing it
-    // without activation avoids a costly focus handoff; the ready overlay takes
-    // focus a few milliseconds later when selection can actually begin.
-    if (!window.isVisible()) window.showInactive();
+    if (!this.ordered) { window.show(); this.ordered = true; }
+    window.setOpacity(1); window.setIgnoreMouseEvents(false);
     screenshotPerformance.mark(sessionId, 'capture_overlay_shell_show_returned');
+    screenshotPerformance.updateMetadata(sessionId, { overlayFocusedAtShellAck: window.isFocused() });
     return true;
   }
 
   frameReady(sessionId: string) {
     if (sessionId !== this.activeSessionId) return false;
+    this.suspendedForCapture = false;
     this.getWindow().webContents.send('capture:frame-ready', sessionId);
     return true;
   }
 
   showRenderedSession(sessionId: string) {
-    if (sessionId !== this.activeSessionId) return false;
+    if (sessionId !== this.activeSessionId || this.suspendedForCapture) return false;
     const window = this.getWindow();
     screenshotPerformance.mark(sessionId, 'capture_overlay_show_called');
-    if (!window.isVisible()) window.show();
-    window.focus();
+    if (!this.ordered) { window.show(); this.ordered = true; }
+    window.setOpacity(1); window.setIgnoreMouseEvents(false);
+    if (!window.isFocused()) window.focus();
     screenshotPerformance.mark(sessionId, 'capture_overlay_show_returned');
     return true;
   }
@@ -139,7 +152,12 @@ export class CaptureOverlayWindow {
   suspendForCapture() {
     // Hide our pixels for Electron fallback while preserving an in-progress drag.
     const window = this.window;
-    if (window && !window.isDestroyed()) window.hide();
+    this.suspendedForCapture = true;
+    if (window && !window.isDestroyed()) {
+      window.setOpacity(0); window.setIgnoreMouseEvents(true);
+      if (this.ordered) window.hide();
+    }
+    this.ordered = false;
   }
 
   hide() {
@@ -147,7 +165,11 @@ export class CaptureOverlayWindow {
     this.activeSessionId = null;
     const window = this.window;
     if (!window || window.isDestroyed()) return;
-    window.hide();
+    // macOS isVisible also reports occlusion / app.hide, not just orderOut.
+    // Always order out a presented window once, including an app-hidden one.
+    window.setOpacity(0); window.setIgnoreMouseEvents(true);
+    if (this.ordered) window.hide();
+    this.ordered = false; this.suspendedForCapture = false;
     window.webContents.send('capture:reset-session');
   }
 
@@ -172,7 +194,7 @@ export class CaptureOverlayWindow {
     this.destroying = true;
     this.finishVisible(false);
     if (this.window && !this.window.isDestroyed()) this.window.destroy();
-    this.window = null;
+    this.window = null; this.ordered = false;
   }
 
   private finishVisible(visible: boolean) {

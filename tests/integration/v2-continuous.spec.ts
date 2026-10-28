@@ -5,6 +5,9 @@ import { join } from 'node:path';
 import { launchDesktop } from '../helpers/desktop';
 
 async function synthetic(app: ElectronApplication) {
+  const page = await app.firstWindow();
+  const current = await page.evaluate(() => window.snipvia.collection.current()); if (!current.ok) throw Error(current.error);
+  expect((await page.evaluate(value => window.snipvia.collection.configure({ ...value, autoHide: false }), current.value.preferences)).ok).toBe(true);
   await app.evaluate(({ clipboard, desktopCapturer, nativeImage, screen, systemPreferences }) => {
     systemPreferences.getMediaAccessStatus = () => 'granted';
     const probe = { copies: 0, fail: false, frames: 0 };
@@ -47,8 +50,12 @@ test('Quick copies directly, retries clipboard failures, isolates sessions and n
     expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map(w => w.id))).toEqual(ids);
     await app.evaluate(() => { (globalThis as typeof globalThis & { continuousProbe: { fail: boolean } }).continuousProbe.fail = true; });
     await select(page, overlay, 'quick');
-    await expect(overlay.locator('.capture-overlay')).toContainText('synthetic clipboard denied');
-    await overlay.keyboard.press('Escape');
+    await expect(page.getByRole('alert').filter({ hasText: 'synthetic clipboard denied' })).toBeAttached();
+    await app.evaluate(({ Menu }) => {
+      (globalThis as typeof globalThis & { continuousProbe: { fail: boolean } }).continuousProbe.fail = false;
+      Menu.getApplicationMenu()!.items[0].submenu!.items.find(item => item.label === '重试失败输出')!.click();
+    });
+    await expect.poll(() => app.evaluate(() => (globalThis as typeof globalThis & { continuousProbe: { copies: number } }).continuousProbe.copies)).toBe(4);
     await mkdir('test-results', { recursive: true }); await writeFile('test-results/v2-quick.json', JSON.stringify(samples, null, 2));
   } finally { await app.close(); await rm(dir, { recursive: true, force: true }); }
 });
@@ -76,9 +83,9 @@ test('Collect keeps ten ordered thumbnails, reuses Shelf, and safely previews, s
     await expect.poll(async () => { const r = await page.evaluate(id => window.snipvia.performance.report(id), quickId); return r.ok && r.value?.marks.some(mark => mark.event === 'clipboard_committed'); }).toBe(true);
     const unchanged = await page.evaluate(() => window.snipvia.collection.current()); expect(unchanged.ok && unchanged.value.collection.count).toBe(10);
     const shelf = app.windows().find(p => p.url().endsWith('#shelf'))!;
-    await expect(shelf.getByRole('button', { name: '展开截图收纳区' })).toBeVisible();
+    await expect(shelf.getByRole('button', { name: '展开图堆' })).toBeVisible();
     const windows = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map(w => w.id));
-    await shelf.getByRole('button', { name: '展开截图收纳区' }).click();
+    await shelf.getByRole('button', { name: '展开图堆' }).click();
     await expect(shelf.getByRole('heading', { name: '截图收纳', exact: true })).toBeVisible();
     await expect(shelf.locator('.shelf-preview img')).toHaveCount(10);
     const interactions: unknown[] = [];
@@ -102,33 +109,40 @@ test('Collect keeps ten ordered thumbnails, reuses Shelf, and safely previews, s
     if (!before.ok) throw new Error(before.error);
     const ids = before.value.collection.items.map(item => item.id);
     expect(new Set(ids).size).toBe(10);
-    await shelf.getByRole('button', { name: '下移截图 1', exact: true }).click();
+    await shelf.getByRole('button', { name: '预览截图 1', exact: true }).press('Alt+ArrowDown');
     await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.items[0].id; }).toBe(ids[1]);
     await recordInteraction('shelf-reorder');
     const articles = shelf.locator('.shelf-grid article');
-    await articles.nth(0).dragTo(articles.nth(2));
+    await shelf.keyboard.down('Alt');
+    try { await articles.nth(0).dragTo(articles.nth(2)); } finally { await shelf.keyboard.up('Alt'); }
     await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.items[2].id; }).toBe(ids[1]);
     await recordInteraction('shelf-reorder');
     // Restore the tested order with a second drag, using the updated revision.
-    await articles.nth(2).dragTo(articles.nth(0));
+    await shelf.keyboard.down('Alt');
+    try { await articles.nth(2).dragTo(articles.nth(0)); } finally { await shelf.keyboard.up('Alt'); }
     await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.items[0].id; }).toBe(ids[1]);
     await recordInteraction('shelf-reorder');
     const stale = await shelf.evaluate(value => window.snipvia.collection.reorder(value), { ids, revision: before.value.collection.revision });
     expect(stale.ok).toBe(false);
     await shelf.getByRole('button', { name: '收起收纳区' }).click();
-    await shelf.getByRole('button', { name: '展开截图收纳区' }).click();
+    await shelf.getByRole('button', { name: '展开图堆' }).click();
     await recordInteraction('shelf-expand');
     expect(await shelf.locator('.shelf-grid article').first().getAttribute('data-id')).toBe(ids[1]);
     await shelf.getByRole('button', { name: '预览截图 1', exact: true }).click();
+    await expect(shelf.locator('.shelf-preview-scene')).toBeVisible();
+    await expect(shelf.getByAltText('原图预览')).toHaveAttribute('src', /^blob:/);
+    await shelf.getByRole('button', { name: '定住当前截图', exact: true }).click();
+    await expect(shelf.locator('.shelf.expanded')).toBeVisible();
     await expect(pin.getByAltText('置顶截图')).toBeVisible();
+    await shelf.getByRole('button', { name: '预览截图 1', exact: true }).hover();
     await shelf.getByRole('button', { name: '删除截图 1', exact: true }).click();
     await expect(pin.getByAltText('置顶截图')).toBeVisible();
     expect((await pin.evaluate(() => window.snipvia.pin.copy())).ok).toBe(true);
     await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 0, checkboxChecked: false }); });
-    await shelf.getByRole('button', { name: '清空…', exact: true }).click();
+    expect((await page.evaluate(() => window.snipvia.collection.clear())).ok).toBe(true);
     let current = await page.evaluate(() => window.snipvia.collection.current()); expect(current.ok && current.value.collection.count).toBe(9);
     await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); });
-    await shelf.getByRole('button', { name: '清空…', exact: true }).click();
+    expect((await page.evaluate(() => window.snipvia.collection.clear())).ok).toBe(true);
     await expect(shelf.locator('.shelf-grid article')).toHaveCount(0);
     current = await page.evaluate(() => window.snipvia.collection.current()); expect(current.ok && current.value.collection.count).toBe(0);
     expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map(w => w.id))).toEqual(windows);
@@ -146,7 +160,7 @@ test('Shelf animations cancel for new captures, hidden feedback expires, and app
     const page = await app.firstWindow(), overlay = app.windows().find(p => p.url().endsWith('#capture'))!;
     await select(page, overlay, 'collect');
     const shelf = await expect.poll(() => app.windows().some(p => p.url().endsWith('#shelf'))).toBe(true).then(() => app.windows().find(p => p.url().endsWith('#shelf'))!);
-    await shelf.locator('.shelf-open').waitFor();
+    await shelf.getByRole('button', { name: '展开图堆', exact: true }).waitFor();
     await shelf.evaluate(() => {
       const events: string[] = []; (window as typeof window & { feedbackEvents: string[] }).feedbackEvents = events;
       window.snipvia.collection.onChanged(state => { if (state.feedback) events.push(state.feedback.kind); });
@@ -164,7 +178,7 @@ test('Shelf animations cancel for new captures, hidden feedback expires, and app
     const during = await page.evaluate(() => window.snipvia.collection.current());
     expect(during.ok && during.value.feedback).toBeUndefined();
     await overlay.keyboard.press('Escape');
-    await expect(shelf.locator('.shelf-open')).toBeVisible();
+    await expect(shelf.getByRole('button', { name: '展开图堆', exact: true })).toBeVisible();
     expect(await app.evaluate(() => (globalThis as typeof globalThis & { shelfFocusCalls: number }).shelfFocusCalls)).toBe(0);
     await shelf.getByRole('button', { name: '隐藏收纳区' }).click();
     await select(page, overlay, 'collect');
@@ -196,13 +210,14 @@ test('Collection produces a real merged PNG and ordered selected files; cancella
     const page = await app.firstWindow(), overlay = app.windows().find(p => p.url().endsWith('#capture'))!;
     for (let i = 0; i < 3; i++) await select(page, overlay, 'collect', i * 30);
     const shelf = app.windows().find(p => p.url().endsWith('#shelf'))!;
-    await expect(shelf.locator('.shelf-open')).toBeVisible();
-    await shelf.locator('.shelf-open').click();
+    await expect(shelf.getByRole('button', { name: '展开图堆', exact: true })).toBeVisible();
+    await shelf.getByRole('button', { name: '展开图堆', exact: true }).click();
     await expect(shelf.locator('.shelf-preview img')).toHaveCount(3);
     const state = await page.evaluate(() => window.snipvia.collection.current()); if (!state.ok) throw new Error(state.error);
     await app.evaluate(({ clipboard }) => { clipboard.write = (globalThis as typeof globalThis & { originalClipboardWrite: typeof clipboard.write }).originalClipboardWrite; });
+    await shelf.getByRole('button', { name: '预览截图 1', exact: true }).hover();
     await shelf.getByRole('button', { name: '合并复制' }).click();
-    await expect(shelf.getByRole('alert')).toContainText('已合并复制');
+    await expect(shelf.getByRole('button', { name: '合并复制', exact: true })).toHaveAttribute('data-action-state', 'success');
     const size = await app.evaluate(async ({ clipboard, nativeImage }) => {
       const items = await clipboard.read(), png = items.find(item => item.types.includes('image/png'));
       if (!png) throw new Error('missing PNG');
@@ -211,11 +226,13 @@ test('Collection produces a real merged PNG and ordered selected files; cancella
     });
     expect(size.width).toBe(Math.max(...state.value.collection.items.map(item => item.width)));
     expect(size.height).toBe(state.value.collection.items.reduce((sum, item) => sum + item.height, 24));
+    await shelf.getByRole('button', { name: '多选截图', exact: true }).click();
     await shelf.getByLabel('选择截图 1', { exact: true }).check();
     await shelf.getByLabel('选择截图 3', { exact: true }).check();
     await app.evaluate(({ dialog }, dir) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [dir] }); }, dir);
+    await shelf.getByRole('button', { name: '预览截图 1', exact: true }).hover();
     await shelf.getByRole('button', { name: '导出 PNG' }).click();
-    await expect(shelf.getByRole('alert')).toContainText('已导出 2 张');
+    await expect(shelf.getByRole('button', { name: '导出 PNG', exact: true })).toHaveAttribute('data-action-state', 'success');
     const folders = (await readdir(dir)).filter(name => name.startsWith('Snipvia-'));
     expect(folders).toHaveLength(1);
     const names = await readdir(join(dir, folders[0]));
@@ -225,8 +242,9 @@ test('Collection produces a real merged PNG and ordered selected files; cancella
     expect((await shelf.evaluate(value => window.snipvia.collection.export(value), { ids: state.value.collection.items.map(item => item.id), revision: state.value.collection.revision }))).toEqual({ ok: true, value: null });
     const bad = join(dir, 'preserve-file'); await writeFile(bad, 'keep');
     await app.evaluate(({ dialog }, bad) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [bad] }); }, bad);
+    await shelf.getByRole('button', { name: '预览截图 1', exact: true }).hover();
     await shelf.getByRole('button', { name: '导出 PNG' }).click();
-    await expect(shelf.getByRole('alert')).toContainText('原图已保留');
+    await expect(shelf.getByRole('status')).toContainText('原图已保留');
     expect(await readFile(bad, 'utf8')).toBe('keep');
     const after = await page.evaluate(() => window.snipvia.collection.current());
     expect(after.ok && after.value.collection).toEqual(state.value.collection);
@@ -277,8 +295,9 @@ test('shortcuts register all five actions, preserve custom bindings and roll bac
     await app.evaluate((_electron, key) => { (globalThis as typeof globalThis & { v2ShortcutCallbacks: Record<string, () => void> }).v2ShortcutCallbacks[key](); }, custom.clearCollectionShortcut);
     await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.count; }).toBe(0);
     await app.evaluate((_electron, key) => { (globalThis as typeof globalThis & { v2ShortcutCallbacks: Record<string, () => void> }).v2ShortcutCallbacks[key](); }, custom.collectionShortcut);
+    await expect.poll(() => app.windows().some(p => p.url().endsWith('#shelf'))).toBe(true);
     const shelf = app.windows().find(p => p.url().endsWith('#shelf'))!;
-    await expect(shelf.getByRole('heading', { name: '截图收纳' })).toBeVisible();
+    await expect(shelf.locator('.shelf.expanded')).toBeVisible();
     await app.evaluate(({ app }) => app.emit('activate'));
     await page.getByRole('navigation', { name: '设置分类' }).getByRole('button', { name: '快捷键', exact: true }).click();
     await expect(page.getByRole('button', { name: '设置收集截图快捷键', exact: true })).toBeVisible();

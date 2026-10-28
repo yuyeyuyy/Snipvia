@@ -4,7 +4,7 @@ import { FeedbackDialog } from './FeedbackDialog';
 import { Icon } from './Icon';
 
 const sections = [
-  ['general', '通用'], ['shortcuts', '快捷键'], ['capture', '截图'], ['storage', '存储'], ['about', '关于']
+  ['general', '通用'], ['shortcuts', '快捷键'], ['capture', '截图'], ['shelf', '收纳区'], ['storage', '存储'], ['about', '关于']
 ];
 export function AppShell({ children }: { children: ReactNode }) {
   const [feedbackOpen, setFeedbackOpen] = useState(false);

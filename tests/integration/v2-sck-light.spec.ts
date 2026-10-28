@@ -24,14 +24,18 @@ test('light real ScreenCaptureKit Quick and Collect regression without persistin
       await overlay.mouse.move(60, 80); await overlay.mouse.down(); await overlay.mouse.move(260, 220); await overlay.mouse.up();
       await expect.poll(async () => { const r = await main.evaluate(id => window.snipvia.performance.report(id!), id); return r.ok && r.value?.marks.some(m => m.event === (mode === 'quick' ? 'clipboard_committed' : 'collection_updated')); }).toBe(true);
       const result = await main.evaluate(id => window.snipvia.performance.report(id!), id);
-      expect(result.ok && result.value?.metadata.captureBackend).toBe('screen-capture-kit'); records.push({ mode, result });
+      records.push({ mode, result });
+      expect(result.ok && result.value?.metadata.captureBackend).toBe('screen-capture-kit');
     }
     expect((await main.evaluate(() => window.snipvia.capture.start('collect'))).ok).toBe(true);
     await overlay.keyboard.press('Escape');
     const collected = await main.evaluate(() => window.snipvia.collection.current());
     expect(collected.ok && collected.value.collection.count).toBe(2); records.push({ collectionCount: collected.ok ? collected.value.collection.count : null });
     records.push({ final: await main.evaluate(() => window.snipvia.performance.captureBackendStatus()) });
-  } catch (error) { records.push({ error: error instanceof Error ? error.message : String(error) }); throw error; }
+  } catch (error) {
+    const backend = await app.firstWindow().then(main => main.evaluate(() => window.snipvia.performance.captureBackendStatus())).catch(() => null);
+    records.push({ error: error instanceof Error ? error.message : String(error), backend }); throw error;
+  }
   finally {
     await mkdir('test-results', { recursive: true });
     await writeFile('test-results/v2-sck-light.json', JSON.stringify({ at: new Date().toISOString(), records, privatePixelsPersisted: false, clipboardMocked: true }, null, 2));

@@ -52,7 +52,11 @@ it('does not desaturate images or reintroduce colored styles in renderer CSS', (
       if (entry.isDirectory()) visit(path);
       else if (entry.name.endsWith('.css')) {
         const css = readFileSync(path, 'utf8');
-        expect(css, path).not.toMatch(/grayscale\(|(?:linear|radial)-gradient\(|\b(?:blue|sky|indigo|cyan|violet)\b/);
+        expect(css, path).not.toMatch(/grayscale\(|\b(?:blue|sky|indigo|cyan|violet)\b/);
+        // An alpha mask fades scroll edges without painting a decorative gradient.
+        const painted = css.replace(/\bmask-image:\s*[^;]+;/g, '');
+        expect(painted, path).not.toMatch(/(?:linear|radial)-gradient\(/);
+        if (/\bmask-image:/.test(css)) expect(css, path).toMatch(/mask-mode:\s*alpha/);
       }
     }
   }

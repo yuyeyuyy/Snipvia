@@ -1,0 +1,14 @@
+.quick-target-setting-identity { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.quick-target-setting-identity > img { width: 30px; height: 30px; object-fit: contain; }
+.quick-target-setting-identity .preference-copy { min-width: 0; overflow-wrap: anywhere; }
+.quick-target-setting-note { margin: 0; padding: 12px 18px; color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.quick-target-website-form { padding: 16px 18px; display: grid; gap: 12px; border-top: 1px solid var(--border-subtle); }
+.quick-target-website-form label { display: grid; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.quick-target-website-form input { width: 100%; padding: 8px 10px; border-radius: var(--radius-control); color: var(--text-primary); background: var(--bg-input); min-width: 0; }
+.quick-target-website-form p { margin: 0; color: var(--text-secondary); font-size: 12px; line-height: 1.6; }
+.quick-target-setting-group { border-top: 1px solid var(--border-subtle); }
+.quick-target-browser-options { margin: 0 18px 14px 60px; border-left: 2px solid var(--border-subtle); }
+.quick-target-browser-options .preference-row { padding: 12px 14px; }
+@container preferences (max-width: 580px) {
+  .quick-target-browser-options { margin-left: 18px; }
+}

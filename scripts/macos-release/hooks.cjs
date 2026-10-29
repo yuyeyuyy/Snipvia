@@ -65,7 +65,7 @@ async function sign(options) {
       entitlements: entitlementFile(app, file),
       hardenedRuntime: true,
       timestamp: 'http://timestamp.apple.com/ts01',
-      additionalArguments: file === helper ? ['--identifier', 'com.snipvia.desktop.capture-helper'] : []
+      additionalArguments: file === helper ? ['--identifier', 'com.snipvia.desktop.capture-helper'] : file === path.join(app, 'Contents/Resources/native/snipvia-quick-target-helper') ? ['--identifier', 'com.snipvia.desktop.quick-target-helper'] : []
     })
   });
   const arches = binaryArchitectures(path.join(app, 'Contents/MacOS/Snipvia'));

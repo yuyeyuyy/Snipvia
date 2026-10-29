@@ -34,7 +34,7 @@ export function ScreenPermissionCard({ onChange }: { onChange?(info: ScreenPermi
     {info?.status === 'granted' ? <p>系统已授权，可以使用截图与标注。{stableDevelopment ? '源码更新继续运行 pnpm dev，不需要重新添加权限。' : info.development ? '若 macOS 要求重启，请退出 Electron 欢迎页，在项目终端停止旧进程后重新运行 pnpm dev。' : '若 macOS 要求重启，请重新打开 Snipvia.app。'}</p> : <>
       <p>首次截图时 macOS 会请求授权。若此前已拒绝，系统不会重复弹出授权框，需要在「系统设置 → 隐私与安全性 → 录屏与系统录音」中打开。</p>
       {info && <>
-        <p>列表中应查找 <strong>{info.applicationName}</strong>{info.development && !stableDevelopment ? '（当前开发模式以 Electron 运行）' : ''}。{stableDevelopment ? '当前开发应用使用临时签名，macOS 不会自动把它加入列表。点击“在 Finder 中选中”，把已选中的应用直接拖入录屏列表并打开开关；无需浏览文件夹。' : '若列表中没有，请点「添加」，在文件选择器按 ⌘⇧G，粘贴下方路径后选择该应用。'}</p>
+        <p>列表中应查找 <strong>{info.applicationName}</strong>{info.development && !stableDevelopment ? '（当前开发模式以 Electron 运行）' : ''}。{stableDevelopment ? '若开关已开启但这里仍未授权，请点击“在 Finder 中选中”，将当前开发应用重新添加到录屏列表，更新旧签名的授权记录。' : '若列表中没有，请点「添加」，在文件选择器按 ⌘⇧G，粘贴下方路径后选择该应用。'}</p>
         {!stableDevelopment && <code className="permission-path">{info.applicationPath}</code>}
         <div className="permission-actions">
           <button type="button" className="primary" onClick={() => void act(window.snipvia.permissions.openScreenSettings(), '已打开录屏设置')}>打开录屏设置</button>
@@ -46,7 +46,7 @@ export function ScreenPermissionCard({ onChange }: { onChange?(info: ScreenPermi
         </div>
         <p className="permission-footnote">{info.development
           ? stableDevelopment
-            ? '开发权限固定绑定到“~/Applications/截然 Dev.app”。完成这一次授权后，普通源码修改和重新启动不会改变权限主体；只有升级 Electron 运行时才需要重新授权。'
+            ? '开发应用位于“~/Applications/截然 Dev.app”。普通源码修改不重新签名；Electron、图标或用途声明迁移后可能需要重新添加授权。系统提示重启时可选择“以后”，再从项目终端重新运行 pnpm dev；直接打开开发 App 可能显示 Electron 欢迎页。'
             : '开发版授权绑定到 Electron.app。macOS 的“退出并重新打开”可能只打开 Electron 欢迎页；关闭该页，在项目终端按 Ctrl+C 停止旧进程，再运行 pnpm dev。不要从 Finder 单独打开 Electron.app。'
           : '授权与 Snipvia.app 绑定。授权后按系统提示退出并重新打开同一个 Snipvia.app。'}</p>
       </>}

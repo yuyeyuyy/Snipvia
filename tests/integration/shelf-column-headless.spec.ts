@@ -79,6 +79,14 @@ test('offscreen Shelf supports photo layers, compact rows, centered preview, edg
     process.stderr.write('[shelf edge] layout\n');
     await expect(shelf.locator('.shelf.expanded')).toHaveCount(1); await still();
     await expect(shelf.locator('.shelf-preview img')).toHaveCount(8);
+    const border = await shelf.locator('.shelf-preview img').first().evaluate(image => {
+      const style = getComputedStyle(image), card = image.closest('.shelf-card')!;
+      const scale = new DOMMatrix(getComputedStyle(card).transform).a;
+      // The first zero-blur shadow is a fractional-width ring, avoiding outline pixel snapping.
+      const ring = style.boxShadow.match(/\) 0px 0px 0px ([\d.]+)px/);
+      return { width: ring ? Number(ring[1]) * scale : 0, shadows: style.boxShadow };
+    });
+    expect(border.width).toBeCloseTo(1, 1); expect(border.shadows).not.toBe('none');
     await expect(shelf.locator('.shelf-tools')).toHaveCount(0);
     await expect(shelf.getByRole('checkbox')).toHaveCount(0);
     for (const name of ['合并选项', '调整收纳区大小', '拖动调整收纳区大小', '加宽收纳区', '恢复收纳宽度']) await expect(shelf.getByRole('button', { name, exact: true })).toHaveCount(0);
@@ -234,6 +242,11 @@ test('offscreen Shelf supports photo layers, compact rows, centered preview, edg
     const narrow = await main.evaluate(() => { const canvas = document.createElement('canvas'); canvas.width = 10; canvas.height = 700; const ctx = canvas.getContext('2d')!; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 10, 700); return canvas.toDataURL(); });
     await app.evaluate((_electron, source) => (globalThis as typeof globalThis & { seedShelf(s: string[]): void }).seedShelf([source]), narrow);
     await click(shelf, '收起收纳区'); await click(shelf, '展开图堆'); await click(shelf, '多选截图'); await still();
+    const narrowImage = await shelf.locator('.shelf-card').last().locator('img').evaluate(image => {
+      const r = image.getBoundingClientRect(); return { width: r.width, height: r.height };
+    });
+    expect(narrowImage.width).toBeCloseTo(narrowImage.height * 10 / 700, 1);
+    expect(narrowImage.width).toBeLessThan(20);
     const controlBoxes = await shelf.locator('.shelf-card').last().evaluate(card => ['.copy-action', '.shelf-select', '.delete-action'].map(selector => { const r = card.querySelector(selector)!.getBoundingClientRect(); return { left: r.left, right: r.right }; }));
     expect(controlBoxes[0].right).toBeLessThan(controlBoxes[1].left); expect(controlBoxes[1].right).toBeLessThan(controlBoxes[2].left);
     await click(shelf, '退出多选'); await click(shelf, '收起收纳区');
@@ -249,6 +262,7 @@ test('offscreen Shelf supports photo layers, compact rows, centered preview, edg
     expect((await main.evaluate(value => window.snipvia.collection.configure(value), { ...valid.value.preferences, autoHide: true, hideDelayMs: 600 })).ok).toBe(true);
     await expect.poll(async () => { const r = await main.evaluate(() => window.snipvia.collection.current()); return r.ok ? r.value.edge : ''; }).toBe('docked');
     const dockSize = await snapshot('edge-tab', false); expect(dockSize.width).toBe(22); expect(dockSize.height).toBe(84);
+    const collapsedDock = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().find(w => w.webContents.getURL().endsWith('#shelf'))!.getBounds());
     process.stderr.write('[shelf edge] reveal\n');
     const settingsShows = await app.evaluate(async ({ BrowserWindow, app }) => {
       const probe = (globalThis as typeof globalThis & { shelfProbe: DragProbe }).shelfProbe;
@@ -262,6 +276,14 @@ test('offscreen Shelf supports photo layers, compact rows, centered preview, edg
     expect(settingsShows).toBe(0);
     await expect.poll(async () => { const r = await main.evaluate(() => window.snipvia.collection.current()); return r.ok ? r.value.edge : ''; }).toBe('shown');
     expect((await main.evaluate(value => window.snipvia.collection.configure(value), { ...valid.value.preferences, autoHide: false })).ok).toBe(true);
+    await click(shelf, '展开图堆'); await expect(shelf.locator('.shelf.expanded')).toHaveCount(1);
+    await app.evaluate(() => { (globalThis as typeof globalThis & { shelfProbe: DragProbe }).shelfProbe.cursor = { x: -100000, y: -100000 }; });
+    expect((await main.evaluate(value => window.snipvia.collection.configure(value), { ...valid.value.preferences, autoHide: true, hideDelayMs: 600 })).ok).toBe(true);
+    await expect.poll(async () => { const r = await main.evaluate(() => window.snipvia.collection.current()); return r.ok ? r.value.edge : ''; }).toBe('docked');
+    const expandedDock = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().find(w => w.webContents.getURL().endsWith('#shelf'))!.getBounds());
+    expect(expandedDock).toEqual(collapsedDock);
+    expect((await main.evaluate(value => window.snipvia.collection.configure(value), { ...valid.value.preferences, autoHide: false })).ok).toBe(true);
+    await expect.poll(async () => { const r = await main.evaluate(() => window.snipvia.collection.current()); return r.ok ? r.value.edge : ''; }).toBe('shown');
     expect((await main.evaluate(() => window.snipvia.collection.current())).ok).toBe(true);
     expect(await app.evaluate(async ({ app }) => {
       const probe = (globalThis as typeof globalThis & { shelfProbe: DragProbe }).shelfProbe;

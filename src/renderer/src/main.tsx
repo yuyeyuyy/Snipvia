@@ -3,7 +3,9 @@ import { createRoot } from 'react-dom/client';
 
 async function bootstrap() {
   let Component: ComponentType;
-  if (location.hash === '#capture') {
+  if (location.hash === '#quick-target') {
+    Component = (await import('./quick-target/QuickTargetBar')).QuickTargetBar;
+  } else if (location.hash === '#capture') {
     const [, module] = await Promise.all([
       import('./capture/capture-window.css'),
       import('./capture/CaptureOverlay')

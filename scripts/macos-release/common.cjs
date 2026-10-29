@@ -105,6 +105,14 @@ function preflight() {
   return { ...matches[0], team, profile, notaryKeychain, keychain, developerDir };
 }
 
+/** A distributable must correspond to one committed, recoverable source revision. */
+function releaseSource(query = args => run('git', args)) {
+  ensure(!query(['status', '--porcelain', '--untracked-files=normal']).trim(), '正式构建需要先提交当前源码和未跟踪文件；请保留改动并完成 commit 后重试。');
+  const commit = query(['rev-parse', 'HEAD']).trim();
+  ensure(/^[a-f0-9]{40}$/.test(commit), '无法确定正式构建的源码提交。');
+  return commit;
+}
+
 function releaseEnvironment(identity, output) {
   const env = { ...process.env };
   // v26 checks Apple ID/API credentials before keychain credentials. Force keychain-only auth.
@@ -174,6 +182,7 @@ function inventory(app) {
 function entitlementFile(app, file) {
   if (file === app || file === path.join(app, 'Contents/MacOS/Snipvia')) return path.join(root, 'build/entitlements.release.mac.plist');
   if (/\/Contents\/Frameworks\/Snipvia Helper(?: \([^)]+\))?\.app(?:\/|$)/.test(file)) return path.join(root, 'build/entitlements.release.electron.plist');
+  if (file === path.join(app, 'Contents/Resources/native/snipvia-quick-target-helper')) return path.join(root, 'build/entitlements.release.quick-target.plist');
   return path.join(root, 'build/entitlements.release.native.plist');
 }
 
@@ -292,6 +301,6 @@ function digest(file) {
 
 module.exports = {
   root, releaseRoot, appName, version, appBuilderRequire, readBaseConfig, ensure, run, teamId,
-  preflight, releaseEnvironment, assertReleaseContext, inventory, entitlementFile,
+  preflight, releaseSource, releaseEnvironment, assertReleaseContext, inventory, entitlementFile,
   binaryArchitectures, verifyApp, verifyCode, verifyDmg, verifyZip, digest
 };

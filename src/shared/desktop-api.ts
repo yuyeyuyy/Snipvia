@@ -7,8 +7,9 @@ import type { EditorCrop, EditorFinishRequest } from './screenshot-editor';
 
 export type DesktopAPI = {
   collection: import('./collection').CollectionAPI;
+  quickTarget: import('./quick-target').QuickTargetAPI;
   platform: NodeJS.Platform;
-  window: { ready(role: 'capture' | 'pin' | 'shelf'): void };
+  window: { ready(role: 'capture' | 'pin' | 'shelf' | 'quick-target'): void };
   settings: {
     get(): Promise<Result<CapturePreferences>>;
     saveShortcuts(value: import('./capture-preferences').CapturePreferencesInput): Promise<Result<CapturePreferences>>;

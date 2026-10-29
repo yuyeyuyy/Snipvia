@@ -14,7 +14,7 @@ export class CaptureOverlayWindow {
   private resolveVisible: ((visible: boolean) => void) | null = null;
   private destroying = false;
   private ordered = false;
-  private suspendedForCapture = false;
+  private suspended = false;
 
   constructor(
     private readonly webPreferences: WebPreferences,
@@ -98,7 +98,7 @@ export class CaptureOverlayWindow {
     const window = this.getWindow();
     this.hide();
     this.activeSessionId = sessionId;
-    this.suspendedForCapture = false;
+    this.suspended = false;
     // Suppress the previous session's pixels/input before waking the native window.
     window.setOpacity(0); window.setIgnoreMouseEvents(true);
     const current = window.getBounds();
@@ -115,7 +115,7 @@ export class CaptureOverlayWindow {
   }
 
   showShellSession(sessionId: string) {
-    if (sessionId !== this.activeSessionId || this.suspendedForCapture) return false;
+    if (sessionId !== this.activeSessionId || this.suspended) return false;
     const window = this.getWindow();
     screenshotPerformance.mark(sessionId, 'capture_overlay_shell_show_called');
     if (!this.ordered) { window.show(); this.ordered = true; }
@@ -127,13 +127,25 @@ export class CaptureOverlayWindow {
 
   frameReady(sessionId: string) {
     if (sessionId !== this.activeSessionId) return false;
-    this.suspendedForCapture = false;
+    this.suspended = false;
     this.getWindow().webContents.send('capture:frame-ready', sessionId);
     return true;
   }
 
+  pauseForDialog(sessionId: string) {
+    if (sessionId !== this.activeSessionId || !this.peekWindow()) return false;
+    this.suspendForCapture();
+    return true;
+  }
+
+  resumeAfterDialog(sessionId: string) {
+    if (sessionId !== this.activeSessionId || !this.peekWindow()) return false;
+    this.suspended = false;
+    return this.showRenderedSession(sessionId);
+  }
+
   showRenderedSession(sessionId: string) {
-    if (sessionId !== this.activeSessionId || this.suspendedForCapture) return false;
+    if (sessionId !== this.activeSessionId || this.suspended) return false;
     const window = this.getWindow();
     screenshotPerformance.mark(sessionId, 'capture_overlay_show_called');
     if (!this.ordered) { window.show(); this.ordered = true; }
@@ -152,7 +164,7 @@ export class CaptureOverlayWindow {
   suspendForCapture() {
     // Hide our pixels for Electron fallback while preserving an in-progress drag.
     const window = this.window;
-    this.suspendedForCapture = true;
+    this.suspended = true;
     if (window && !window.isDestroyed()) {
       window.setOpacity(0); window.setIgnoreMouseEvents(true);
       if (this.ordered) window.hide();
@@ -169,7 +181,7 @@ export class CaptureOverlayWindow {
     // Always order out a presented window once, including an app-hidden one.
     window.setOpacity(0); window.setIgnoreMouseEvents(true);
     if (this.ordered) window.hide();
-    this.ordered = false; this.suspendedForCapture = false;
+    this.ordered = false; this.suspended = false;
     window.webContents.send('capture:reset-session');
   }
 

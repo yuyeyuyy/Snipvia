@@ -17,6 +17,8 @@ mac:
   extraResources:
     - from: build/native/snipvia-capture-helper
       to: native/snipvia-capture-helper
+    - from: build/native/snipvia-quick-target-helper
+      to: native/snipvia-quick-target-helper
     - from: build/TrayTemplate.png
       to: TrayTemplate.png
     - from: build/TrayTemplate@2x.png
@@ -27,10 +29,11 @@ mac:
   entitlementsInherit: build/entitlements.mac.inherit.plist
   binaries:
     - Contents/Resources/native/snipvia-capture-helper
+    - Contents/Resources/native/snipvia-quick-target-helper
   extendInfo:
     CFBundleDisplayName: '截然'
     NSScreenCaptureUsageDescription: '截然需要录制你框选的屏幕区域，以生成截图并执行你选择的操作。'
-    NSAppleEventsUsageDescription: '选择目标日历或提醒事项列表时读取可写位置；你确认添加后，截然才会控制“日历”或“提醒事项”写入所选内容。'
+    NSAppleEventsUsageDescription: '仅在你选择网页目标时，匹配并切换 Chrome 中已打开的普通标签；不会粘贴或发送内容。'
   target:
     - target: dmg
       arch: [arm64]

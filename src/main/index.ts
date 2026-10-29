@@ -20,6 +20,17 @@ import { ShelfPreferencesStore } from './storage/ShelfPreferencesStore';
 import { ScreenshotDragFiles } from './storage/ScreenshotDragFiles';
 import { shelfResizeSchema, shelfPreferencesSchema } from '../shared/shelf-preferences';
 import { ShelfWindow } from './windows/ShelfWindow';
+import { QuickTargetWindow } from './windows/QuickTargetWindow';
+import { QuickTargetService } from './quick-target/QuickTargetService';
+import { ChromeTargetService } from './quick-target/ChromeTargetService';
+import { QuickTargetPlatform } from './quick-target/QuickTargetPlatform';
+import { QuickTargetRegistry } from './quick-target/QuickTargetRegistry';
+import { WebsiteIconCache } from './quick-target/WebsiteIconCache';
+import { fetchWebsiteIcon } from './quick-target/WebsiteIconFetch';
+import { faviconImage } from './quick-target/FaviconImage';
+import { QuickTargetPreferencesStore } from './storage/QuickTargetPreferencesStore';
+import { clipboardMatchesQuickTarget, quickTargetClipboardMetadata } from './quick-target/clipboard-marker';
+import { quickTargetId, quickTargetConfigureSchema, quickTargetPermissionSchema, quickTargetRenameSchema, quickTargetActivateSchema, quickTargetPresentationSchema, quickTargetInteractionSchema, type QuickTargetView } from '../shared/quick-target';
 import { collectionOutputSchema, mergeOptionsSchema, mergeLayout, orderedOutputIds } from '../shared/collection-output';
 import { exportCollectionPng } from './storage/CollectionExporter';
 import { copyCollectionImages } from './storage/CollectionClipboard';
@@ -56,6 +67,14 @@ let dragFiles: ScreenshotDragFiles | null = null;
 export const appearance = new AppearanceService(() => mainWindow);
 let captureOverlayWindow: CaptureOverlayWindow | null = null;
 let shelfWindow: ShelfWindow | null = null;
+let quickTargetWindow: QuickTargetWindow | null = null;
+let quickTargetService: QuickTargetService | null = null;
+let quickTargetRegistry: QuickTargetRegistry;
+let websiteIcons: WebsiteIconCache;
+let quickTargetViews: QuickTargetView[] = [];
+let quickTargetSettingsEpoch = 0;
+let quickTargetPickerBusy = false;
+let quickTargetPermissionBusy = false;
 let screenshotToAllWindow: PinnedCaptureWindows | null = null;
 let captureOverlayPreloaded = false;
 let resolveCaptureOverlayReady: (() => void) | null = null;
@@ -127,8 +146,7 @@ const modeRouter = new CaptureModeRouter<RoutedImage>({
     if (!action) throw new Error('请从编辑工具栏完成截图');
     const png = image.toPNG();
     if (action === 'save') {
-      const overlay = captureOverlayWindow!.getWindow();
-      overlay.hide();
+      captureOverlayWindow!.pauseForDialog(session.id);
       try {
         const saved = await dialog.showSaveDialog({ title: '保存截图', defaultPath: join(app.getPath('pictures'), 'Snipvia-' + Date.now() + '.png'), filters: [{ name: 'PNG 图片', extensions: ['png'] }] });
         session.signal.throwIfAborted();
@@ -136,7 +154,7 @@ const modeRouter = new CaptureModeRouter<RoutedImage>({
         await writeFile(saved.filePath, png);
         session.signal.throwIfAborted();
       } finally {
-        if (captureOverlayWindow?.isSessionActive(session.id)) captureOverlayWindow.showRenderedSession(session.id);
+        captureOverlayWindow?.resumeAfterDialog(session.id);
       }
       cleanupOverlay(false);
     } else {
@@ -177,8 +195,11 @@ function enqueueOutput(value: RoutedImage, session: CaptureSession) {
       signal.throwIfAborted();
       if (session.mode === 'quick') {
         screenshotPerformance.mark(session.id, 'clipboard_write_start');
-        await clipboard.write([new ClipboardItem({ 'image/png': new Blob([new Uint8Array(png)], { type: 'image/png' }) })]);
+        const marker = quickTargetService?.enabled() ? randomUUID() : undefined;
+        await clipboard.write([new ClipboardItem({ 'image/png': new Blob([new Uint8Array(png)], { type: 'image/png' }),
+          ...quickTargetClipboardMetadata(marker) })]);
         screenshotPerformance.mark(session.id, 'clipboard_committed');
+        if (marker) quickTargetService?.copied(session.id, marker, display.workArea);
       } else {
         const item = screenshots.create(png, { width: rect.width, height: rect.height, mimeType: 'image/png' });
         try { collection.append(item.id); } catch (error) { screenshots.release(item.id); throw error; }
@@ -197,9 +218,19 @@ function enqueueOutput(value: RoutedImage, session: CaptureSession) {
   feedbackGeneration = generation;
 }
 
-async function copyScreenshot(id: string) {
+async function copyScreenshot(id: string, marker?: string) {
   const { bytes, item } = screenshots.image(id);
-  await clipboard.write([new ClipboardItem({ [item.mimeType]: new Blob([new Uint8Array(bytes)], { type: item.mimeType }) })]);
+  await clipboard.write([new ClipboardItem({ [item.mimeType]: new Blob([new Uint8Array(bytes)], { type: item.mimeType }), ...quickTargetClipboardMetadata(marker) })]);
+}
+async function copyShelfOutput(write: (marker?: string) => Promise<void>) {
+  const service = quickTargetService, id = randomUUID();
+  service?.beginCopy(id);
+  const marker = service?.enabled() ? randomUUID() : undefined;
+  const bounds = shelfWindow?.peekWindow()?.getBounds();
+  const area = (bounds ? screen.getDisplayMatching(bounds) : screen.getDisplayNearestPoint(screen.getCursorScreenPoint())).workArea;
+  await write(marker);
+  // Optional UI never joins the clipboard transaction or prepares a window here.
+  if (marker) service?.copied(id, marker, area);
 }
 function closePinnedFlow(sessionId?: string) {
   const ids = sessionId ? [sessionId] : [...localPins.keys()];
@@ -546,6 +577,7 @@ async function startCapture(trigger: CaptureTrigger = 'main', mode: CaptureMode 
     screenshotPerformance.mark(activeCapturePerformanceSessionId, 'capture_cancelled', 'main', { reason: 'superseded' });
     cleanupOverlay();
   }
+  quickTargetService?.beginCapture(performanceSessionId);
   screenshotToAllWindow?.suspend();
   const shelfTiming = shelfWindow?.suspend();
   if (shelfTiming) screenshotPerformance.updateMetadata(performanceSessionId, shelfTiming);
@@ -700,11 +732,12 @@ async function finishEditor(value: unknown) {
     return { completed: completed !== false };
   } finally { editorFinishing.delete(request.sessionId); }
 }
-type WindowRole = 'main' | 'overlay' | 'pin' | 'shelf';
+type WindowRole = 'main' | 'overlay' | 'pin' | 'shelf' | 'quick-target';
 
 function windowForRole(role: WindowRole) {
   if (role === 'main') return mainWindow;
   if (role === 'shelf') return shelfWindow?.peekWindow() ?? null;
+  if (role === 'quick-target') return quickTargetWindow?.peekWindow() ?? null;
   if (role === 'overlay') return captureOverlayWindow?.peekWindow() ?? null;
   return screenshotToAllWindow?.peekWindow() ?? null;
 }
@@ -745,7 +778,64 @@ function selectedCollection(value: unknown) {
   if (request.revision !== snapshot.revision) throw new Error('收纳区已变化，请重试输出');
   return { ids: orderedOutputIds(snapshot.items.map(item => item.id), request.ids), revision: snapshot.revision };
 }
+async function refreshQuickTargets() {
+  quickTargetService?.dismiss();
+  const epoch = ++quickTargetSettingsEpoch;
+  const state = await quickTargetRegistry.settings();
+  if (epoch === quickTargetSettingsEpoch) {
+    quickTargetViews = state.targets;
+    websiteIcons.configure(state.enabled ? quickTargetRegistry.store.current().targets.flatMap(target => target.kind === 'website' ? [target.url] : []) : []);
+    const needsChrome = state.enabled && quickTargetRegistry.store.current().targets.some(target => target.kind === 'website' && target.mode === 'existing-tab');
+    if (needsChrome) void quickTargetRegistry.platform.prepareBrowser().catch(() => {});
+    else quickTargetRegistry.platform.disposeBrowser();
+    if (state.enabled && state.targets.length && !quitting) void quickTargetWindow?.prepare();
+    else quickTargetWindow?.destroy();
+  }
+  return state;
+}
+async function publishQuickTargetArtwork() {
+  const epoch = quickTargetSettingsEpoch, state = await quickTargetRegistry.settings();
+  if (quitting || epoch !== quickTargetSettingsEpoch) return;
+  quickTargetViews = state.targets;
+  quickTargetService?.updateArtwork(state.targets);
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('quick-target:settings-changed', state);
+}
 function setupIPC() {
+  handle('quick-target:settings', 'main', () => quickTargetRegistry.settings());
+  handle('quick-target:configure', 'main', async value => { quickTargetRegistry.store.configure(quickTargetConfigureSchema.parse(value)); return refreshQuickTargets(); });
+  handle('quick-target:add-application', 'main', async () => {
+    if (quickTargetPickerBusy) throw new Error('应用选择器已打开');
+    if (!quickTargetRegistry.platform.supported()) throw new Error('应用切换组件尚未就绪');
+    quickTargetPickerBusy = true;
+    try {
+      const selected = await dialog.showOpenDialog(mainWindow, { title: '添加快速切换应用', defaultPath: '/Applications', filters: [{ name: '应用程序', extensions: ['app'] }], properties: ['openFile'] });
+      if (!selected.canceled && selected.filePaths.length === 1) await quickTargetRegistry.addApplication(selected.filePaths[0]);
+      return refreshQuickTargets();
+    } finally { quickTargetPickerBusy = false; }
+  });
+  handle('quick-target:add-website', 'main', async value => { quickTargetRegistry.addWebsite(value); return refreshQuickTargets(); });
+  handle('quick-target:configure-browser', 'main', async value => { quickTargetRegistry.store.configureBrowser(value); return refreshQuickTargets(); });
+  handle('quick-target:permissions', 'main', () => quickTargetRegistry.platform.permissions());
+  handle('quick-target:request-permission', 'main', async value => {
+    const kind = quickTargetPermissionSchema.parse(value);
+    if (quickTargetPermissionBusy) throw new Error('权限请求正在进行，请先完成系统弹窗');
+    quickTargetPermissionBusy = true;
+    try { return await quickTargetRegistry.platform.requestPermission(kind); }
+    finally { quickTargetPermissionBusy = false; }
+  });
+  handle('quick-target:open-permission-settings', 'main', async value => {
+    const kind = quickTargetPermissionSchema.parse(value);
+    if (process.platform !== 'darwin') throw new Error('此权限入口仅支持 macOS');
+    await shell.openExternal('x-apple.systempreferences:com.apple.preference.security?' + (kind === 'automation' ? 'Privacy_Automation' : 'Privacy_Accessibility'));
+  });
+  handle('quick-target:rename', 'main', async value => { const request = quickTargetRenameSchema.parse(value); quickTargetRegistry.store.rename(request.id, request.label); return refreshQuickTargets(); });
+  handle('quick-target:remove', 'main', async value => { quickTargetRegistry.store.remove(quickTargetId.parse(value)); return refreshQuickTargets(); });
+  handle('quick-target:current', 'quick-target', () => quickTargetService!.current());
+  handle('quick-target:activate', 'quick-target', value => { const request = quickTargetActivateSchema.parse(value); return quickTargetService!.activate(request.presentationId, request.targetId, request.choiceId); });
+  handle('quick-target:rendered', 'quick-target', value => { const request = quickTargetPresentationSchema.parse(value); return quickTargetService!.current().visible && quickTargetService!.current().presentationId === request.presentationId && quickTargetWindow!.rendered(request.presentationId); });
+  handle('quick-target:interaction', 'quick-target', value => { const request = quickTargetInteractionSchema.parse(value); quickTargetService!.interaction(request.presentationId, request.active); });
+  handle('quick-target:dismiss', 'quick-target', value => { const request = quickTargetPresentationSchema.parse(value); quickTargetService!.dismissPresentation(request.presentationId); });
+  handle('quick-target:focus', 'main', () => quickTargetService!.current().visible && quickTargetWindow!.focus());
   handle('collection:configure', 'main', async value => {
     const configuration = shelfPreferences.configure(shelfPreferencesSchema.parse(value));
     const state = await shelfWindow!.configure(configuration);
@@ -778,7 +868,7 @@ function setupIPC() {
     const { revision } = z.strictObject({ revision: z.number().int().nonnegative() }).parse(value);
     const snapshot = collection.snapshot();
     if (revision !== snapshot.revision) throw new Error('收纳区已变化，请重试复制');
-    await copyCollectionImages(screenshots, snapshot.items.map(item => item.id), join(app.getPath('userData'), 'clipboard-files'));
+    await copyShelfOutput(marker => copyCollectionImages(screenshots, snapshot.items.map(item => item.id), join(app.getPath('userData'), 'clipboard-files'), marker));
   });
   handle('collection:copy-merged', 'shelf', async value => {
     const request = z.strictObject({ ids: z.array(z.string().uuid()).min(1).max(32), revision: z.number().int().nonnegative(), options: mergeOptionsSchema,
@@ -788,7 +878,7 @@ function setupIPC() {
     validateEditorPng(request.png, layout);
     const image = nativeImage.createFromBuffer(Buffer.from(request.png));
     if (image.isEmpty() || image.getSize().width !== layout.width || image.getSize().height !== layout.height) throw new Error('合并图片无效');
-    await clipboard.write([new ClipboardItem({ 'image/png': new Blob([new Uint8Array(request.png)], { type: 'image/png' }) })]);
+    await copyShelfOutput(marker => clipboard.write([new ClipboardItem({ 'image/png': new Blob([new Uint8Array(request.png)], { type: 'image/png' }), ...quickTargetClipboardMetadata(marker) })]));
   });
   handle('collection:export', 'shelf', async value => {
     const request = selectedCollection(value);
@@ -813,7 +903,7 @@ function setupIPC() {
     shelfWindow?.recordInteraction(id); shelfWindow?.publish(); return shelfWindow!.current();
   });
   handle('collection:clear', ['main', 'shelf'], value => { z.undefined().parse(value); return confirmClearCollection(); });
-  handle('collection:copy', 'shelf', async value => { const id = z.string().uuid().parse(value); collection.getItem(id); await copyScreenshot(id); });
+  handle('collection:copy', 'shelf', async value => { const id = z.string().uuid().parse(value); collection.getItem(id); await copyShelfOutput(marker => copyScreenshot(id, marker)); });
   handle('collection:start-drag', 'shelf', (value, event) => {
     const { id, revision } = z.strictObject({ id: z.string().uuid(), revision: z.number().int().nonnegative() }).parse(value);
     const state = shelfWindow!.current();
@@ -876,6 +966,7 @@ function setupIPC() {
   ipcMain.on('window:ready', (event, value: unknown) => {
     if (value === 'capture' && senderAllowed(event, 'overlay')) captureOverlayWindow?.markRendererReady();
     if (value === 'shelf' && senderAllowed(event, 'shelf')) shelfWindow?.markReady();
+    if (value === 'quick-target' && senderAllowed(event, 'quick-target')) quickTargetWindow?.markReady();
     if (value === 'pin' && senderAllowed(event, 'pin')) screenshotToAllWindow?.markRendererReady(event.sender);
   });
   ipcMain.on('performance:mark', (event, value: unknown) => {
@@ -1129,6 +1220,30 @@ else {
     shelfPreferences = new ShelfPreferencesStore(join(app.getPath('userData'), 'shelf-preferences.json'));
     dragFiles = new ScreenshotDragFiles(app.getPath('temp'));
     try { shelfPreferences.load(); } catch { startupError += '收纳区尺寸配置损坏，原文件已保留，使用默认尺寸。'; }
+    const quickTargetStore = new QuickTargetPreferencesStore(join(app.getPath('userData'), 'quick-target-preferences.json'));
+    try { quickTargetStore.load(); } catch { /* Preserve damaged config; the independent feature stays disabled. */ }
+    const quickTargetPlatform = new QuickTargetPlatform(app.isPackaged ? join(process.resourcesPath, 'native', 'snipvia-quick-target-helper') : join(app.getAppPath(), 'build/native/snipvia-quick-target-helper'), process.platform,
+      developmentSession && existsSync(join(app.getAppPath(), '.dev-runtime/quick-target-timing.enabled'))
+        ? value => { if (['permissions', 'browser-list', 'browser-select', 'browser-resolve'].includes(value.operation)) console.info('[QuickTargetTiming]', JSON.stringify(value)); } : undefined);
+    app.once('before-quit', () => quickTargetPlatform.disposeBrowser());
+    const chromeTargetService = new ChromeTargetService(quickTargetPlatform);
+    websiteIcons = new WebsiteIconCache(join(app.getPath('userData'), 'website-icons'),
+      (origin, signal) => fetchWebsiteIcon(origin, signal, bytes => {
+        const source = faviconImage(bytes); if (!source) return undefined;
+        const image = source.kind === 'png' ? nativeImage.createFromBuffer(source.bytes)
+          : nativeImage.createFromBitmap(source.bytes, { width: source.width, height: source.height });
+        if (image.isEmpty()) return undefined;
+        const size = image.getSize(), ratio = Math.min(68 / size.width, 68 / size.height);
+        return image.resize({ width: Math.max(1, Math.round(size.width * ratio)), height: Math.max(1, Math.round(size.height * ratio)), quality: 'best' }).toDataURL();
+      }), () => { void publishQuickTargetArtwork().catch(() => {}); });
+    app.once('before-quit', () => websiteIcons.dispose());
+    quickTargetRegistry = new QuickTargetRegistry(quickTargetStore, quickTargetPlatform, async path => process.platform === 'darwin'
+      ? quickTargetPlatform.icon(path)
+      : (await app.getFileIcon(path, { size: 'normal' })).resize({ width: 68, height: 68 }).toDataURL(), {
+      website: url => websiteIcons.current(url),
+      browser: async mode => process.platform === 'darwin' ? quickTargetPlatform.browserIcon(mode)
+        : mode !== 'chrome' ? (await app.getApplicationInfoForProtocol(mode === 'http' ? 'http://example.invalid/' : 'https://example.invalid/')).icon.resize({ width: 68, height: 68 }).toDataURL() : undefined
+    });
     appearance.start();
     writePackagedTestResult({ stage: 'storage-loaded' });
     startupPerformanceSessionId = screenshotPerformance.startSession({
@@ -1158,6 +1273,23 @@ else {
     captureOverlayWindow = new CaptureOverlayWindow(webPreferencesFor(startupPerformanceSessionId), loadWindow, startupPerformanceSessionId, () => cleanupOverlay());
     screenshotToAllWindow = new PinnedCaptureWindows(webPreferences, loadWindow, startupPerformanceSessionId, id => closePinnedFlow(id));
     shelfWindow = new ShelfWindow(webPreferences, loadWindow, () => collection.snapshot(), id => screenshotThumbnail(id), shelfPreferences.current(), shelfPreferences.configuration());
+    quickTargetWindow = new QuickTargetWindow(webPreferences, loadWindow, () => quickTargetService?.dismiss());
+    quickTargetService = new QuickTargetService({
+      preferences: () => quickTargetRegistry.store.current(), views: () => quickTargetViews,
+      clipboardMatches: clipboardMatchesQuickTarget, ready: () => quickTargetWindow!.isReady(),
+      present: (state, area) => quickTargetWindow!.present(state, area), update: state => quickTargetWindow!.update(state),
+      hide: forCapture => {
+        chromeTargetService.clear();
+        const wasFocused = quickTargetWindow?.peekWindow()?.isFocused(); if (forCapture) quickTargetWindow?.suspend(); else quickTargetWindow?.hide();
+        if (wasFocused && process.platform === 'darwin' && !mainWindow.isVisible() && !quitting) { app.hide(); shelfWindow?.resume(); screenshotToAllWindow?.resume(); }
+      },
+      activate: async (target, launch, signal, presentation, choiceId) => {
+        signal.throwIfAborted();
+        if (target.kind === 'application') await quickTargetPlatform.activate(target, launch, signal);
+        else if (target.mode === 'existing-tab') return chromeTargetService.activate(target, presentation, choiceId, signal);
+        else { await shell.openExternal(target.url); signal.throwIfAborted(); }
+      }
+    });
     writePackagedTestResult({ stage: 'window-managers-ready' });
     updates = new UpdateCheckService({
       currentVersion: app.isPackaged ? app.getVersion() : sourceVersion,
@@ -1165,6 +1297,7 @@ else {
       installer: new ElectronUpdateInstaller({
         beforeInstall: () => {
           quitting = true;
+          quickTargetService?.dispose(); quickTargetWindow?.destroy();
           // Native Mac quitAndInstall closes windows before before-quit. These
           // reusable capture windows intercept close, so release only the idle
           // windows after the user confirms installation.
@@ -1190,6 +1323,7 @@ else {
     const captureMenu = [
       { label: '重试失败输出', click: () => outputQueue.retryFailed() },
       { label: '放弃失败输出…', click: () => { void dialog.showMessageBox({ type: 'warning', message: '放弃未完成的截图输出？', detail: '仅清除本次运行中保留的失败任务，不删除已保存截图。', buttons: ['保留', '放弃'], defaultId: 0, cancelId: 0 }).then(r => { if (r.response === 1) outputQueue.discardFailed(); }); } },
+      { label: '选择截图目标', click: () => { if (quickTargetService?.current().visible) quickTargetWindow?.focus(); } },
       { label: '快速截图', click: () => { void startCapture('menu', 'quick').catch(announceError); } },
       { label: '收集截图', click: () => { void startCapture('menu', 'collect').catch(announceError); } },
       { label: '截图收纳区', click: () => { void shelfWindow?.toggle(); } },
@@ -1213,17 +1347,20 @@ else {
     }
     writePackagedTestResult({ stage: 'shortcut-ready' });
     screen.on('display-added', () => {
+      quickTargetService?.dismiss();
       shelfWindow?.relocate();
       void captureEngine?.invalidateDisplays();
       if (preparing || captureOverlayWindow?.isActive()) cleanupOverlay();
     });
     screen.on('display-removed', () => {
+      quickTargetService?.dismiss();
       shelfWindow?.relocate();
       void captureEngine?.invalidateDisplays();
       if (preparing || captureOverlayWindow?.isActive()) cleanupOverlay();
     });
     screen.on('display-metrics-changed', (_event, _display, metrics) => {
       if (!metrics.some((metric) => ['bounds', 'scaleFactor', 'rotation'].includes(metric))) return;
+      quickTargetService?.dismiss();
       shelfWindow?.relocate();
       void captureEngine?.invalidateDisplays();
       if (preparing || captureOverlayWindow?.isActive()) cleanupOverlay();
@@ -1289,6 +1426,7 @@ else {
     scheduleDesktopCaptureWarmup();
     setupCaptureEngine();
     await reusableWindowsReady;
+    void refreshQuickTargets().catch(() => { /* Optional UI must never block capture startup. */ });
     writePackagedTestResult({ stage: 'reusable-windows-ready' });
     if (packagedTestInstance && process.env.SNIPVIA_PACKAGED_TEST_CAPTURE === '1') {
       try {
@@ -1320,7 +1458,7 @@ else {
     app.on('activate', () => {
       // Allow native focus to settle: clicking a floating card must not open Settings.
       setImmediate(() => {
-        if (quitting || preparing || captureOverlayWindow?.isActive() || shelfWindow?.hasPointerInteraction() || screenshotToAllWindow?.hasPointerInteraction()) return;
+        if (quitting || preparing || captureOverlayWindow?.isActive() || shelfWindow?.hasPointerInteraction() || screenshotToAllWindow?.hasPointerInteraction() || quickTargetWindow?.hasPointerInteraction() || quickTargetService?.protectsActivation()) return;
         showMain();
       });
     });
@@ -1335,6 +1473,7 @@ else {
 app.on('before-quit', () => {
   quitting = true;
   updates?.dispose();
+  quickTargetService?.dispose(); quickTargetWindow?.destroy();
   outputQueue.dispose(); pngEncoder.dispose(); captureLoopDelay?.disable();
   if (preparing || captureOverlayWindow?.isActive()) cleanupOverlay();
   modeRouter.cancel();

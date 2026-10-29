@@ -34,7 +34,12 @@ export class ShelfWindow {
   peekWindow() { return this.window && !this.window.isDestroyed() ? this.window : null; }
   private workArea() { return this.area ?? screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea; }
   private restingBounds() { return shelfWindowBounds(this.workArea(), this.size, this.snapshot().items, this.expanded, this.wide, this.configuration.heightMode); }
-  private activeBounds() { const bounds = this.restingBounds(); return this.edge === 'docked' ? shelfDockBounds(this.workArea(), bounds) : bounds; }
+  private activeBounds() {
+    if (this.edge !== 'docked') return this.restingBounds();
+    // The handle belongs to the resting stack, not the expanded browsing viewport.
+    const area = this.workArea();
+    return shelfDockBounds(area, shelfWindowBounds(area, this.size, this.snapshot().items, false, this.wide, this.configuration.heightMode));
+  }
   current(): ShelfState {
     const bounds = this.peekWindow()?.getBounds() ?? this.activeBounds();
     return { size: { ...this.size }, preferences: { ...this.configuration, ...this.size }, edge: this.edge, wide: this.wide,

@@ -21,6 +21,7 @@ vi.mock('../../src/main/performance/screenshot-performance', () => ({ screenshot
 import { ShelfWindow } from '../../src/main/windows/ShelfWindow';
 import { defaultShelfPreferences } from '../../src/shared/shelf-preferences';
 import type { ScreenshotItem } from '../../src/shared/screenshot';
+import { shelfWindowBounds, shelfDockBounds } from '../../src/shared/collection';
 const windows: ShelfWindow[] = [];
 beforeEach(() => { vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'performance'] }); });
 afterEach(() => { windows.splice(0).forEach(window => window.destroy()); vi.useRealTimers(); runtime.cursor = { x: -3000, y: -3000 }; });
@@ -45,6 +46,20 @@ it('docks only after leaving idle, restores from the edge and rejects late motio
   expect(shelf.current().edge).toBe('revealing');
   shelf.edgeFinished(shelf.current().presentation);
   expect(shelf.current().edge).toBe('shown'); expect(native.getBounds()).toEqual(shown);
+});
+it('anchors the edge handle to the stack for both expanded and collapsed panels', async () => {
+  const { shelf, native, items } = await fixture();
+  const stack = shelfWindowBounds(runtime.area, shelf.current().size, items, false);
+  const expected = shelfDockBounds(runtime.area, stack);
+  expect(native.getBounds().height).toBeGreaterThan(stack.height);
+  vi.advanceTimersByTime(1840); shelf.edgeFinished(shelf.current().presentation); await settle(); shelf.rendered(shelf.current().presentation);
+  expect(native.getBounds()).toEqual(expected);
+  await shelf.reveal(); shelf.rendered(shelf.current().presentation); shelf.edgeFinished(shelf.current().presentation);
+  shelf.collapse(); await settle(); shelf.rendered(shelf.current().presentation);
+  vi.advanceTimersByTime(1840); shelf.edgeFinished(shelf.current().presentation); await settle(); shelf.rendered(shelf.current().presentation);
+  expect(native.getBounds()).toEqual(expected);
+  await shelf.configure({ ...defaultShelfPreferences, heightMode: 'fixed', height: 1600 });
+  expect(native.getBounds()).toEqual(expected);
 });
 it('holds the panel during a tool interaction and cancels edge motion before a new capture', async () => {
   const { shelf, native, items } = await fixture();

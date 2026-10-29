@@ -1,7 +1,14 @@
-export type IconName = 'pin' | 'width' | 'copy' | 'brand' | 'arrow' | 'info' | 'trash' | 'merge' | 'export' | 'select' | 'check' | 'resize' | 'more' | 'collapse' | 'expand' | 'close' | 'back';
+export type IconName = 'settings' | 'keyboard' | 'capture' | 'switch' | 'collection' | 'folder' | 'globe' | 'pin' | 'width' | 'copy' | 'brand' | 'arrow' | 'info' | 'trash' | 'merge' | 'export' | 'select' | 'check' | 'resize' | 'more' | 'collapse' | 'expand' | 'close' | 'back';
 
 export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
   const paths: Record<IconName, React.ReactNode> = {
+    settings: <><path d="M4 7h5m4 0h7M4 17h9m4 0h3" /><circle cx="11" cy="7" r="2" /><circle cx="15" cy="17" r="2" /></>,
+    keyboard: <><rect x="2" y="5" width="20" height="14" rx="3" /><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 15h8" /></>,
+    capture: <><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3" /><rect x="7" y="7" width="10" height="10" rx="2" /></>,
+    switch: <><path d="M4 7h15m-4-4 4 4-4 4M20 17H5m4-4-4 4 4 4" /></>,
+    collection: <><rect x="4" y="8" width="16" height="13" rx="2" /><path d="M7 5h10M9 2h6" /></>,
+    folder: <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />,
+    globe: <><circle cx="12" cy="12" r="9" /><ellipse cx="12" cy="12" rx="4" ry="9" /><path d="M3 12h18M5 7h14M5 17h14" /></>,
     // Reuse the tray template silhouette; real application artwork stays unchanged.
     brand: <><path d="M19 7.75A4.5 4.5 0 0 1 22 12v5.5a4.5 4.5 0 0 1-4.5 4.5H12a4.5 4.5 0 0 1-4.25-3" /><path fill="currentColor" fillRule="evenodd" stroke="none" d="M7 2h5a5 5 0 0 1 5 5v5a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Z M9.5 5c.4 2.7 1.8 4.1 4.5 4.5-2.7.4-4.1 1.8-4.5 4.5-.4-2.7-1.8-4.1-4.5-4.5 2.7-.4 4.1-1.8 4.5-4.5Z" /></>,
     pin: <><path d="m8 3 8 2-2 5 3 4-6-1-3 4-1-6-4-3 5-1Z" /><path d="m8 16-4 5" /></>,

@@ -17,6 +17,7 @@ const sha256 = content => createHash('sha256').update(content).digest('hex');
 function planPublication(directory, notesFile) {
   ensure(/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository), '公开发布仓库配置无效');
   const report = JSON.parse(fs.readFileSync(path.join(directory, 'verification.json'), 'utf8'));
+  ensure(/^[a-f0-9]{40}$/.test(report.sourceCommit || ''), '验收报告缺少完整源码提交，请从已提交源码重新构建。');
   ensure(report.autoUpdateEnabled === true && report.updateRepository === repository, '此验收报告未启用当前公开更新源，请重新正式构建，不能发布旧包作为自动更新版');
   ensure(Array.isArray(report.architectures) && report.architectures.length === 2
     && ['arm64', 'x64'].every(arch => report.architectures.filter(item => item.arch === arch && item.notarization?.status === 'Accepted').length === 1), '两种架构必须完成公证验收');
@@ -37,7 +38,7 @@ function planPublication(directory, notesFile) {
   const sums = report.artifacts.map(item => `${item.sha256}  ${item.name}\n`).join('');
   const assets = report.artifacts.map(item => ({ name: item.name, source: path.join(directory, item.name), sha256: item.sha256, size: fs.statSync(path.join(directory, item.name)).size }));
   for (const [name, content] of [['latest-mac.yml', manifest], ['SHA256SUMS.txt', sums]]) assets.push({ name, content, sha256: sha256(content), size: Buffer.byteLength(content) });
-  return { repository, version: report.version, tag: `v${report.version}`, notesFile, assets };
+  return { repository, sourceCommit: report.sourceCommit, version: report.version, tag: `v${report.version}`, notesFile, assets };
 }
 
 function gh(args) {
@@ -65,13 +66,38 @@ function verifyRemoteAssets(release, plan, complete = false) {
   }
   if (complete) ensure(release.assets.length === plan.assets.length, '远程发行文件尚未完整上传');
 }
+
+/** Read-only: reject absent source commits and tags pointing at different code. */
+function verifyRemoteSource(plan, query = gh) {
+  ensure(/^[a-f0-9]{40}$/.test(plan.sourceCommit || ''), '源码提交无效');
+  const commit = JSON.parse(query(['api', `repos/${repository}/commits/${plan.sourceCommit}`]));
+  ensure(commit.sha === plan.sourceCommit, '请先把本次源码提交推送到目标仓库，再发布安装包。');
+  let reference;
+  try { reference = JSON.parse(query(['api', `repos/${repository}/git/ref/tags/${encodeURIComponent(plan.tag)}`])).object; }
+  catch (error) {
+    if (/\bHTTP 404\b/.test(error.stderr?.toString() || '')) return;
+    throw new Error('无法核对远程标签；没有创建或修改 Release。');
+  }
+  for (let depth = 0; depth < 5; depth++) {
+    ensure(reference && /^[a-f0-9]{40}$/.test(reference.sha), '远程标签格式无效');
+    if (reference.type === 'commit') {
+      ensure(reference.sha === plan.sourceCommit, '远程标签指向其他源码，拒绝覆盖或发布。');
+      return;
+    }
+    ensure(reference.type === 'tag', '远程标签目标无效');
+    reference = JSON.parse(query(['api', `repos/${repository}/git/tags/${reference.sha}`])).object;
+  }
+  throw new Error('远程注释标签嵌套过深；没有修改标签或 Release。');
+}
 function publish(plan) {
   const repo = JSON.parse(gh(['api', `repos/${repository}`]));
   ensure(repo.full_name === repository && repo.private === false, '发布目标必须是已配置的公开分发仓库');
+  verifyRemoteSource(plan);
   let release = releaseOrNull(plan.tag);
   ensure(!release || release.draft, '该版本已经公开发布，拒绝覆盖；请使用新的版本号');
+  ensure(!release || release.target_commitish === plan.sourceCommit, '已有草稿的源码目标不一致，请人工核对；没有覆盖草稿。');
   if (!release) {
-    gh(['release', 'create', plan.tag, '--repo', repository, '--target', 'main', '--draft', '--title', `截然 Snipvia ${plan.tag}`, '--notes-file', plan.notesFile]);
+    gh(['release', 'create', plan.tag, '--repo', repository, '--target', plan.sourceCommit, '--draft', '--title', `截然 Snipvia ${plan.tag}`, '--notes-file', plan.notesFile]);
     release = releaseOrNull(plan.tag);
   }
   ensure(release?.draft && !release.prerelease, '目标必须是正式版本草稿');
@@ -97,7 +123,7 @@ if (require.main === module) {
     const { values } = parseArgs({ options: { directory: { type: 'string' }, notes: { type: 'string' }, execute: { type: 'boolean', default: false } } });
     ensure(values.directory && values.notes, '用法：pnpm release:publish --directory <verified目录> --notes <公开说明.md> [--execute]');
     const plan = planPublication(path.resolve(values.directory), path.resolve(values.notes));
-    console.log(JSON.stringify({ repository: plan.repository, tag: plan.tag, assets: plan.assets.map(({ name, size }) => ({ name, size })), execute: values.execute }, null, 2));
+    console.log(JSON.stringify({ repository: plan.repository, tag: plan.tag, sourceCommit: plan.sourceCommit, assets: plan.assets.map(({ name, size }) => ({ name, size })), execute: values.execute }, null, 2));
     if (values.execute) publish(plan);
     else console.log('发布计划校验通过；加 --execute 才创建草稿、上传并发布。');
   } catch (error) {
@@ -105,4 +131,4 @@ if (require.main === module) {
     process.exitCode = 1;
   }
 }
-module.exports = { planPublication, verifyRemoteAssets, releaseOrNull };
+module.exports = { planPublication, verifyRemoteAssets, verifyRemoteSource, releaseOrNull };

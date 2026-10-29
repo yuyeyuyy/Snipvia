@@ -1,0 +1,6 @@
+.quick-target-artwork { position: relative; display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; color: inherit; }
+.quick-target-artwork > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.quick-target-artwork > svg { display: block; flex-shrink: 0; }
+.quick-target-artwork > .quick-target-site-image { padding: 1px; border-radius: 7px; background: var(--overlay-text); }
+.quick-target-browser-badge { position: absolute; left: -3px; bottom: -3px; display: grid; place-items: center; width: 15px; height: 15px; padding: 1px; border: 1px solid var(--bg-panel); border-radius: 50%; color: var(--overlay-control-bg); background: var(--overlay-text); box-shadow: var(--shadow-control); }
+.quick-target-browser-badge > img { display: block; width: 100%; height: 100%; object-fit: contain; }

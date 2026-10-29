@@ -9,7 +9,7 @@ interface PlatformAdapter {
 
 const macOS: PlatformAdapter = {
   capturePermission: () => systemPreferences.getMediaAccessStatus('screen'),
-  permissionHelp: `录屏权限未开启。请在录屏权限弹窗中打开系统设置并启用当前应用。${app.isPackaged ? '授权后重新打开 Snipvia.app。' : process.env.SNIPVIA_DEV_APP_PATH ? '点击“在 Finder 中选中”，把固定开发应用拖入录屏列表并打开开关；只需操作一次。' : '开发版授权后请在项目终端重新运行 pnpm dev，不要单独打开 Electron.app。'}`
+  permissionHelp: `录屏权限未开启。请在录屏权限弹窗中打开系统设置并启用当前应用。${app.isPackaged ? '授权后重新打开 Snipvia.app。' : process.env.SNIPVIA_DEV_APP_PATH ? '点击“在 Finder 中选中”，把当前开发应用重新添加到录屏列表并打开开关；随后从项目终端重新运行 pnpm dev，不要直接打开 Electron.app。' : '开发版授权后请在项目终端重新运行 pnpm dev，不要单独打开 Electron.app。'}`
 };
 
 // Windows uses Electron capture APIs; no macOS TCC permission or Swift helper.

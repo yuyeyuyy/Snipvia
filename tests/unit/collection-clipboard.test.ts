@@ -16,6 +16,7 @@ vi.mock('electron', () => ({
   }
 }));
 import { copyCollectionImages } from '../../src/main/storage/CollectionClipboard';
+import { clipboardMatchesQuickTarget, quickTargetClipboardType } from '../../src/main/quick-target/clipboard-marker';
 let directory: string, cache: string;
 beforeEach(async () => {
   directory = await mkdtemp(join(tmpdir(), 'snipvia-copy 中文-')); cache = join(directory, 'clipboard-files');
@@ -30,12 +31,26 @@ function fixture() {
   items.forEach(item => collection.append(item.id));
   return { store, collection, ids: items.map(item => item.id) };
 }
-async function files() {
+async function files(types = ['text/uri-list']) {
   const entries = runtime.items;
-  expect(entries).toHaveLength(1); expect(entries[0].types).toEqual(['text/uri-list']);
+  expect(entries).toHaveLength(1); expect(entries[0].types).toEqual(types);
   return (await (await entries[0].getType('text/uri-list')).text()).split('\r\n').map(uri => fileURLToPath(uri));
 }
 describe('native original-file clipboard transaction', () => {
+  it('commits the chooser marker atomically alongside every original file and preserves reuse', async () => {
+    const { store, ids } = fixture();
+    await copyCollectionImages(store, ids, cache, 'shelf-all-marker');
+    expect(runtime.write).toHaveBeenCalledOnce();
+    const paths = await files(['text/uri-list', quickTargetClipboardType]);
+    expect(paths).toHaveLength(2);
+    expect(await readFile(paths[0])).toEqual(Buffer.from([1, 2, 3]));
+    expect(await readFile(paths[1])).toEqual(Buffer.from([4, 5]));
+    expect(await clipboardMatchesQuickTarget('shelf-all-marker')).toBe(true);
+    await copyCollectionImages(store, ids, cache, 'next-marker');
+    expect(await files(['text/uri-list', quickTargetClipboardType])).toEqual(paths);
+    expect(await clipboardMatchesQuickTarget('shelf-all-marker')).toBe(false);
+    expect(await clipboardMatchesQuickTarget('next-marker')).toBe(true);
+  });
   it('commits every original in Collection order as one native file list, with unchanged PNG/JPEG bytes', async () => {
     const { store, ids } = fixture();
     await copyCollectionImages(store, ids, cache);

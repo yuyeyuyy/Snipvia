@@ -51,6 +51,7 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
     expect(await app.evaluate(({ globalShortcut }) => [globalShortcut.isRegistered('CommandOrControl+Alt+F7'), globalShortcut.isRegistered('CommandOrControl+Alt+F8'), globalShortcut.isRegistered('CommandOrControl+Shift+Enter'), globalShortcut.isRegistered('Control+2')])).toEqual([true, true, false, true]);
     await expect(page.getByRole('button', { name: 'AI 对话', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'AI 笔记', exact: true })).toHaveCount(0);
+    await page.getByRole('navigation', { name: '设置分类' }).getByRole('button', { name: '存储', exact: true }).click();
     await page.getByRole('button', { name: '查看旧记录', exact: true }).click();
     const legacy = page.getByRole('dialog', { name: '旧版记录（只读）' });
     await expect(legacy).toContainText('旧对话保留');
@@ -86,12 +87,12 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
     expect(await readFile(join(book.directory, '保留.md'), 'utf8')).toBe('# 原笔记\n\n不要修改。');
     await app.evaluate(({ app }) => app.emit('activate', {}, false));
     await page.getByRole('navigation', { name: '设置分类' }).getByRole('button', { name: '通用', exact: true }).click();
-    await mkdir('docs/ui/v2', { recursive: true });
+    await mkdir('test-results/v2-settings', { recursive: true });
     await page.locator('main').evaluate(node => { node.scrollTop = 0; });
     for (const theme of ['light', 'dark'] as const) {
       await page.getByLabel('外观主题').selectOption(theme);
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-      await page.screenshot({ path: 'docs/ui/v2/settings-phase2-' + theme + '.png', animations: 'disabled' });
+      await page.screenshot({ path: 'test-results/v2-settings/settings-phase2-' + theme + '.png', animations: 'disabled' });
     }
     await app.close(); closed = true;
     const restart = await launchDesktop(options);

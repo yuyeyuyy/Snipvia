@@ -1,0 +1,608 @@
+{
+  "reviewDate": "2026-10-29",
+  "scope": "Current lockfile including development and optional dependencies; Electron is shipped runtime despite devDependency placement.",
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 5,
+      "moderate": 14,
+      "high": 9,
+      "critical": 0
+    },
+    "dependencies": 122,
+    "devDependencies": 493,
+    "optionalDependencies": 101,
+    "totalDependencies": 615
+  },
+  "advisories": [
+    {
+      "module_name": "vite",
+      "github_advisory_id": "GHSA-698v-4r3x-3vcv",
+      "title": "launch-editor: escapeCmdArgs() omits % escaping on Windows",
+      "severity": "moderate",
+      "vulnerable_versions": ">=7.0.0 <=7.3.6",
+      "patched_versions": ">=7.3.7",
+      "url": "https://github.com/advisories/GHSA-698v-4r3x-3vcv",
+      "findings": [
+        {
+          "version": "7.3.6",
+          "paths": [
+            ".>@vitejs/plugin-react>vite",
+            ".>electron-vite>vite",
+            ".>vite",
+            ".>vitest>@vitest/mocker>vite",
+            ".>vitest>vite"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "vite",
+      "github_advisory_id": "GHSA-r825-w8mm-5pxw",
+      "title": "launch-editor: Editor CLI flag misinterpretation causing arbitrary command execution for some editors",
+      "severity": "moderate",
+      "vulnerable_versions": ">=7.0.0 <=7.3.6",
+      "patched_versions": ">=7.3.7",
+      "url": "https://github.com/advisories/GHSA-r825-w8mm-5pxw",
+      "findings": [
+        {
+          "version": "7.3.6",
+          "paths": [
+            ".>@vitejs/plugin-react>vite",
+            ".>electron-vite>vite",
+            ".>vite",
+            ".>vitest>@vitest/mocker>vite",
+            ".>vitest>vite"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "vite",
+      "github_advisory_id": "GHSA-587h-7wmj-h5pm",
+      "title": "launch-editor: `fs.existsSync()` existence check can be bypassed on Windows",
+      "severity": "high",
+      "vulnerable_versions": ">=7.0.0 <=7.3.6",
+      "patched_versions": ">=7.3.7",
+      "url": "https://github.com/advisories/GHSA-587h-7wmj-h5pm",
+      "findings": [
+        {
+          "version": "7.3.6",
+          "paths": [
+            ".>@vitejs/plugin-react>vite",
+            ".>electron-vite>vite",
+            ".>vite",
+            ".>vitest>@vitest/mocker>vite",
+            ".>vitest>vite"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "vite",
+      "github_advisory_id": "GHSA-9jrq-w75r-8gcw",
+      "title": "Vite: Cross origin script execution through Vite custom middleware",
+      "severity": "low",
+      "vulnerable_versions": ">=7.0.0 <=7.3.6",
+      "patched_versions": ">=7.3.7",
+      "url": "https://github.com/advisories/GHSA-9jrq-w75r-8gcw",
+      "findings": [
+        {
+          "version": "7.3.6",
+          "paths": [
+            ".>@vitejs/plugin-react>vite",
+            ".>electron-vite>vite",
+            ".>vite",
+            ".>vitest>@vitest/mocker>vite",
+            ".>vitest>vite"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "vite",
+      "github_advisory_id": "GHSA-rq7h-c2jc-7f22",
+      "title": "Vite: Files outside `server.fs.allow` could be served when project paths match system paths on non-Windows machine",
+      "severity": "moderate",
+      "vulnerable_versions": ">=7.0.0 <=7.3.6",
+      "patched_versions": ">=7.3.7",
+      "url": "https://github.com/advisories/GHSA-rq7h-c2jc-7f22",
+      "findings": [
+        {
+          "version": "7.3.6",
+          "paths": [
+            ".>@vitejs/plugin-react>vite",
+            ".>electron-vite>vite",
+            ".>vite",
+            ".>vitest>@vitest/mocker>vite",
+            ".>vitest>vite"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "@vitest/mocker",
+      "github_advisory_id": "GHSA-qxg6-89mg-rqv8",
+      "title": "Vitest: Code injection via unauthenticated manual mock registration",
+      "severity": "moderate",
+      "vulnerable_versions": ">=2.1.0-beta.7 <4.1.12",
+      "patched_versions": ">=4.1.12",
+      "url": "https://github.com/advisories/GHSA-qxg6-89mg-rqv8",
+      "findings": [
+        {
+          "version": "4.1.11",
+          "paths": [
+            ".>vitest>@vitest/mocker"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "@vitest/mocker",
+      "github_advisory_id": "GHSA-xp26-3454-mjgp",
+      "title": "Vitest: Windows backslash traversal bypasses the @vitest/mocker redirect allowlist fix",
+      "severity": "moderate",
+      "vulnerable_versions": ">=4.1.11 <4.1.12",
+      "patched_versions": ">=4.1.12",
+      "url": "https://github.com/advisories/GHSA-xp26-3454-mjgp",
+      "findings": [
+        {
+          "version": "4.1.11",
+          "paths": [
+            ".>vitest>@vitest/mocker"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "electron",
+      "github_advisory_id": "GHSA-x562-297c-g43g",
+      "title": "Electron: Pointer lock permission requests can be attributed to the wrong frame",
+      "severity": "moderate",
+      "vulnerable_versions": ">=44.0.0-alpha.1 <44.5.0",
+      "patched_versions": ">=44.5.0",
+      "url": "https://github.com/advisories/GHSA-x562-297c-g43g",
+      "findings": [
+        {
+          "version": "44.4.1",
+          "paths": [
+            ".>electron"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "electron",
+      "github_advisory_id": "GHSA-3qxv-5xgr-q7w9",
+      "title": "Electron: Frame subscription trusts GPU-supplied frame geometry",
+      "severity": "low",
+      "vulnerable_versions": ">=44.0.0-alpha.1 <44.4.3",
+      "patched_versions": ">=44.4.3",
+      "url": "https://github.com/advisories/GHSA-3qxv-5xgr-q7w9",
+      "findings": [
+        {
+          "version": "44.4.1",
+          "paths": [
+            ".>electron"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "electron",
+      "github_advisory_id": "GHSA-h3v5-h239-pg29",
+      "title": "Electron: Off-screen rendering on macOS trusts GPU-supplied frame geometry",
+      "severity": "low",
+      "vulnerable_versions": ">=44.0.0-alpha.1 <44.4.3",
+      "patched_versions": ">=44.4.3",
+      "url": "https://github.com/advisories/GHSA-h3v5-h239-pg29",
+      "findings": [
+        {
+          "version": "44.4.1",
+          "paths": [
+            ".>electron"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "electron",
+      "github_advisory_id": "GHSA-jr5w-w6x2-84p9",
+      "title": "Electron: Mitigation for compromised eMudhra intermediate certificates",
+      "severity": "high",
+      "vulnerable_versions": ">=44.0.0-alpha.1 <44.9.1",
+      "patched_versions": ">=44.9.1",
+      "url": "https://github.com/advisories/GHSA-jr5w-w6x2-84p9",
+      "findings": [
+        {
+          "version": "44.4.1",
+          "paths": [
+            ".>electron"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-4qv8-2p9j-2685",
+      "title": "undici vulnerable to Denial of Service via unbounded memory in the EventSource parser",
+      "severity": "moderate",
+      "vulnerable_versions": ">=7.0.0 <7.30.1",
+      "patched_versions": ">=7.30.1",
+      "url": "https://github.com/advisories/GHSA-4qv8-2p9j-2685",
+      "findings": [
+        {
+          "version": "7.29.1",
+          "paths": [
+            ".>electron>@electron/get>undici"
+          ],
+          "dev": true,
+          "optional": true,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-4qv8-2p9j-2685",
+      "title": "undici vulnerable to Denial of Service via unbounded memory in the EventSource parser",
+      "severity": "moderate",
+      "vulnerable_versions": ">=6.5.0 <6.29.1",
+      "patched_versions": ">=6.29.1",
+      "url": "https://github.com/advisories/GHSA-4qv8-2p9j-2685",
+      "findings": [
+        {
+          "version": "6.28.1",
+          "paths": [
+            ".>electron-builder>app-builder-lib>@electron/rebuild>node-gyp>undici",
+            ".>electron-builder>dmg-builder>app-builder-lib>@electron/rebuild>node-gyp>undici"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-f72v-6w45-q472",
+      "title": "undici vulnerable to Subresource Integrity bypass via non-lowercase algorithm tokens",
+      "severity": "moderate",
+      "vulnerable_versions": ">=7.15.0 <7.30.1",
+      "patched_versions": ">=7.30.1",
+      "url": "https://github.com/advisories/GHSA-f72v-6w45-q472",
+      "findings": [
+        {
+          "version": "7.29.1",
+          "paths": [
+            ".>electron>@electron/get>undici"
+          ],
+          "dev": true,
+          "optional": true,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "fast-uri",
+      "github_advisory_id": "GHSA-w74x-v6f9-j3xg",
+      "title": "fast-uri vulnerable to URI scheme spoofing via percent-encoded scheme decoding",
+      "severity": "moderate",
+      "vulnerable_versions": ">=3.0.0 <3.1.9",
+      "patched_versions": ">=3.1.9",
+      "url": "https://github.com/advisories/GHSA-w74x-v6f9-j3xg",
+      "findings": [
+        {
+          "version": "3.1.8",
+          "paths": [
+            ".>electron-builder>app-builder-lib>ajv>fast-uri",
+            ".>electron-builder>dmg-builder>app-builder-lib>ajv>fast-uri"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "fast-uri",
+      "github_advisory_id": "GHSA-xhq7-xmqj-769h",
+      "title": "fast-uri vulnerable to improper path equivalence in relative reference normalization",
+      "severity": "low",
+      "vulnerable_versions": ">=3.0.0 <3.1.9",
+      "patched_versions": ">=3.1.9",
+      "url": "https://github.com/advisories/GHSA-xhq7-xmqj-769h",
+      "findings": [
+        {
+          "version": "3.1.8",
+          "paths": [
+            ".>electron-builder>app-builder-lib>ajv>fast-uri",
+            ".>electron-builder>dmg-builder>app-builder-lib>ajv>fast-uri"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "fast-uri",
+      "github_advisory_id": "GHSA-wjr9-j795-jxcr",
+      "title": "fast-uri vulnerable to host confusion via unchecked WHATWG host canonicalization",
+      "severity": "moderate",
+      "vulnerable_versions": ">=3.1.3 <3.1.9",
+      "patched_versions": ">=3.1.9",
+      "url": "https://github.com/advisories/GHSA-wjr9-j795-jxcr",
+      "findings": [
+        {
+          "version": "3.1.8",
+          "paths": [
+            ".>electron-builder>app-builder-lib>ajv>fast-uri",
+            ".>electron-builder>dmg-builder>app-builder-lib>ajv>fast-uri"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "fast-uri",
+      "github_advisory_id": "GHSA-333x-w4r6-6crp",
+      "title": "fast-uri vulnerable to scheme injection via an unescaped first-segment colon in suffix references",
+      "severity": "low",
+      "vulnerable_versions": ">=3.0.0 <3.1.9",
+      "patched_versions": ">=3.1.9",
+      "url": "https://github.com/advisories/GHSA-333x-w4r6-6crp",
+      "findings": [
+        {
+          "version": "3.1.8",
+          "paths": [
+            ".>electron-builder>app-builder-lib>ajv>fast-uri",
+            ".>electron-builder>dmg-builder>app-builder-lib>ajv>fast-uri"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-xjj6-f33q-929c",
+      "title": "undici vulnerable to Denial of Service via unhandled error on excessive content-encodings",
+      "severity": "high",
+      "vulnerable_versions": ">=7.18.0 <7.30.1",
+      "patched_versions": ">=7.30.1",
+      "url": "https://github.com/advisories/GHSA-xjj6-f33q-929c",
+      "findings": [
+        {
+          "version": "7.29.1",
+          "paths": [
+            ".>electron>@electron/get>undici"
+          ],
+          "dev": true,
+          "optional": true,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-xjj6-f33q-929c",
+      "title": "undici vulnerable to Denial of Service via unhandled error on excessive content-encodings",
+      "severity": "high",
+      "vulnerable_versions": ">=6.23.0 <6.29.1",
+      "patched_versions": ">=6.29.1",
+      "url": "https://github.com/advisories/GHSA-xjj6-f33q-929c",
+      "findings": [
+        {
+          "version": "6.28.1",
+          "paths": [
+            ".>electron-builder>app-builder-lib>@electron/rebuild>node-gyp>undici",
+            ".>electron-builder>dmg-builder>app-builder-lib>@electron/rebuild>node-gyp>undici"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-4w7w-5xrc-9h26",
+      "title": "undici vulnerable to cache poisoning and cross-user disclosure via cross-origin redirects",
+      "severity": "high",
+      "vulnerable_versions": ">=7.0.0 <7.30.1",
+      "patched_versions": ">=7.30.1",
+      "url": "https://github.com/advisories/GHSA-4w7w-5xrc-9h26",
+      "findings": [
+        {
+          "version": "7.29.1",
+          "paths": [
+            ".>electron>@electron/get>undici"
+          ],
+          "dev": true,
+          "optional": true,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-2m5v-pch6-74hx",
+      "title": "undici vulnerable to TLS certificate validation bypass via dropped tls options in Agent",
+      "severity": "high",
+      "vulnerable_versions": ">=7.0.0 <7.30.1",
+      "patched_versions": ">=7.30.1",
+      "url": "https://github.com/advisories/GHSA-2m5v-pch6-74hx",
+      "findings": [
+        {
+          "version": "7.29.1",
+          "paths": [
+            ".>electron>@electron/get>undici"
+          ],
+          "dev": true,
+          "optional": true,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-2m5v-pch6-74hx",
+      "title": "undici vulnerable to TLS certificate validation bypass via dropped tls options in Agent",
+      "severity": "high",
+      "vulnerable_versions": ">=4.0.0 <6.29.1",
+      "patched_versions": ">=6.29.1",
+      "url": "https://github.com/advisories/GHSA-2m5v-pch6-74hx",
+      "findings": [
+        {
+          "version": "6.28.1",
+          "paths": [
+            ".>electron-builder>app-builder-lib>@electron/rebuild>node-gyp>undici",
+            ".>electron-builder>dmg-builder>app-builder-lib>@electron/rebuild>node-gyp>undici"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-qrxm-fqhp-jwvm",
+      "title": "undici vulnerable to Denial of Service via TLS 1.2 certificate-changing renegotiation",
+      "severity": "high",
+      "vulnerable_versions": ">=7.0.0 <7.30.1",
+      "patched_versions": ">=7.30.1",
+      "url": "https://github.com/advisories/GHSA-qrxm-fqhp-jwvm",
+      "findings": [
+        {
+          "version": "7.29.1",
+          "paths": [
+            ".>electron>@electron/get>undici"
+          ],
+          "dev": true,
+          "optional": true,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-qrxm-fqhp-jwvm",
+      "title": "undici vulnerable to Denial of Service via TLS 1.2 certificate-changing renegotiation",
+      "severity": "high",
+      "vulnerable_versions": ">=4.2.1 <6.29.1",
+      "patched_versions": ">=6.29.1",
+      "url": "https://github.com/advisories/GHSA-qrxm-fqhp-jwvm",
+      "findings": [
+        {
+          "version": "6.28.1",
+          "paths": [
+            ".>electron-builder>app-builder-lib>@electron/rebuild>node-gyp>undici",
+            ".>electron-builder>dmg-builder>app-builder-lib>@electron/rebuild>node-gyp>undici"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-9fm3-97px-rjf6",
+      "title": "undici WebSocket client vulnerable to Denial of Service via unbounded automatic PONG buffering",
+      "severity": "moderate",
+      "vulnerable_versions": ">=7.0.0 <7.30.1",
+      "patched_versions": ">=7.30.1",
+      "url": "https://github.com/advisories/GHSA-9fm3-97px-rjf6",
+      "findings": [
+        {
+          "version": "7.29.1",
+          "paths": [
+            ".>electron>@electron/get>undici"
+          ],
+          "dev": true,
+          "optional": true,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-9fm3-97px-rjf6",
+      "title": "undici WebSocket client vulnerable to Denial of Service via unbounded automatic PONG buffering",
+      "severity": "moderate",
+      "vulnerable_versions": ">=5.15.0 <6.29.1",
+      "patched_versions": ">=6.29.1",
+      "url": "https://github.com/advisories/GHSA-9fm3-97px-rjf6",
+      "findings": [
+        {
+          "version": "6.28.1",
+          "paths": [
+            ".>electron-builder>app-builder-lib>@electron/rebuild>node-gyp>undici",
+            ".>electron-builder>dmg-builder>app-builder-lib>@electron/rebuild>node-gyp>undici"
+          ],
+          "dev": true,
+          "optional": false,
+          "bundled": false
+        }
+      ]
+    },
+    {
+      "module_name": "undici",
+      "github_advisory_id": "GHSA-55wc-3pg8-jfw6",
+      "title": "undici vulnerable to Denial of Service via unhandled exception in the decompress interceptor",
+      "severity": "moderate",
+      "vulnerable_versions": ">=7.15.0 <7.30.1",
+      "patched_versions": ">=7.30.1",
+      "url": "https://github.com/advisories/GHSA-55wc-3pg8-jfw6",
+      "findings": [
+        {
+          "version": "7.29.1",
+          "paths": [
+            ".>electron>@electron/get>undici"
+          ],
+          "dev": true,
+          "optional": true,
+          "bundled": false
+        }
+      ]
+    }
+  ]
+}

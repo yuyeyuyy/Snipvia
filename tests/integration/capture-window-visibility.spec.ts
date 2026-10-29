@@ -127,7 +127,9 @@ for (const backend of ['electron', 'screen-capture-kit'] as const) {
 
       await start(); await select();
       await quick();
-      await expect(pin.getByRole('button')).toHaveCount(0);
+      await expect(pin.getByRole('button')).toHaveCount(2);
+      await expect(pin.getByRole('button', { name: '复制并关闭钉图', exact: true })).toHaveCount(1);
+      await expect(pin.getByRole('button', { name: '关闭钉图', exact: true })).toHaveCount(1);
       const layout = await pin.evaluate(() => {
         const image = document.querySelector('img')!.getBoundingClientRect();
         return { imageHeight: image.height, imageWidth: image.width, height: innerHeight, width: innerWidth };

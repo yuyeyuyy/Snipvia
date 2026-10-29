@@ -59,3 +59,24 @@ it('blocks late shell/render ACKs while Electron fallback is capturing its backg
   overlay.frameReady('one'); expect(overlay.showRenderedSession('one')).toBe(true);
   expect(native.ordered).toBe(true); expect(native.opacity).toBe(1); expect(native.ignored).toBe(false);
 });
+
+it('restores the same editor after a dialog and blocks late ACKs while it is concealed', async () => {
+  const { overlay, native } = await setup();
+  await overlay.prepare('edit', bounds); overlay.showRenderedSession('edit');
+  expect(overlay.pauseForDialog('edit')).toBe(true);
+  expect(overlay.isSessionActive('edit')).toBe(true);
+  expect(native.ordered).toBe(false); expect(native.opacity).toBe(0);
+  expect(overlay.showShellSession('edit')).toBe(false); expect(overlay.showRenderedSession('edit')).toBe(false);
+  expect(overlay.resumeAfterDialog('edit')).toBe(true);
+  expect(native.calls).toEqual(['show', 'hide', 'show']);
+  expect(native.ordered).toBe(true); expect(native.opacity).toBe(1); expect(native.ignored).toBe(false);
+});
+it('does not restore an obsolete dialog after a new capture or cancellation', async () => {
+  const { overlay, native } = await setup();
+  await overlay.prepare('old', bounds); overlay.pauseForDialog('old');
+  await overlay.prepare('new', bounds);
+  const calls = native.calls.length;
+  expect(overlay.resumeAfterDialog('old')).toBe(false); expect(overlay.pauseForDialog('old')).toBe(false);
+  expect(native.calls).toHaveLength(calls); expect(overlay.isSessionActive('new')).toBe(true);
+  overlay.hide(); expect(overlay.resumeAfterDialog('new')).toBe(false); expect(native.ordered).toBe(false);
+});

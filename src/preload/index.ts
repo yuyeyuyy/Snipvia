@@ -32,6 +32,34 @@ if (initialPerformanceSessionId) {
 }
 
 const api: SnipviaAPI = {
+  quickTarget: {
+    onSettingsChanged: callback => {
+      const listener = (_event: Electron.IpcRendererEvent, value: import('../shared/quick-target').QuickTargetSettingsState) => callback(value);
+      ipcRenderer.on('quick-target:settings-changed', listener);
+      return () => { ipcRenderer.removeListener('quick-target:settings-changed', listener); };
+    },
+    settings: () => ipcRenderer.invoke('quick-target:settings'),
+    configure: value => ipcRenderer.invoke('quick-target:configure', value),
+    addApplication: () => ipcRenderer.invoke('quick-target:add-application'),
+    addWebsite: value => ipcRenderer.invoke('quick-target:add-website', value),
+    configureBrowser: value => ipcRenderer.invoke('quick-target:configure-browser', value),
+    permissions: () => ipcRenderer.invoke('quick-target:permissions'),
+    requestPermission: value => ipcRenderer.invoke('quick-target:request-permission', value),
+    openPermissionSettings: value => ipcRenderer.invoke('quick-target:open-permission-settings', value),
+    rename: value => ipcRenderer.invoke('quick-target:rename', value),
+    remove: id => ipcRenderer.invoke('quick-target:remove', id),
+    current: () => ipcRenderer.invoke('quick-target:current'),
+    activate: value => ipcRenderer.invoke('quick-target:activate', value),
+    rendered: value => ipcRenderer.invoke('quick-target:rendered', value),
+    interaction: value => ipcRenderer.invoke('quick-target:interaction', value),
+    dismiss: value => ipcRenderer.invoke('quick-target:dismiss', value),
+    focus: () => ipcRenderer.invoke('quick-target:focus'),
+    onChanged: callback => {
+      const listener = (_event: Electron.IpcRendererEvent, value: import('../shared/quick-target').QuickTargetState) => callback(value);
+      ipcRenderer.on('quick-target:changed', listener);
+      return () => { ipcRenderer.removeListener('quick-target:changed', listener); };
+    }
+  },
   collection: {
     configure: value => ipcRenderer.invoke('collection:configure', value),
     widen: () => ipcRenderer.invoke('collection:widen'),

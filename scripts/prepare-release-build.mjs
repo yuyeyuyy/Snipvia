@@ -7,7 +7,7 @@ import process from 'node:process';
 import { fileURLToPath, URL } from 'node:url';
 
 const defaultRoot = fileURLToPath(new URL('../', import.meta.url));
-const nativeFiles = ['snipvia-capture-helper', 'snipvia-capture-helper-arm64', 'snipvia-capture-helper-x86_64'];
+const nativeFiles = ['snipvia-capture-helper', 'snipvia-capture-helper-arm64', 'snipvia-capture-helper-x86_64', 'snipvia-quick-target-helper', 'snipvia-quick-target-helper-arm64', 'snipvia-quick-target-helper-x86_64'];
 
 export function fingerprint(root, files, context = {}) {
   const hash = createHash('sha256').update(JSON.stringify(context));
@@ -100,7 +100,7 @@ export function prepareReleaseBuild({ root = defaultRoot, native = false } = {})
     xcode: run(root, '/usr/bin/xcodebuild', ['-version']),
     swift: run(root, '/usr/bin/xcrun', ['swiftc', '--version']) };
   const helper = cachedStep(root, 'native', () => ['native/screen-capture-kit-helper/main.swift', 'native/screen-capture-kit-helper/FrozenFrameCache.swift',
-    'scripts/build-native-helper.sh', 'scripts/prepare-release-build.mjs'],
+    'scripts/build-native-helper.sh', 'native/quick-target-helper/main.swift', 'native/quick-target-helper/Browser.swift', 'native/quick-target-helper/Info.plist', 'scripts/build-quick-target-helper.sh', 'scripts/prepare-release-build.mjs'],
   () => nativeFiles.map(name => `build/native/${name}`), nativeContext, 'pnpm', ['native:build']);
   return { build, native: helper };
 }

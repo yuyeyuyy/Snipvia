@@ -20,10 +20,10 @@ function thumbnail(id: string) {
   }
   return value;
 }
-const Thumbnail = memo(function Thumbnail({ id, index, fullUrl, onError }: { id: string; index: number; fullUrl?: string; onError(value: string): void }) {
+const Thumbnail = memo(function Thumbnail({ id, index, width, height, fullUrl, onError }: { id: string; index: number; width: number; height: number; fullUrl?: string; onError(value: string): void }) {
   const [url, setUrl] = useState('');
   useEffect(() => { let live = true; void thumbnail(id).then(value => { if (live) setUrl(value); }).catch(error => { if (live) onError(error.message); }); return () => { live = false; }; }, [id, onError]);
-  return url ? <img src={fullUrl || url} alt={'截图 ' + (index + 1)} draggable={false} /> : <span className="shelf-loading">正在预览…</span>;
+  return url ? <img src={fullUrl || url} alt={'截图 ' + (index + 1)} style={{ width, height }} draggable={false} /> : <span className="shelf-loading">正在预览…</span>;
 });
 
 export function ScreenshotShelf() {
@@ -282,7 +282,7 @@ export function ScreenshotShelf() {
                 const width = item.width * factor, height = item.height * factor;
                 void window.snipvia.collection.openPreview({ id: item.id, source: { x: r.x + (r.width - width) / 2, y: r.y + (r.height - height) / 2, width, height } }).then(result);
               }}>
-              {!hidden && <Thumbnail id={item.id} index={index} onError={setError} />}
+              {!hidden && <Thumbnail id={item.id} index={index} width={base.width} height={base.height} onError={setError} />}
             </button>
             {expanded && <>
               <ShelfActionButton className="shelf-card-action copy-action" label={'复制截图 ' + (index + 1)} icon="copy" onError={setError} onAction={async () => { setError(''); const r = await window.snipvia.collection.copy(item.id); if (!r.ok) throw new Error(r.error); }} />

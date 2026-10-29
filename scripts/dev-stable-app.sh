@@ -26,6 +26,7 @@ if [[ ! -d "$TARGET_APP" ]]; then
   /usr/libexec/PlistBuddy -c 'Set :CFBundleName 截然 Dev' "$TARGET_APP/Contents/Info.plist"
   /usr/libexec/PlistBuddy -c 'Set :CFBundleDisplayName 截然 Dev' "$TARGET_APP/Contents/Info.plist"
   /usr/libexec/PlistBuddy -c 'Add :NSScreenCaptureUsageDescription string 截然需要录制你框选的屏幕区域，以生成截图并执行你选择的操作。' "$TARGET_APP/Contents/Info.plist"
+  /usr/libexec/PlistBuddy -c 'Add :NSAppleEventsUsageDescription string 仅在你选择网页目标时匹配并切换 Chrome 已打开的标签，不会粘贴或发送内容。' "$TARGET_APP/Contents/Info.plist"
   if [[ -f "$ROOT_DIR/build/Snipvia.icns" ]]; then
     /usr/bin/ditto "$ROOT_DIR/build/Snipvia.icns" "$TARGET_APP/Contents/Resources/Snipvia.icns"
     /usr/libexec/PlistBuddy -c 'Set :CFBundleIconFile Snipvia.icns' "$TARGET_APP/Contents/Info.plist"
@@ -38,6 +39,31 @@ if ! /usr/libexec/PlistBuddy -c 'Print :NSScreenCaptureUsageDescription' "$TARGE
   print "为固定开发应用补充 macOS 录屏用途声明（一次性迁移）。"
   /usr/libexec/PlistBuddy -c 'Add :NSScreenCaptureUsageDescription string 截然需要录制你框选的屏幕区域，以生成截图并执行你选择的操作。' "$TARGET_APP/Contents/Info.plist"
   /usr/bin/codesign --force --deep --sign - "$TARGET_APP"
+fi
+
+# Apple Events authorization belongs to the responsible app, not the child helper.
+# Upgrade only while stopped, retaining a complete, verified local recovery copy.
+if [[ "${SNIPVIA_DEV_AUTOMATION_UPGRADE:-0}" == "1" ]] && ! /usr/libexec/PlistBuddy -c 'Print :NSAppleEventsUsageDescription' "$TARGET_APP/Contents/Info.plist" >/dev/null 2>&1; then
+  if /usr/bin/pgrep -f -x "$TARGET_APP/Contents/MacOS/Electron $ROOT_DIR" >/dev/null 2>&1; then
+    print -u2 "请先退出截然 Dev，再启动以补充 Chrome 自动化用途声明。"
+    exit 1
+  fi
+  permission_backup="$RUNTIME_DIR/dev-permissions/$(date +%Y%m%d-%H%M%S)-$$/截然 Dev.app"
+  mkdir -p "${permission_backup:h}"
+  chmod 700 "${permission_backup:h}"
+  /usr/bin/ditto "$TARGET_APP" "$permission_backup"
+  /usr/bin/codesign --verify --deep --strict "$permission_backup"
+  print "已备份开发应用：$permission_backup"
+  if ! (
+    /usr/libexec/PlistBuddy -c 'Add :NSAppleEventsUsageDescription string 仅在你选择网页目标时匹配并切换 Chrome 已打开的标签，不会粘贴或发送内容。' "$TARGET_APP/Contents/Info.plist" &&
+    /usr/bin/codesign --force --sign - --preserve-metadata=entitlements,requirements,flags,runtime "$TARGET_APP" &&
+    /usr/bin/codesign --verify --deep --strict "$TARGET_APP"
+  ); then
+    /usr/bin/ditto "$permission_backup" "$TARGET_APP"
+    print -u2 "开发权限声明迁移失败，已从备份恢复；未修改用户数据。"
+    exit 1
+  fi
+  print "已补充 Chrome 用途声明；若 macOS 要求，请重新允许截然 Dev 的录屏权限。"
 fi
 
 target_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$TARGET_APP/Contents/Info.plist")"

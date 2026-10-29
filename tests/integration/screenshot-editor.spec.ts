@@ -32,6 +32,7 @@ test('ordinary capture annotates, flattens, copies, saves, pins locally without 
       };
     });
     await page.evaluate(() => window.snipvia.permissions.screen());
+    await page.getByRole('navigation', { name: '设置分类' }).getByRole('button', { name: '快捷键', exact: true }).click();
     await page.getByRole('button', { name: '设置普通截图快捷键' }).click();
     await page.getByRole('button', { name: '设置普通截图快捷键' }).press('ControlOrMeta+Alt+F8');
     await expect(page.locator('.preference-status[role="status"]')).toHaveText('快捷键已生效');
@@ -109,10 +110,14 @@ test('ordinary capture annotates, flattens, copies, saves, pins locally without 
 
     // Native save dialog cancel and success: do not open dialogs over the user's desktop.
     await start();
-    await app.evaluate(({ dialog }) => { dialog.showSaveDialog = async () => ({ canceled: true, filePath: '' }); });
+    await app.evaluate(({ dialog }) => {
+      (globalThis as typeof globalThis & { saveCancelCount: number }).saveCancelCount = 0;
+      dialog.showSaveDialog = async () => { (globalThis as typeof globalThis & { saveCancelCount: number }).saveCancelCount++; return { canceled: true, filePath: '' }; };
+    });
     await overlay.getByRole('button', { name: '保存图片', exact: true }).click();
     await expect(overlay.getByRole('button', { name: '保存图片', exact: true })).toBeEnabled();
-    expect(await visible('#capture')).toBe(true);
+    await expect.poll(() => app.evaluate(() => (globalThis as typeof globalThis & { saveCancelCount: number }).saveCancelCount)).toBe(1);
+    await expect.poll(() => visible('#capture')).toBe(true);
     const savePath = join(directory, 'edited.png');
     await app.evaluate(({ dialog }, path) => { dialog.showSaveDialog = async () => ({ canceled: false, filePath: path }); }, savePath);
     await draw('箭头', [180, 160], [400, 300]);

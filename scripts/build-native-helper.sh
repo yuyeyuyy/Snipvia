@@ -24,3 +24,4 @@ xcrun swiftc -O -parse-as-library -module-cache-path "$MODULE_CACHE" \
 xcrun lipo -create "$ARM_BINARY" "$X64_BINARY" -output "$UNIVERSAL_BINARY"
 chmod 755 "$UNIVERSAL_BINARY"
 xcrun lipo -info "$UNIVERSAL_BINARY"
+"$ROOT_DIR/scripts/build-quick-target-helper.sh"

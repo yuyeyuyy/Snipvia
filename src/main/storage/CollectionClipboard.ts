@@ -4,6 +4,7 @@ import { mkdir, readdir, lstat, readFile, writeFile, rm } from 'node:fs/promises
 import { join, dirname, basename, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { ScreenshotStore } from './ScreenshotStore';
+import { quickTargetClipboardMetadata } from '../quick-target/clipboard-marker';
 
 const batchName = /^batch-[0-9a-f-]{36}$/;
 const imageName = /^\d{3}-[0-9a-f-]{36}\.(png|jpg)$/;
@@ -60,7 +61,7 @@ async function reusableFiles(store: ScreenshotStore, ids: string[], root: string
 }
 
 /** One native copied-files entry, preserving all original bytes and Collection order. */
-export async function copyCollectionImages(store: ScreenshotStore, ids: string[], cacheRoot: string) {
+export async function copyCollectionImages(store: ScreenshotStore, ids: string[], cacheRoot: string, marker?: string) {
   if (!ids.length || ids.length > 32 || new Set(ids).size !== ids.length) throw new Error('没有可复制的截图或收纳列表无效');
   if (copying) throw new Error('正在复制收纳图片，请稍候');
   copying = true;
@@ -88,7 +89,7 @@ export async function copyCollectionImages(store: ScreenshotStore, ids: string[]
       }
     }
     const list = paths.map(path => pathToFileURL(path).href).join('\r\n');
-    await clipboard.write([new ClipboardItem({ 'text/uri-list': new Blob([list], { type: 'text/uri-list' }) })]);
+    await clipboard.write([new ClipboardItem({ 'text/uri-list': new Blob([list], { type: 'text/uri-list' }), ...quickTargetClipboardMetadata(marker) })]);
     committed = true;
     const actual = await clipboardFiles();
     if (actual.length !== paths.length || actual.some((path, index) => canonical(path) !== canonical(paths[index]))) {

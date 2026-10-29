@@ -6,7 +6,7 @@ const process = require('node:process');
 const { writeVerificationFiles } = require('./update-metadata.cjs');
 const { repository } = require('../../src/shared/release-source.json');
 const {
-  releaseRoot, appName, version, ensure, run, preflight, releaseEnvironment,
+  releaseRoot, appName, version, ensure, run, preflight, releaseSource, releaseEnvironment,
   verifyCode, verifyApp, verifyDmg, verifyZip, digest
 } = require('./common.cjs');
 
@@ -27,6 +27,7 @@ try {
     '此命令会执行正式签名并上传 Apple 公证。仅在第四阶段获批准后运行：node scripts/macos-release/release.cjs --execute');
   // Fail before building or creating a release directory if the identity is invalid.
   const identity = preflight();
+  const sourceCommit = releaseSource();
   const runName = `${version}-${new Date().toISOString().replace(/[:.]/g, '-')}-${randomUUID().slice(0, 8)}`;
   fs.mkdirSync(releaseRoot, { recursive: true });
   const output = path.join(releaseRoot, runName);
@@ -43,7 +44,8 @@ try {
   run('/usr/bin/xcrun', ['notarytool', 'history', ...credentials, '--output-format', 'json'], { env });
   console.log(`正式发布输出：${output}`);
   run('node', ['scripts/prepare-release-build.mjs', '--native'], { env, stdio: 'inherit' });
-  const report = { version, teamId: identity.team, identity: identity.name, updateRepository: repository,
+  ensure(releaseSource() === sourceCommit, '构建过程中源码提交发生变化，请重新构建。');
+  const report = { version, sourceCommit, teamId: identity.team, identity: identity.name, updateRepository: repository,
     autoUpdateEnabled: true, architectures: [], artifacts: [] };
   for (const arch of ['arm64', 'x64']) {
     console.log(`构建、签名及公证 ${arch} APP。`);
@@ -62,6 +64,7 @@ try {
     fs.writeFileSync(path.join(output, 'verification-' + arch + '.json'), JSON.stringify(report, null, 2) + '\n', { flag: 'wx' });
   }
   // Stapling changes the DMG. Regenerate update hashes only after all files are frozen.
+  ensure(releaseSource() === sourceCommit, '签名验收过程中源码发生变化，产物尚未冻结发布。');
   const verified = path.join(output, 'verified');
   const pending = path.join(output, 'verified.pending');
   fs.mkdirSync(pending);

@@ -57,6 +57,7 @@ globalThis.enableUpdateDownloadFixture = () => {
   type Probe = { calls: number; status: number; tag: string; body: string | null; blocked: boolean; release?: () => void; opened: string[] };
   try {
     const page = await instance.firstWindow();
+    await page.getByRole('navigation', { name: '设置分类' }).getByRole('button', { name: '关于', exact: true }).click();
     const row = page.locator('.update-settings-row');
     await expect(row).toContainText('启动后在后台检查正式版本');
     // The normal unpackaged client does not contact GitHub. Simulate its packaged

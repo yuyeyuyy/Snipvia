@@ -70,12 +70,12 @@ export async function verifyWindowsBuild(outputDirectory) {
   const icon = await readFile(join(appDirectory, 'resources', 'Snipvia.ico'));
   assert.equal(hash(icon), hash(sourceIcon));
   const paths = asar.listPackage(appAsar);
-  const forbidden = paths.filter(path => /snipvia-capture-helper|\.(?:node|dylib|so|swift|icns)$|\.icon\/|\/vendor\//i.test(path));
+  const forbidden = paths.filter(path => /snipvia-(?:capture|quick-target)-helper|\.(?:node|dylib|so|swift|icns)$|\.icon\/|\/vendor\//i.test(path));
   assert.deepEqual(forbidden, [], 'Unexpected native or macOS resources in ASAR');
   for (const file of ['out/main/index.js', 'out/main/capture-png-worker.js', 'out/preload/index.js', 'out/renderer/index.html']) assert(asar.statFile(appAsar, file).size > 0);
   assert.equal(JSON.parse(asar.extractFile(appAsar, 'package.json').toString()).version, version);
   const resources = await walk(join(appDirectory, 'resources'));
-  assert(!resources.some(path => /snipvia-capture-helper|elevate\.exe|\.(?:node|dylib|so|swift|icns)$/i.test(path)));
+  assert(!resources.some(path => /snipvia-(?:capture|quick-target)-helper|elevate\.exe|\.(?:node|dylib|so|swift|icns)$/i.test(path)));
   const installerBytes = await readFile(installer);
   const installerPe = inspectPe(installerBytes);
   assert.deepEqual(embeddedIconHashes(installerBytes), [...iconFrames].sort(), 'Installer PE icon differs from selected ICO');

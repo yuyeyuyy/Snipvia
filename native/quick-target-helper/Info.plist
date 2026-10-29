@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>CFBundleIdentifier</key><string>com.snipvia.desktop.quick-target-helper</string>
+  <key>CFBundleName</key><string>Snipvia Quick Target</string>
+  <key>NSAppleEventsUsageDescription</key><string>仅在你选择网页目标时，匹配并切换 Chrome 中已打开的普通标签；不会粘贴或发送内容。</string>
+</dict></plist>

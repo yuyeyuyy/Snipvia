@@ -8,9 +8,10 @@ import releaseSource from '../../src/shared/release-source.json';
 
 const require = createRequire(import.meta.url);
 type Asset = { name: string; size: number; sha256: string; content?: string };
-const { planPublication, verifyRemoteAssets, releaseOrNull } = require('../../scripts/macos-release/publish.cjs') as {
-  planPublication(directory: string, notes: string): { repository: string; tag: string; assets: Asset[] };
+const { planPublication, verifyRemoteAssets, verifyRemoteSource, releaseOrNull } = require('../../scripts/macos-release/publish.cjs') as {
+  planPublication(directory: string, notes: string): { repository: string; tag: string; sourceCommit: string; assets: Asset[] };
   verifyRemoteAssets(release: { assets: { name: string; size: number; digest: string }[] }, plan: { assets: Asset[] }, complete?: boolean): void;
+  verifyRemoteSource(plan: { tag: string; sourceCommit: string }, query: (args: string[]) => string): void;
   releaseOrNull(tag: string, query: (args: string[]) => string): { draft: boolean } | null;
 };
 const directories: string[] = [];
@@ -22,7 +23,7 @@ function fixture() {
     writeFileSync(join(directory, name), content);
     return { name, sha256: createHash('sha256').update(content).digest('hex') };
   }));
-  const report = { version: '0.3.0', teamId: 'F76JCDMA4Y', autoUpdateEnabled: true, updateRepository: releaseSource.repository,
+  const report = { version: '0.3.0', sourceCommit: 'a'.repeat(40), teamId: 'F76JCDMA4Y', autoUpdateEnabled: true, updateRepository: releaseSource.repository,
     architectures: ['arm64', 'x64'].map(arch => ({ arch, notarization: { status: 'Accepted' } })), artifacts };
   const notes = join(directory, 'PUBLIC_NOTES.md'); writeFileSync(notes, '## 改进\n\n- 正式更新。');
   const saveReport = () => writeFileSync(join(directory, 'verification.json'), JSON.stringify(report));
@@ -31,6 +32,7 @@ function fixture() {
 it('公开发布白名单只含最终二进制与哈希清单，复用固定公开更新源', () => {
   const f = fixture(), plan = planPublication(f.directory, f.notes);
   expect(plan.repository).toBe('yuyeyuyy/Snipvia'); expect(plan.tag).toBe('v0.3.0');
+  expect(plan.sourceCommit).toBe(f.report.sourceCommit);
   expect(plan.assets).toHaveLength(6); expect(plan.assets.map(item => item.name)).not.toContain('verification.json');
   expect(JSON.parse(plan.assets.find(item => item.name === 'latest-mac.yml')!.content!).files).toHaveLength(4);
 });
@@ -67,4 +69,38 @@ it('通过 CLI 找到未发布草稿后按 ID 读取，网络错误不能当作 
   expect(calls[1]).toEqual(['api', 'repos/yuyeyuyy/Snipvia/releases/123']);
   expect(releaseOrNull('v0.3.0', () => { throw Object.assign(new Error('not found'), { stderr: 'release not found' }); })).toBeNull();
   expect(() => releaseOrNull('v0.3.0', () => { throw Object.assign(new Error('network'), { stderr: 'EOF' }); })).toThrow('网络');
+});
+
+it('refuses a release without source provenance before considering its assets', () => {
+  const f = fixture();
+  f.report.sourceCommit = ''; f.saveReport();
+  expect(() => planPublication(f.directory, f.notes)).toThrow('源码提交');
+});
+it('verifies the pushed source commit and treats only a tag 404 as absent', () => {
+  const plan = { tag: 'v1.0.0', sourceCommit: 'a'.repeat(40) };
+  const missingTag = Object.assign(new Error('missing tag'), { stderr: 'gh: Not Found (HTTP 404)' });
+  const calls: string[][] = [];
+  expect(() => verifyRemoteSource(plan, args => {
+    calls.push(args);
+    if (args[1].includes('/commits/')) return JSON.stringify({ sha: plan.sourceCommit });
+    throw missingTag;
+  })).not.toThrow();
+  expect(calls[0][1]).toBe('repos/yuyeyuyy/Snipvia/commits/' + plan.sourceCommit);
+  expect(() => verifyRemoteSource(plan, () => { throw missingTag; })).toThrow();
+  expect(() => verifyRemoteSource(plan, args => {
+    if (args[1].includes('/commits/')) return JSON.stringify({ sha: plan.sourceCommit });
+    throw Object.assign(new Error('network'), { stderr: 'HTTP 403' });
+  })).toThrow('无法核对');
+});
+it('accepts matching lightweight and annotated tags, rejecting a conflicting tag without mutation', () => {
+  const plan = { tag: 'v1.0.0', sourceCommit: 'a'.repeat(40) };
+  for (const annotated of [false, true]) {
+    expect(() => verifyRemoteSource(plan, args => {
+      if (args[1].includes('/commits/')) return JSON.stringify({ sha: plan.sourceCommit });
+      if (annotated && args[1].includes('/git/ref/')) return JSON.stringify({ object: { type: 'tag', sha: 'b'.repeat(40) } });
+      return JSON.stringify({ object: { type: 'commit', sha: plan.sourceCommit } });
+    })).not.toThrow();
+  }
+  expect(() => verifyRemoteSource(plan, args => JSON.stringify(args[1].includes('/commits/')
+    ? { sha: plan.sourceCommit } : { object: { type: 'commit', sha: 'c'.repeat(40) } }))).toThrow('其他源码');
 });

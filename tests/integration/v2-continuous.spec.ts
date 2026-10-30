@@ -192,11 +192,11 @@ test('Shelf animations cancel for new captures, hidden feedback expires, and app
     await expect(shelf.getByRole('status')).toContainText('已收集 4 张');
     await expect(shelf.locator('.shelf-fly')).toHaveCount(0);
     await expect(shelf.getByRole('heading', { name: '截图收纳' })).toBeVisible();
-    await mkdir('docs/ui/v2', { recursive: true });
+    await mkdir('test-results/v2-shelf', { recursive: true });
     for (const mode of ['light', 'dark'] as const) {
       await page.evaluate(mode => window.snipvia.appearance.set(mode), mode);
       await expect(shelf.locator('html')).toHaveAttribute('data-theme', mode);
-      await shelf.screenshot({ path: 'docs/ui/v2/shelf-' + mode + '.png' });
+      await shelf.screenshot({ path: 'test-results/v2-shelf/shelf-' + mode + '.png' });
     }
   } finally { await app.close(); await rm(dir, { recursive: true, force: true }); }
 });

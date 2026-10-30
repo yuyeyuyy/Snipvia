@@ -52,6 +52,6 @@ V2 没有 AI 对话、Agent、笔记编辑、账号、订阅或模型调用。�
 
 ## 分发与许可
 
-v1.0.0 处于发布准备阶段，尚未上传安装包；当前 Electron / 构建依赖安全公告及完整 Xcode 缺失仍阻挡正式发布。源码审查、验证结果和发布阻断项见 [v1.0.0 审查记录](docs/review/V1_0_0_REVIEW.md)。既有 [v0.3.2 Release](https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.2) 属于 V1，不包含此 V2 工作流。更新模块与 GitHub Release 渠道仍保留，源码清理不执行发布或修改仓库可见性。
+v1.0.0 处于发布准备阶段，尚未上传安装包；Electron 与构建依赖安全升级已完成；正式签名安装包正在准备。最新验证和发布准备状态见 [v1.0.0 安全修复记录](docs/review/V1_0_0_SECURITY_FIX.md)，原始问题见 [审查记录](docs/review/V1_0_0_REVIEW.md)。既有 [v0.3.2 Release](https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.2) 属于 V1，不包含此 V2 工作流。更新模块与 GitHub Release 渠道仍保留，源码清理不执行发布或修改仓库可见性。
 
 源码采用 [Apache License 2.0](LICENSE)，保留 [NOTICE](NOTICE)、[第三方声明](THIRD_PARTY_NOTICES.md)和[素材来源](docs/opensource/ASSET_PROVENANCE.md)。

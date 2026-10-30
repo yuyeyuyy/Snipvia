@@ -1,7 +1,7 @@
 packages:
   - .
 overrides:
-  'fast-uri@>=3.0.0 <3.1.8': 3.1.8
+  'fast-uri@>=3.0.0 <3.1.9': 3.1.9
   'ajv@8.17.1': 8.20.0
   'source-map-js@>=1.0.0 <1.2.2': 1.2.2
   'http-cache-semantics@<=4.2.0': 4.3.0

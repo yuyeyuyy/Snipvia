@@ -37,7 +37,9 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
     require(${JSON.stringify(mainPath)});
   `);
   const options = { args: [bootstrap, '--user-data-dir=' + data], env: { ...process.env, SNIPVIA_CONSOLE_ORIGIN: 'http://127.0.0.1:9', SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } };
+  console.info('[V2Compat] launch');
   const app = await launchDesktop(options);
+  console.info('[V2Compat] ready');
   let closed = false;
   try {
     const page = await app.firstWindow();
@@ -58,16 +60,19 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
     await expect(legacy).toContainText('原笔记');
     await expect(legacy).toContainText('原有会议');
     await page.keyboard.press('Escape');
+    console.info('[V2Compat] legacy-read');
 
     const overlay = app.windows().find(window => window.url().endsWith('#capture'))!, pin = app.windows().find(window => window.url().endsWith('#pin'))!;
     const windowIds = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map(window => window.id));
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().find(window => !new URL(window.webContents.getURL()).hash)!.close());
     for (let index = 0; index < 3; index++) {
+      console.info('[V2Compat] capture-' + index);
       expect((await page.evaluate(() => window.snipvia.capture.start('edit'))).ok).toBe(true);
       await expect(overlay.locator('.screen-frame')).toBeVisible();
       await overlay.mouse.move(80, 80); await overlay.mouse.down(); await overlay.mouse.move(280, 200); await overlay.mouse.up();
       await overlay.getByRole('button', { name: '定住截图', exact: true }).click();
       await expect(pin.getByAltText('置顶截图')).toBeVisible();
+      console.info('[V2Compat] pinned-' + index);
       const current = await pin.evaluate(() => window.snipvia.pin.current());
       expect(current.ok && current.value.capture).not.toHaveProperty('conversationId');
       expect((await pin.evaluate(() => window.snipvia.legacy.read())).ok).toBe(false);
@@ -78,6 +83,7 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
         await expect(pin.getByAltText('置顶截图')).toBeVisible();
       }
       await pin.keyboard.press('Control+C');
+      console.info('[V2Compat] copied-' + index);
     }
     expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().map(window => window.id))).toEqual(windowIds);
     expect(app.windows().some(window => window.url().endsWith('#quick-chat'))).toBe(false);
@@ -85,6 +91,7 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
     expect(probe).toMatchObject({ fetches: 0, decrypts: 0, copies: 3 });
     for (const [name, original] of Object.entries(files)) expect(await readFile(join(data, name), 'utf8'), name).toBe(original);
     expect(await readFile(join(book.directory, '保留.md'), 'utf8')).toBe('# 原笔记\n\n不要修改。');
+    console.info('[V2Compat] original-data-preserved');
     await app.evaluate(({ app }) => app.emit('activate', {}, false));
     await page.getByRole('navigation', { name: '设置分类' }).getByRole('button', { name: '通用', exact: true }).click();
     await mkdir('test-results/v2-settings', { recursive: true });
@@ -93,9 +100,13 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
       await page.getByLabel('外观主题').selectOption(theme);
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
       await page.screenshot({ path: 'test-results/v2-settings/settings-phase2-' + theme + '.png', animations: 'disabled' });
+      console.info('[V2Compat] theme-' + theme);
     }
+    console.info('[V2Compat] closing');
     await app.close(); closed = true;
+    console.info('[V2Compat] closed');
     const restart = await launchDesktop(options);
+    console.info('[V2Compat] restarted');
     try {
       const page = await restart.firstWindow();
       await expect(page.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
@@ -112,6 +123,7 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
       const settings = await page.evaluate(() => window.snipvia.settings.get());
       expect(settings.ok && settings.value.shortcut).toBe('CommandOrControl+Alt+F7');
       expect(await restart.evaluate(({ globalShortcut }) => globalShortcut.isRegistered('CommandOrControl+Alt+F7'))).toBe(true);
+      console.info('[V2Compat] restart-complete');
     } finally { await restart.close(); }
   } finally { if (!closed) await app.close(); await rm(directory, { recursive: true, force: true }); }
 });

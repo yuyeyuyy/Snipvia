@@ -35,10 +35,13 @@ jobs:
       - name: Check current capture, collection, IPC, storage and platform adapters
         run: pnpm test
       - name: Build and inspect unsigned NSIS installer
+        id: build
         run: pnpm dist:windows
       - name: Validate current synthetic desktop flows
         run: pnpm exec playwright test tests/integration/v2-settings.spec.ts tests/integration/appearance.spec.ts tests/integration/feedback.spec.ts tests/integration/screenshot-editor.spec.ts tests/integration/capture-window-visibility.spec.ts tests/integration/windows-capture-ui.spec.ts tests/integration/v2-continuous.spec.ts
       - name: Install in a temporary per-user directory
+        id: install
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         shell: pwsh
         run: |
           $output = Get-ChildItem dist/windows-internal -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1
@@ -51,6 +54,7 @@ jobs:
           if (!(Test-Path $binary)) { throw 'Installed application missing' }
           "SNIPVIA_TEST_APP_BINARY=$binary" >> $env:GITHUB_ENV
       - name: Validate the installed client using synthetic frames
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm exec playwright test tests/integration/windows-release.spec.ts
       - name: Uninstall temporary application
         if: always() && env.SNIPVIA_TEST_INSTALL_DIR != ''

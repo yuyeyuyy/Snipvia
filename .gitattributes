@@ -1,0 +1,2 @@
+# Reviewed license bytes must match the recorded SHA-256 on every checkout OS.
+/scripts/opensource/licenses/*.txt text eol=lf

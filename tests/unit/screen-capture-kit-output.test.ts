@@ -1,4 +1,4 @@
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 const protocol = vi.hoisted(() => ({ writes: [] as Record<string, unknown>[], badCrop: false, full: false, delayed: false, deliver: null as null | (() => void) }));
 vi.mock('electron', () => ({ nativeImage: { createFromBitmap: vi.fn() } }));
 vi.mock('node:fs/promises', () => ({ access: async () => {} }));
@@ -30,12 +30,20 @@ vi.mock('node:child_process', async () => {
 });
 import { ScreenCaptureKitBackend } from '../../src/main/capture/screen-capture-kit-backend';
 const backends: ScreenCaptureKitBackend[] = [];
+// The helper is mocked: protocol tests must simulate its macOS host on every CI OS.
+const hostPlatform = Object.getOwnPropertyDescriptor(process, 'platform')!;
+beforeEach(() => { Object.defineProperty(process, 'platform', { ...hostPlatform, value: 'darwin' }); });
 function setup() {
   const backend = new ScreenCaptureKitBackend({ helperPath: '/test/helper', systemVersion: '14.0', outputFormat: () => 'jpeg', enabled: () => true, mark: () => {}, updateMetadata: () => {} });
   backends.push(backend); return backend;
 }
 const request = { display: { id: '1', bounds: { x: 0, y: 0, width: 400, height: 300 }, size: { width: 400, height: 300 }, scaleFactor: 1 }, performanceSessionId: 'session-one', mainWindowWasVisible: false, retainOriginal: true };
-afterEach(async () => { await Promise.all(backends.splice(0).map(b => b.dispose())); protocol.writes.length = 0; protocol.badCrop = false; protocol.full = false; protocol.delayed = false; protocol.deliver = null; });
+afterEach(async () => {
+  try { await Promise.all(backends.splice(0).map(b => b.dispose())); } finally {
+    Object.defineProperty(process, 'platform', hostPlatform);
+    protocol.writes.length = 0; protocol.badCrop = false; protocol.full = false; protocol.delayed = false; protocol.deliver = null;
+  }
+});
 it('keeps a session-bound original for PNG output and releases it exactly once', async () => {
   const frame = await setup().captureDisplay(request), rect = { x: 10, y: 20, width: 30, height: 40 };
   const png = await frame.original!.png(rect, new AbortController().signal);

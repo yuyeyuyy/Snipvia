@@ -40,8 +40,9 @@ describe('release build evidence', () => {
     const root = fixture();
     chmodSync(join(root, 'source'), 0o644);
     const before = fingerprint(root, ['source']);
-    chmodSync(join(root, 'source'), 0o755);
+    chmodSync(join(root, 'source'), 0o444);
     expect(fingerprint(root, ['source'])).not.toBe(before);
+    chmodSync(join(root, 'source'), 0o644);
     expect(() => fingerprint(root, ['missing'])).toThrow();
   });
   it('uses a stable file order', () => {

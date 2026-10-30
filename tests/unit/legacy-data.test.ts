@@ -30,7 +30,7 @@ describe('read-only v1 compatibility', () => {
     const fixture = seed(), service = new LegacyDataService(directory);
     const read = await service.read();
     expect(read.conversations[0].detail).toContain('旧内容'); expect(read.schedule[0].detail).toContain('必须保留的会议');
-    expect(read.notebooks).toEqual([fixture.book]); expect(await service.notebookDirectory(fixture.book.id)).toBe(realpathSync(fixture.book.directory));
+    expect(read.notebooks).toEqual([fixture.book]); expect(await service.notebookDirectory(fixture.book.id)).toBe(realpathSync.native(fixture.book.directory));
     expect(readFileSync(join(directory, 'history/conversations.json'))).toEqual(fixture.history);
     expect(readFileSync(join(directory, 'schedule/jobs.json'))).toEqual(fixture.schedule);
   });

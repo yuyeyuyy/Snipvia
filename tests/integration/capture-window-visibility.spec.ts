@@ -177,7 +177,11 @@ for (const backend of ['electron', 'screen-capture-kit'] as const) {
         Menu.getApplicationMenu()!.items[0].submenu!.items.find(item => item.label === '截图与标注')!.click();
       });
       await expect(main.getByRole('alert').filter({ hasText: 'synthetic capture failure' })).toHaveCount(1);
-      await expectHidden();
+      if (process.platform === 'win32') {
+        // Windows has no TCC guide: Main deliberately reveals the existing error surface.
+        await expect.poll(() => visible()).toBe(true);
+        expect(await instance.evaluate(() => (globalThis as typeof globalThis & { mainShows: number }).mainShows)).toBe(1);
+      } else await expectHidden();
       expect(await instance.evaluate(() => (globalThis as typeof globalThis & { captureWindowVisibility: boolean[] }).captureWindowVisibility.every(visible => !visible))).toBe(true);
       await openMain();
     } finally { await instance.close(); await rm(directory, { recursive: true, force: true }); }

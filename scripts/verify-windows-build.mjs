@@ -102,7 +102,7 @@ export async function verifyWindowsBuild(outputDirectory) {
   assert.match(installerPe.manifest, /requestedExecutionLevel[^>]+level="asInvoker"/);
   const bundledZip = await getPath7za();
   const candidates = [bundledZip];
-  if (process.platform === 'win32') candidates.push(join(process.env.ProgramFiles || 'C:\Program Files', '7-Zip', '7z.exe'));
+  if (process.platform === 'win32') candidates.push(join(process.env.ProgramFiles || 'C:/Program Files', '7-Zip', '7z.exe'));
   else candidates.push(join(dirname(bundledZip), '7zz'));
   const sevenZip = chooseNsisInspector(candidates);
   const scratch = await mkdtemp(join(tmpdir(), 'snipvia-win-contents-'));

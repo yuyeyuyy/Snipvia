@@ -43,6 +43,17 @@ function inspectPe(buffer) {
     strings, iconCount: entries.filter(entry => entry.type === 3).length, manifest };
 }
 
+export function inspectWindowsArchive(appAsar, version) {
+  const paths = asar.listPackage(appAsar).map(file => file.replaceAll('\\', '/'));
+  const forbidden = paths.filter(file => /snipvia-(?:capture|quick-target)-helper|\.(?:node|dylib|so|swift|icns)$|\.icon\/|\/vendor\//i.test(file));
+  assert.deepEqual(forbidden, [], 'Unexpected native or macOS resources in ASAR');
+  // @electron/asar traverses with path.sep, so API paths must use native separators.
+  for (const file of ['out/main/index.js', 'out/main/capture-png-worker.js', 'out/preload/index.js', 'out/renderer/index.html']) {
+    assert(asar.statFile(appAsar, join(...file.split('/'))).size > 0);
+  }
+  assert.equal(JSON.parse(asar.extractFile(appAsar, 'package.json').toString()).version, version);
+}
+
 export async function verifyWindowsBuild(outputDirectory) {
   const output = resolve(outputDirectory);
   const { version } = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
@@ -69,11 +80,7 @@ export async function verifyWindowsBuild(outputDirectory) {
   assert.match(pe.manifest, /requestedExecutionLevel[^>]+level="asInvoker"/);
   const icon = await readFile(join(appDirectory, 'resources', 'Snipvia.ico'));
   assert.equal(hash(icon), hash(sourceIcon));
-  const paths = asar.listPackage(appAsar);
-  const forbidden = paths.filter(path => /snipvia-(?:capture|quick-target)-helper|\.(?:node|dylib|so|swift|icns)$|\.icon\/|\/vendor\//i.test(path));
-  assert.deepEqual(forbidden, [], 'Unexpected native or macOS resources in ASAR');
-  for (const file of ['out/main/index.js', 'out/main/capture-png-worker.js', 'out/preload/index.js', 'out/renderer/index.html']) assert(asar.statFile(appAsar, file).size > 0);
-  assert.equal(JSON.parse(asar.extractFile(appAsar, 'package.json').toString()).version, version);
+  inspectWindowsArchive(appAsar, version);
   const resources = await walk(join(appDirectory, 'resources'));
   assert(!resources.some(path => /snipvia-(?:capture|quick-target)-helper|elevate\.exe|\.(?:node|dylib|so|swift|icns)$/i.test(path)));
   const installerBytes = await readFile(installer);

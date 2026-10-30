@@ -57,6 +57,7 @@ test('installed Windows client uses the patched runtime and preserves local capt
     await expect.poll(() => app.evaluate(async ({ clipboard }) => (await clipboard.read()).some(item => item.types.includes('image/png')))).toBe(true);
     await start('collect'); await select(overlay);
     await expect.poll(async () => { const result = await page.evaluate(() => window.snipvia.collection.current()); return result.ok && result.value.collection.count; }).toBe(1);
+    await expect.poll(() => app.windows().some(page => page.url().endsWith('#shelf'))).toBe(true);
     const shelf = app.windows().find(page => page.url().endsWith('#shelf'))!;
     await expect(shelf.getByRole('button', { name: '展开图堆', exact: true })).toBeVisible();
     await shelf.getByRole('button', { name: '展开图堆', exact: true }).click();

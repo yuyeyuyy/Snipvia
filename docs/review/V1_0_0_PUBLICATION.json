@@ -1,0 +1,55 @@
+{
+  "version": "1.0.0",
+  "sourceCommit": "6207bd83256ccb5b6390ea02a0446e6ee3d92e35",
+  "releaseUrl": "https://github.com/yuyeyuyy/Snipvia/releases/tag/v1.0.0",
+  "releaseId": 428642378,
+  "publishedAt": "2026-10-30T04:17:26Z",
+  "windowsRun": "https://github.com/yuyeyuyy/Snipvia/actions/runs/40999082293",
+  "artifacts": [
+    {
+      "name": "Snipvia-1.0.0-arm64.dmg",
+      "size": 134568686,
+      "sha256": "afe0663975f03c8c015e3e1f806bebfc410648ca6866c5d8b226a0d434d1fa0c"
+    },
+    {
+      "name": "Snipvia-1.0.0-arm64.zip",
+      "size": 134543259,
+      "sha256": "efa7d2d5acb695ed716446aba4e3ed95475cf89a374d5d698588df30bf4ac4c4"
+    },
+    {
+      "name": "Snipvia-1.0.0-x64.dmg",
+      "size": 141422009,
+      "sha256": "0884120792624a1f0704b9747341110d139bef860dc3f3aef3e46f256a44c50f"
+    },
+    {
+      "name": "Snipvia-1.0.0-x64.zip",
+      "size": 141413550,
+      "sha256": "0a722587c2b9320f0ba0a2cdafa652e306f8b2308d866d0b67f22b8322a079ff"
+    },
+    {
+      "name": "latest-mac.yml",
+      "size": 964,
+      "sha256": "b960435c98fee6c63cef874ab8d60cfd0f31e13522e686b6d41f84cedad5ef00"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 356,
+      "sha256": "d21a1b9901ea81c392c568599db5a01174eb33d3db071f7fb321344eaf03de06"
+    },
+    {
+      "name": "Snipvia-Setup-1.0.0-x64.exe",
+      "size": 114343788,
+      "sha256": "5312a67c1f09164ec9d2c88eb39757717965fa975534f2cc4b230735b923dac0"
+    },
+    {
+      "name": "SHA256SUMS-Windows.txt",
+      "size": 94,
+      "sha256": "3ad55fc95fec8562009683284437418f13c4b6d8e80fdc71a0492463391ba143"
+    }
+  ],
+  "updateChannel": {
+    "url": "https://github.com/yuyeyuyy/Snipvia/releases/latest/download/latest-mac.yml",
+    "verifiedVersion": "1.0.0",
+    "sha256": "b960435c98fee6c63cef874ab8d60cfd0f31e13522e686b6d41f84cedad5ef00"
+  }
+}

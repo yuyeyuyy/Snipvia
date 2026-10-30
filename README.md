@@ -1,6 +1,6 @@
 # Snipvia（截然）
 
-轻量、本地优先的截图工具。当前为 1.0.0 发布候选，源码位于 `refactor/snipvia-v2`：不需要账号、模型或 API Key，主窗口是设置中心。
+轻量、本地优先的截图工具。当前稳定版为 [1.0.0](https://github.com/yuyeyuyy/Snipvia/releases/tag/v1.0.0)：不需要账号、模型或 API Key，主窗口是设置中心。
 
 | 快捷键（新安装默认） | 当前行为 |
 | --- | --- |
@@ -52,6 +52,8 @@ V2 没有 AI 对话、Agent、笔记编辑、账号、订阅或模型调用。�
 
 ## 分发与许可
 
-v1.0.0 处于发布准备阶段，尚未上传安装包；Electron 与构建依赖安全升级已完成；正式签名安装包正在准备。最新验证和发布准备状态见 [v1.0.0 安全修复记录](docs/review/V1_0_0_SECURITY_FIX.md)，原始问题见 [审查记录](docs/review/V1_0_0_REVIEW.md)。既有 [v0.3.2 Release](https://github.com/yuyeyuyy/Snipvia/releases/tag/v0.3.2) 属于 V1，不包含此 V2 工作流。更新模块与 GitHub Release 渠道仍保留，源码清理不执行发布或修改仓库可见性。
+[v1.0.0 已发布](https://github.com/yuyeyuyy/Snipvia/releases/tag/v1.0.0)：[macOS Apple Silicon](https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.0/Snipvia-1.0.0-arm64.dmg)、[macOS Intel](https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.0/Snipvia-1.0.0-x64.dmg)、[Windows x64](https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.0/Snipvia-Setup-1.0.0-x64.exe)。macOS 已签名并公证；Windows 安装、运行、卸载回归通过，安装包尚未签名，保留手动更新。
+
+完整结果、公开文件哈希及已知限制见[发行记录](docs/review/V1_0_0_RELEASE.md)。本机 SCK 原生截图专项仍有超时，客户端会自动回退 Electron；连续截图人工试用正常，不能据此声称原生路径已通过。Electron 与构建依赖的修复见[安全记录](docs/review/V1_0_0_SECURITY_FIX.md)。更新使用独立 GitHub Release 渠道；旧 v0.3.2 与 V1 AI 客户端发行资产保留。
 
 源码采用 [Apache License 2.0](LICENSE)，保留 [NOTICE](NOTICE)、[第三方声明](THIRD_PARTY_NOTICES.md)和[素材来源](docs/opensource/ASSET_PROVENANCE.md)。

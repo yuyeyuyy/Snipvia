@@ -16,3 +16,12 @@
 此版本聚焦截图与收纳，不再提供旧版 AI 对话、Agent、笔记编辑、模型调用或账号功能。旧历史、日程与笔记文件保留，可从设置中只读查看、导出或导入旧截图，不会自动删除原数据。
 
 快速切换、浏览器控制和输入框聚焦受系统权限与目标应用支持限制。Windows 当前保留检查更新与手动安装入口，尚未配置签名自动安装更新。
+
+## 安装包与验证
+
+- macOS Apple Silicon / Intel：提供 DMG 与 ZIP，均已使用 Developer ID 签名、通过 Apple 公证与 Gatekeeper 检查，保留独立 GitHub 更新渠道。
+- Windows x64：提供未签名 NSIS 安装包，已在 Windows runner 完成实际安装、合成截图/复制/收纳测试及卸载；保留检查更新与手动安装。尚无 Windows 代码签名证书，系统可能提示未知发布者。
+- 运行时升级至 Electron 44.9.1，完整依赖审计未发现已知漏洞（本次审计时点）。
+- macOS 本机原生截图专项仍出现 ScreenCaptureKit 超时，现有保护会自动回退 Electron；人工连续截图试用正常、速度可接受。此项不计为原生路径验收通过。Intel 真机、混合 DPI 及所有第三方粘贴/拖放目标尚未全面验收。
+
+源码提交：`6207bd83256ccb5b6390ea02a0446e6ee3d92e35`。Windows 安装验收：[成功工作流](https://github.com/yuyeyuyy/Snipvia/actions/runs/40999082293)。下载后可按随附 SHA-256 清单核对文件完整性。

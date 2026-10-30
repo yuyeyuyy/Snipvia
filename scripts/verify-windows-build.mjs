@@ -6,7 +6,7 @@ import { createHash } from 'node:crypto';
 import { mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath, URL } from 'node:url';
 
@@ -54,6 +54,17 @@ export function inspectWindowsArchive(appAsar, version) {
   assert.equal(JSON.parse(asar.extractFile(appAsar, 'package.json').toString()).version, version);
 }
 
+/** 7za may inspect an EXE as PE without supporting its NSIS payload. Require the actual format handler. */
+export function chooseNsisInspector(candidates, inspect = file => execFileSync(file, ['i'], { encoding: 'utf8', stdio: 'pipe' })) {
+  for (const file of new Set(candidates)) {
+    try {
+      const formats = /Formats:\s*([\s\S]*?)(?:\r?\nCodecs:|\r?\nHashers:|$)/i.exec(inspect(file))?.[1] ?? '';
+      if (/\bNsis\b/i.test(formats)) return file;
+    } catch { /* Missing or incompatible tools cannot verify the installer. */ }
+  }
+  throw new Error('NSIS inspection requires full 7-Zip with NSIS support; install 7-Zip on Windows.');
+}
+
 export async function verifyWindowsBuild(outputDirectory) {
   const output = resolve(outputDirectory);
   const { version } = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
@@ -89,7 +100,11 @@ export async function verifyWindowsBuild(outputDirectory) {
   assert.equal(installerPe.certificateBytes, 0, 'Internal installer must be unsigned');
   assert(installerPe.strings.some(value => value.ProductName === 'Snipvia' && value.ProductVersion === version));
   assert.match(installerPe.manifest, /requestedExecutionLevel[^>]+level="asInvoker"/);
-  const sevenZip = await getPath7za();
+  const bundledZip = await getPath7za();
+  const candidates = [bundledZip];
+  if (process.platform === 'win32') candidates.push(join(process.env.ProgramFiles || 'C:\Program Files', '7-Zip', '7z.exe'));
+  else candidates.push(join(dirname(bundledZip), '7zz'));
+  const sevenZip = chooseNsisInspector(candidates);
   const scratch = await mkdtemp(join(tmpdir(), 'snipvia-win-contents-'));
   try {
     execFileSync(sevenZip, ['t', installer], { stdio: 'pipe' });

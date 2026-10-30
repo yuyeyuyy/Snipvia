@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url';
 const require = createRequire(import.meta.url), builder = createRequire(require.resolve('electron-builder'));
 const asar = createRequire(builder.resolve('app-builder-lib'))('@electron/asar') as { createPackage(source: string, archive: string): Promise<void> };
 const moduleUrl = pathToFileURL(resolve('scripts/verify-windows-build.mjs')).href;
-const { inspectWindowsArchive } = await import(moduleUrl) as { inspectWindowsArchive(archive: string, version: string): void };
+const { inspectWindowsArchive, chooseNsisInspector } = await import(moduleUrl) as { inspectWindowsArchive(archive: string, version: string): void; chooseNsisInspector(candidates: string[], inspect: (file: string) => string): string };
 const temporary: string[] = [];
 afterEach(async () => { for (const directory of temporary.splice(0)) await rm(directory, { recursive: true, force: true }); });
 
@@ -41,4 +41,19 @@ it('rejects native modules and macOS resources on every host OS', async () => {
     const file = await archive({ extra });
     expect(() => inspectWindowsArchive(file, '1.0.0')).toThrow('Unexpected native or macOS resources');
   }
+});
+
+
+it('requires a real NSIS handler instead of accepting a PE-only inspector', () => {
+  const capabilities: Record<string, string> = {
+    standalone: 'Nsis is unavailable\nFormats:\n 0 C... 7z 7z\nCodecs:\n',
+    full: 'Formats:\n 0 C... 7z 7z\n 1 .... Nsis nsis\nCodecs:\n'
+  };
+  expect(chooseNsisInspector(['missing', 'standalone', 'full'], file => {
+    if (!(file in capabilities)) throw new Error('not installed');
+    return capabilities[file];
+  })).toBe('full');
+});
+it('fails closed when no inspector can decode NSIS', () => {
+  expect(() => chooseNsisInspector(['standalone'], () => 'Formats:\n PE exe\nCodecs:\n')).toThrow('NSIS support');
 });

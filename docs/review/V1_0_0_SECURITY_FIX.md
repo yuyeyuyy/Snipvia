@@ -20,7 +20,7 @@ Electron 官方包已安装，实际 `dist/version` 为 44.9.1。官方归档由
 
 - Node 24.15.0、pnpm 11.1.3；冻结锁文件安装成功。
 - `pnpm lint`、`pnpm typecheck` 通过。
-- Vitest 4.1.12：52 个文件、294 项单测通过（含新增的 3 项 Windows 构建命令及 3 项真实 ASAR 回归）。
+- Vitest 4.1.12：52 个文件、296 项单测通过（含 Windows 构建命令、真实 ASAR 与解包工具能力回归）。
 - `pnpm build` 通过；依赖许可证记录为 122 个生产版本，0 个缺少许可证文件。
 - Electron 44.9.1 完整集成回归：31 通过、13 按环境条件未执行。原先的真实屏幕/耐久/正式包专项为 12 项，新增 1 项仅在已安装 Windows 客户端上执行。
 - 首次升级后的离屏收纳重启测试曾超时，未删除或放宽断言；专项诊断重跑和无诊断改动的完整回归均通过。没有把这次超时称为已经证明的业务缺陷或已定位的产品修复，后续若复发应保留启动阶段诊断继续追查。
@@ -41,13 +41,13 @@ Electron 官方包已安装，实际 `dist/version` 为 44.9.1。官方归档由
 
 第二次 CI 已通过全部 288 项原单测，随后发现 Windows 无法用 `execFileSync` 直接启动 pnpm 的 `.cmd` 入口。`prepare-release-build.mjs` 现通过当前 Node 执行活动 pnpm CLI 文件，保留字面参数数组，不启用 shell；新增测试覆盖空格路径、特殊字符参数和无效入口拒绝。
 
-Windows 首次 CI 暴露 7 项跨平台测试夹具问题：异步原生 realpath 与 8.3 同步路径比较、审查过的许可证文本在 checkout 时被转换为 CRLF、只测试 Unix 执行位的 chmod 断言，以及未固定 macOS 主机的四项模拟 SCK 协议测试。修复为原生路径比较、用 `.gitattributes` 固定许可证 LF、跨平台可观察的只读位变化与可恢复的平台模拟；保留全部原断言，没有更改生产平台检查或放宽许可证哈希。第三次 CI 已生成安装包，但旧 ASAR 检查把 POSIX 路径传给按 `path.sep` 遍历的 API，在 Windows 上误报入口缺失。现将检查路径改为原生分隔符，统一资源黑名单匹配路径；用真实微型 ASAR 覆盖入口完整性、错误版本及禁止资源，不放宽包体检查。Windows CI 成功记录及产物哈希仍需要在上传 Release 前核对。Windows 安装包仍未配置代码签名与自动安装更新，分发说明必须明确；检查更新和手动下载安装保留。真实混合 DPI、第三方应用接收拖放/多文件粘贴仍为平台边界，不能用 CI 合成帧推断其全部行为。
+Windows 首次 CI 暴露 7 项跨平台测试夹具问题：异步原生 realpath 与 8.3 同步路径比较、审查过的许可证文本在 checkout 时被转换为 CRLF、只测试 Unix 执行位的 chmod 断言，以及未固定 macOS 主机的四项模拟 SCK 协议测试。修复为原生路径比较、用 `.gitattributes` 固定许可证 LF、跨平台可观察的只读位变化与可恢复的平台模拟；保留全部原断言，没有更改生产平台检查或放宽许可证哈希。第三次 CI 已生成安装包，但旧 ASAR 检查把 POSIX 路径传给按 `path.sep` 遍历的 API，在 Windows 上误报入口缺失。现将检查路径改为原生分隔符，统一资源黑名单匹配路径；用真实微型 ASAR 覆盖入口完整性、错误版本及禁止资源，不放宽包体检查。随后 CI 的 NSIS 检查暴露 Windows 构建工具包中的独立 7za 能读取 PE，却无法解出 NSIS；验收现在先核对工具的 NSIS 格式能力，再选择完整 7-Zip，而非把 EXE 可读当作安装负载已验证。没有跳过负载、卸载器和源字节检查。Windows CI 成功记录及产物哈希仍需要在上传 Release 前核对。Windows 安装包仍未配置代码签名与自动安装更新，分发说明必须明确；检查更新和手动下载安装保留。真实混合 DPI、第三方应用接收拖放/多文件粘贴仍为平台边界，不能用 CI 合成帧推断其全部行为。
 
 ## macOS 签名准备与剩余条件
 
 钥匙串 `snipvia-notary` 已通过 Apple `notarytool history` 的只读认证，没有导出凭据或上传二进制。这解除“远程凭据尚未验证”这一不确定项，不等于本次 APP/DMG 已经通过公证。
 
-本记录准备时完整 Xcode 仍在安装，系统选中 Command Line Tools；正式 preflight 尚未放行。正式构建仍需完整 Xcode 的 `xcodebuild` / `actool`，不能删掉检查或切换到临时签名作为替代。
+现已安装完整 Xcode 27.2 并完成首次启动；`xcodebuild -checkFirstLaunchStatus`、actool 27.2 与 Developer ID 正式 preflight 均通过。构建通过局部 `DEVELOPER_DIR` 使用完整 Xcode，不修改系统全局开发工具选择；签名、公证与最终安装包验收仍按原流程执行。
 
 发行顺序为：保存安全升级提交并正常推送 → Windows CI 安装/运行/卸载通过 → 完整 Xcode preflight → 从干净的相同源码构建两种 macOS 架构 → 签名、公证 Accepted、Staple、Gatekeeper 与最终元数据/哈希验证 → 核对远程源码和标签 → 发布 v1.0.0。没有覆盖已有发行版或强推历史的步骤。
 

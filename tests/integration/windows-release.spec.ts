@@ -17,8 +17,7 @@ test('installed Windows client uses the patched runtime and preserves local capt
     const page = app.windows().find(page => !new URL(page.url()).hash)!;
     await expect(page.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
     const status = await app.evaluate(({ app, nativeImage, globalShortcut }) => {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const path = require('node:path') as typeof import('node:path');
+      const path = process.getBuiltinModule('path');
       return { packaged: app.isPackaged, version: app.getVersion(), runtime: process.versions.electron,
         architecture: process.arch, userData: app.getPath('userData'),
         iconEmpty: nativeImage.createFromPath(path.join(process.resourcesPath, 'Snipvia.ico')).isEmpty(),

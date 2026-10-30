@@ -35,9 +35,19 @@ export function canReuse(receipt, input, output) {
     && receipt.input === input && receipt.output === output;
 }
 
+/** Execute pnpm through Node on Windows; .cmd files require a shell and cannot be execFile targets. */
+export function buildCommand(command, args, { platform = process.platform, node = process.execPath, pnpm = process.env.npm_execpath } = {}) {
+  if (command !== 'pnpm' || platform !== 'win32') return { command, args };
+  if (!pnpm || !path.win32.isAbsolute(pnpm) || !/^pnpm\.(?:c|m)?js$/i.test(path.win32.basename(pnpm))) {
+    throw new Error('Windows release preparation must be started through pnpm.');
+  }
+  return { command: node, args: [pnpm, ...args] };
+}
+
 function run(root, command, args, inherit = false) {
+  const invocation = buildCommand(command, args);
   try {
-    return execFileSync(command, args, {
+    return execFileSync(invocation.command, invocation.args, {
       cwd: root, encoding: 'utf8', stdio: inherit ? 'inherit' : ['ignore', 'pipe', 'pipe'],
       maxBuffer: 32 * 1024 * 1024
     })?.trim();

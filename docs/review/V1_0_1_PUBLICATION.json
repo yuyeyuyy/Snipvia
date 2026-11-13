@@ -1,0 +1,81 @@
+{
+  "version": "1.0.1",
+  "tag": "v1.0.1",
+  "sourceCommit": "786633c624491781c4eb0bb71c5ed876c1f52bf3",
+  "publishedAt": "2026-11-13T13:14:14Z",
+  "url": "https://github.com/yuyeyuyy/Snipvia/releases/tag/v1.0.1",
+  "windowsRun": "43424398312",
+  "windowsConclusion": "success",
+  "assets": [
+    {
+      "name": "Snipvia-1.0.1-arm64.dmg",
+      "size": 134569358,
+      "sha256": "2e1584403c0fe8e56f40e367c8224a8d05b61ccc3090d0ccb24c537f4a8b120d"
+    },
+    {
+      "name": "Snipvia-1.0.1-arm64.zip",
+      "size": 134543841,
+      "sha256": "871aadb7ee52ca44ca182f24174e9bca2068976275bf57bddc2693946f2deffe"
+    },
+    {
+      "name": "Snipvia-1.0.1-x64.dmg",
+      "size": 141422332,
+      "sha256": "98e93d55aaa835ac1c178fe8697748ff2071dc7039f2f8d6fdd27358a3eca705"
+    },
+    {
+      "name": "Snipvia-1.0.1-x64.zip",
+      "size": 141414164,
+      "sha256": "f1db6140cfab6c9dff5f948d8f76f518d81255238bf6ceadc0f575ed3ef6e4d0"
+    },
+    {
+      "name": "latest-mac.yml",
+      "size": 964,
+      "sha256": "bcbb57fd3e7c3b61e23ece33122a2a18e4e251c1a9499d49e2978f4e9d53b6ba"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 356,
+      "sha256": "71ea15ebce77cc9f683b0a051fe1b11509ff9638093a959c55f9dcb0321b7110"
+    },
+    {
+      "name": "Snipvia-Setup-1.0.1-x64.exe",
+      "size": 114344337,
+      "sha256": "b680c19460440f4d6589d728a6dc85b32d97792b71ff3dd139c6db8722c0c7c1"
+    },
+    {
+      "name": "SHA256SUMS-Windows.txt",
+      "size": 94,
+      "sha256": "0875d3db14106862301882986b4e3b7cd92f8ac4c791c6e5480a4840f303b469"
+    }
+  ],
+  "notarization": [
+    {
+      "arch": "arm64",
+      "status": "Accepted"
+    },
+    {
+      "arch": "x64",
+      "status": "Accepted"
+    }
+  ],
+  "packagedSource": [
+    {
+      "arch": "mac-arm64",
+      "version": "1.0.1",
+      "compiledFilesMatched": 27,
+      "asarSha256": "cb7bd583f5099be3ef9509e527f2df5fa65a89365543bb29a3be221c9b96353b"
+    },
+    {
+      "arch": "mac",
+      "version": "1.0.1",
+      "compiledFilesMatched": 27,
+      "asarSha256": "cb7bd583f5099be3ef9509e527f2df5fa65a89365543bb29a3be221c9b96353b"
+    }
+  ],
+  "publicUpdate": {
+    "url": "https://github.com/yuyeyuyy/Snipvia/releases/latest/download/latest-mac.yml",
+    "version": "1.0.1",
+    "sha256": "bcbb57fd3e7c3b61e23ece33122a2a18e4e251c1a9499d49e2978f4e9d53b6ba"
+  },
+  "checkedAt": "2026-11-13T13:16:18.781Z"
+}

@@ -31,17 +31,17 @@ macOS 可激活本机应用，并可选匹配 Chrome 已打开的标签。Window
 
 ## 下载 Snipvia
 
-当前稳定版：[v1.0.0](https://github.com/yuyeyuyy/Snipvia/releases/tag/v1.0.0)。可从[官网下载页](https://umbraticus.cn/#download)获取安装包，也可直接下载 GitHub Release：
+当前稳定版：[v1.0.1](https://github.com/yuyeyuyy/Snipvia/releases/tag/v1.0.1)。以下按钮直达 GitHub Release；[官网](https://umbraticus.cn/)提供功能介绍与视频演示：
 
 <p align="center">
-  <a href="https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.0/Snipvia-1.0.0-arm64.dmg"><img src="docs/readme/download-mac-arm64.svg" alt="下载 macOS Apple silicon 安装包" width="252" /></a>
-  <a href="https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.0/Snipvia-1.0.0-x64.dmg"><img src="docs/readme/download-mac-x64.svg" alt="下载 macOS Intel 安装包" width="252" /></a>
-  <a href="https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.0/Snipvia-Setup-1.0.0-x64.exe"><img src="docs/readme/download-windows-x64.svg" alt="下载 Windows x64 安装包" width="252" /></a>
+  <a href="https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.1/Snipvia-1.0.1-arm64.dmg"><img src="docs/readme/download-mac-arm64.svg" alt="下载 macOS Apple silicon 安装包" width="252" /></a>
+  <a href="https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.1/Snipvia-1.0.1-x64.dmg"><img src="docs/readme/download-mac-x64.svg" alt="下载 macOS Intel 安装包" width="252" /></a>
+  <a href="https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.1/Snipvia-Setup-1.0.1-x64.exe"><img src="docs/readme/download-windows-x64.svg" alt="下载 Windows x64 安装包" width="252" /></a>
 </p>
 
 - **Mac**：macOS 14 及以上，提供 Apple silicon 与 Intel 安装包，已完成 Developer ID 签名和 Apple 公证。
 - **Windows**：Windows 11 x64 安装与运行回归通过；安装包尚未签名，检查更新后需手动安装。
-- 完整说明与 SHA-256 校验文件见 [Release](https://github.com/yuyeyuyy/Snipvia/releases/tag/v1.0.0) 和[发行验收记录](docs/review/V1_0_0_RELEASE.md)。
+- 完整说明与 SHA-256 校验文件见 [Release](https://github.com/yuyeyuyy/Snipvia/releases/tag/v1.0.1) 和[发行验收记录](docs/review/V1_0_1_RELEASE.md)。
 
 ## 边截边收，稍后一起处理
 
@@ -83,7 +83,7 @@ macOS 可激活本机应用，并可选匹配 Chrome 已打开的标签。Window
 3. **配上常用目标**：开启「快速切换」，添加应用或网页。截图后选择目标，手动粘贴即可。
 
 <details>
-<summary><strong>查看当前源码的新默认快捷键</strong></summary>
+<summary><strong>查看默认快捷键</strong></summary>
 
 | macOS | Windows | 动作 |
 | --- | --- | --- |
@@ -93,7 +93,7 @@ macOS 可激活本机应用，并可选匹配 Chrome 已打开的标签。Window
 | `Command+4` | `Ctrl+4` | 隐藏／显示收纳区，保留展开状态 |
 | `Command+5` | `Ctrl+5` | 确认后清空收纳区 |
 
-v1.0.1 起的新配置采用上述组合；v1.0.0 安装包仍以设置中的实际键位为准。已有配置和自定义快捷键保留。展开／收起仍通过点击图堆或收纳区顶栏按钮操作；以设置中的实际键位为准。
+v1.0.1 起的新配置采用上述组合，已有配置和自定义快捷键保留。展开／收起仍通过点击图堆或收纳区顶栏按钮操作；以设置中的实际键位为准。
 
 </details>
 

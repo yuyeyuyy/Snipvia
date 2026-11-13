@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="80" viewBox="0 0 300 80" role="img" aria-label="下载 Mac · Intel">
+  <rect x=".5" y=".5" width="299" height="79" rx="14" fill="#f6f7f9" stroke="#d8dce3"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Microsoft YaHei, sans-serif"><text x="24" y="33" fill="#20232a" font-size="17" font-weight="600">Mac · Intel</text><text x="24" y="57" fill="#737b88" font-size="13">macOS 14+ · .dmg</text></g>
+  <path d="M266 26v21m-6-6 6 6 6-6M256 52v5h20v-5" fill="none" stroke="#252831" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="460" viewBox="0 0 1280 460" role="img" aria-labelledby="title desc">
+  <title id="title">Snipvia 截然 — 截图之后，直接开始对话。</title>
+  <desc id="desc">免费的本地截图工具，截图、标注、收纳，并快速切换到常用应用或网页。右侧为流程示意。</desc>
+  <rect width="1280" height="460" rx="28" fill="#f6f7f9"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" fill="#181a1f">
+    <g transform="translate(62 48) scale(2.1)" color="#181a1f"><path d="M19 7.75A4.5 4.5 0 0 1 22 12v5.5a4.5 4.5 0 0 1-4.5 4.5H12a4.5 4.5 0 0 1-4.25-3" fill="none" stroke="currentColor" stroke-width="1.7"/><path fill="currentColor" fill-rule="evenodd" d="M7 2h5a5 5 0 0 1 5 5v5a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Z M9.5 5c.4 2.7 1.8 4.1 4.5 4.5-2.7.4-4.1 1.8-4.5 4.5-.4-2.7-1.8-4.1-4.5-4.5 2.7-.4 4.1-1.8 4.5-4.5Z"/></g>
+    <text x="128" y="86" font-size="36" font-weight="650" letter-spacing="-1">Snipvia <tspan fill="#727782" font-weight="400" font-size="24">/ 截然</tspan></text>
+    <text x="64" y="200" font-size="59" font-weight="650" letter-spacing="-2">截图之后，</text>
+    <text x="64" y="280" font-size="59" font-weight="650" letter-spacing="-2">直接开始对话。</text>
+    <text x="68" y="338" font-size="22" fill="#626975">截图 · 标注 · 收纳 · 快速切换</text>
+    <text x="68" y="406" font-size="14" fill="#7c8491" letter-spacing="2">FREE · LOCAL FIRST · APACHE 2.0</text>
+    <g transform="translate(750 77) rotate(5 190 125)">
+      <rect width="366" height="252" rx="16" fill="#eceef2" stroke="#d8dce3"/>
+      <rect x="17" y="17" width="332" height="211" rx="9" fill="#e5e0f0"/>
+      <path d="M43 159h209M43 177h160" stroke="#b7adc9" stroke-width="8" stroke-linecap="round"/>
+      <text x="41" y="91" font-size="24" font-weight="600">把想法，截下来。</text>
+      <text x="43" y="125" font-size="12" fill="#7f7495" letter-spacing="2">YOUR NEXT CONVERSATION</text>
+      <path d="M5 48V3h45M317 3h45v45M362 205v44h-45M50 249H5v-44" fill="none" stroke="#6e647e" stroke-width="3"/>
+    </g>
+    <g transform="translate(696 278)">
+      <rect x="2" y="5" width="444" height="105" rx="26" fill="#d8dce3" opacity=".7"/>
+      <rect width="444" height="105" rx="26" fill="#fff" stroke="#d5d9df"/>
+      <rect x="12" y="12" width="132" height="81" rx="18" fill="#eef0f4"/>
+      <g text-anchor="middle" font-size="14">
+        <rect x="66" y="23" width="24" height="24" rx="8" fill="#292c34"/><text x="78" y="41" fill="#fff" font-size="15">C</text>
+        <text x="78" y="74">Codex</text>
+        <circle cx="222" cy="35" r="12" fill="#eceef2"/><text x="222" y="40" font-size="15">G</text><text x="222" y="74">ChatGPT</text>
+        <circle cx="366" cy="35" r="12" fill="#eceef2"/><text x="366" y="40" font-size="15">D</text><text x="366" y="74">DeepSeek</text>
+      </g>
+      <path d="m116 72 5 18 5-6 7 4 3-5-7-4 5-4Z" fill="#252831" stroke="#fff" stroke-width="1.5"/>
+    </g>
+    <text x="919" y="416" text-anchor="middle" font-size="13" fill="#808794">截图 → 选择目标 → 粘贴</text>
+  </g>
+</svg>

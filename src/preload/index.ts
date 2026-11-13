@@ -80,6 +80,7 @@ const api: SnipviaAPI = {
     reducedMotion: value => ipcRenderer.invoke('collection:reduced-motion', value),
     current: () => ipcRenderer.invoke('collection:current'),
     toggle: () => ipcRenderer.invoke('collection:toggle'),
+    toggleVisibility: () => ipcRenderer.invoke('collection:toggle-visibility'),
     collapse: () => ipcRenderer.invoke('collection:collapse'),
     hide: () => ipcRenderer.invoke('collection:hide'),
     remove: id => ipcRenderer.invoke('collection:remove', id),

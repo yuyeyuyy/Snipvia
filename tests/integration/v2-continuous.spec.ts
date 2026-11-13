@@ -261,8 +261,8 @@ test('shortcuts register all five actions, preserve custom bindings and roll bac
   try {
     const page = await app.firstWindow();
     const current = await page.evaluate(() => window.snipvia.settings.get()); if (!current.ok) throw new Error(current.error);
-    expect(current.value).toEqual({ shortcut: 'Control+1', editorShortcut: 'Control+3', collectShortcut: 'Control+2', collectionShortcut: 'Control+Shift+2', clearCollectionShortcut: 'Alt+2' });
-    expect(await app.evaluate(({ globalShortcut }) => ['Control+1', 'Control+2', 'Control+3', 'Control+Shift+2', 'Alt+2'].map(key => globalShortcut.isRegistered(key)))).toEqual([true, true, true, true, true]);
+    expect(current.value).toEqual({ shortcut: 'CommandOrControl+1', editorShortcut: 'CommandOrControl+2', collectShortcut: 'CommandOrControl+3', collectionShortcut: 'CommandOrControl+4', clearCollectionShortcut: 'CommandOrControl+5' });
+    expect(await app.evaluate(({ globalShortcut }) => ['CommandOrControl+1', 'CommandOrControl+2', 'CommandOrControl+3', 'CommandOrControl+4', 'CommandOrControl+5'].map(key => globalShortcut.isRegistered(key)))).toEqual([true, true, true, true, true]);
     expect(await app.evaluate(({ globalShortcut }) => globalShortcut.isRegistered('Control+Shift+1'))).toBe(false);
     await synthetic(app);
     await app.evaluate(({ globalShortcut }) => {
@@ -273,7 +273,7 @@ test('shortcuts register all five actions, preserve custom bindings and roll bac
     const custom = { ...current.value, collectShortcut: 'Control+Alt+F9' };
     expect((await page.evaluate(value => window.snipvia.settings.saveShortcuts(value), custom)).ok).toBe(true);
     const bytes = await readFile(join(dir, 'capture-preferences.json'), 'utf8');
-    const duplicate = await page.evaluate(value => window.snipvia.settings.saveShortcuts({ ...value, collectShortcut: 'Ctrl+1' }), custom);
+    const duplicate = await page.evaluate(value => window.snipvia.settings.saveShortcuts({ ...value, collectShortcut: 'CmdOrCtrl+1' }), custom);
     expect(duplicate.ok).toBe(false);
     await app.evaluate(({ globalShortcut }) => { const register = globalShortcut.register.bind(globalShortcut); globalShortcut.register = (key, callback) => key === 'Control+Alt+F10' ? false : register(key, callback); });
     const failed = await page.evaluate(value => window.snipvia.settings.saveShortcuts({ ...value, collectionShortcut: 'Control+Alt+F10' }), custom);
@@ -294,10 +294,12 @@ test('shortcuts register all five actions, preserve custom bindings and roll bac
     await app.evaluate(({ dialog }) => { dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false }); });
     await app.evaluate((_electron, key) => { (globalThis as typeof globalThis & { v2ShortcutCallbacks: Record<string, () => void> }).v2ShortcutCallbacks[key](); }, custom.clearCollectionShortcut);
     await expect.poll(async () => { const r = await page.evaluate(() => window.snipvia.collection.current()); return r.ok && r.value.collection.count; }).toBe(0);
-    await app.evaluate((_electron, key) => { (globalThis as typeof globalThis & { v2ShortcutCallbacks: Record<string, () => void> }).v2ShortcutCallbacks[key](); }, custom.collectionShortcut);
     await expect.poll(() => app.windows().some(p => p.url().endsWith('#shelf'))).toBe(true);
     const shelf = app.windows().find(p => p.url().endsWith('#shelf'))!;
-    await expect(shelf.locator('.shelf.expanded')).toBeVisible();
+    await shelf.evaluate(() => window.snipvia.collection.hide());
+    await app.evaluate((_electron, key) => { (globalThis as typeof globalThis & { v2ShortcutCallbacks: Record<string, () => void> }).v2ShortcutCallbacks[key](); }, custom.collectionShortcut);
+    await expect(shelf.locator('.shelf')).toBeVisible();
+    await expect(shelf.locator('.shelf.expanded')).toHaveCount(0);
     await app.evaluate(({ app }) => app.emit('activate'));
     await page.getByRole('navigation', { name: '设置分类' }).getByRole('button', { name: '快捷键', exact: true }).click();
     await expect(page.getByRole('button', { name: '设置收集截图快捷键', exact: true })).toBeVisible();

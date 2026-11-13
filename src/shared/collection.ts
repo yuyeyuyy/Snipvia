@@ -25,6 +25,7 @@ export type CollectionAPI = {
   rendered(presentation: number): Promise<Result<boolean>>;
   reducedMotion(value: boolean): Promise<Result<void>>;
   toggle(): Promise<Result<void>>;
+  toggleVisibility(): Promise<Result<void>>;
   collapse(): Promise<Result<void>>;
   hide(): Promise<Result<void>>;
   remove(id: string): Promise<Result<ShelfState>>;

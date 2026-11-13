@@ -3,6 +3,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { defaultCapturePreferences } from '../../src/shared/capture-preferences';
 
 const metadata = JSON.parse(readFileSync('package.json', 'utf8'));
 
@@ -21,12 +22,13 @@ test('installed Windows client uses the patched runtime and preserves local capt
       return { packaged: app.isPackaged, version: app.getVersion(), runtime: process.versions.electron,
         architecture: process.arch, userData: app.getPath('userData'),
         iconEmpty: nativeImage.createFromPath(path.join(process.resourcesPath, 'Snipvia.ico')).isEmpty(),
-        shortcut: globalShortcut.isRegistered('Control+1') };
+        shortcuts: [1, 2, 3, 4, 5].map(key => globalShortcut.isRegistered('Control+' + key)) };
     });
     expect(status).toMatchObject({ packaged: true, version: metadata.version, runtime: metadata.devDependencies.electron,
-      architecture: 'x64', iconEmpty: false, shortcut: true });
+      architecture: 'x64', iconEmpty: false, shortcuts: [true, true, true, true, true] });
     expect(await page.evaluate(() => ({ bridge: typeof window.snipvia.capture.start === 'function', node: 'require' in window || 'process' in window }))).toEqual({ bridge: true, node: false });
     expect(status.userData.toLowerCase()).toBe(directory.toLowerCase());
+    expect(await page.evaluate(() => window.snipvia.settings.get())).toEqual({ ok: true, value: defaultCapturePreferences });
     await expect(page.getByRole('navigation', { name: '设置分类' }).getByRole('button')).toHaveCount(7);
     const config = await page.evaluate(() => window.snipvia.collection.current());
     if (!config.ok) throw new Error(config.error);
@@ -62,6 +64,15 @@ test('installed Windows client uses the patched runtime and preserves local capt
     await expect(shelf.getByRole('button', { name: '展开图堆', exact: true })).toBeVisible();
     await shelf.getByRole('button', { name: '展开图堆', exact: true }).click();
     await expect(shelf.locator('.shelf-grid article')).toHaveCount(1);
+    const collected = await page.evaluate(() => window.snipvia.collection.current());
+    if (!collected.ok) throw new Error(collected.error);
+    expect((await page.evaluate(() => window.snipvia.collection.toggleVisibility())).ok).toBe(true);
+    const hidden = await page.evaluate(() => window.snipvia.collection.current());
+    expect(hidden.ok && hidden.value).toMatchObject({ hidden: true, expanded: true, collection: collected.value.collection });
+    expect((await page.evaluate(() => window.snipvia.collection.toggleVisibility())).ok).toBe(true);
+    await expect(shelf.locator('.shelf.expanded')).toBeVisible();
+    const restored = await page.evaluate(() => window.snipvia.collection.current());
+    expect(restored.ok && restored.value).toMatchObject({ hidden: false, expanded: true, collection: collected.value.collection });
     expect(await page.evaluate(() => window.snipvia.screenshots.list())).toEqual({ ok: true, value: [] });
   } finally {
     await app.close();

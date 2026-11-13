@@ -1,3 +1,4 @@
+import { captureShortcutKeys, defaultCapturePreferences } from '../../src/shared/capture-preferences';
 import { describe, expect, it } from 'vitest';
 import { acceleratorFromKeyboardEvent, formatAccelerator } from '../../src/renderer/src/settings/shortcut';
 
@@ -36,4 +37,10 @@ describe('shortcut recording', () => {
     expect(formatAccelerator('CommandOrControl+Shift+K', 'win32')).toBe('Ctrl + Shift + K');
     expect(acceleratorFromKeyboardEvent(keyboardEvent({ code: 'KeyK', key: 'k', metaKey: true }), 'win32')).toBeNull();
   });
+});
+
+
+it('displays the same five defaults as Command on macOS and Ctrl on Windows', () => {
+  expect(captureShortcutKeys.map(key => formatAccelerator(defaultCapturePreferences[key], 'darwin'))).toEqual(['⌘ 1', '⌘ 2', '⌘ 3', '⌘ 4', '⌘ 5']);
+  expect(captureShortcutKeys.map(key => formatAccelerator(defaultCapturePreferences[key], 'win32'))).toEqual(['Ctrl + 1', 'Ctrl + 2', 'Ctrl + 3', 'Ctrl + 4', 'Ctrl + 5']);
 });

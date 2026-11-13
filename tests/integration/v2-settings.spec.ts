@@ -50,7 +50,7 @@ test('V2 boots offline into settings, protects old data and credentials, and cap
       const handlers = (ipcMain as unknown as { _invokeHandlers: Map<string, unknown> })._invokeHandlers;
       return [...handlers.keys()].filter(key => /^(chat|agent|notes|history|prediction-settings|auto-action|editing|chat-images):/.test(key));
     })).toEqual([]);
-    expect(await app.evaluate(({ globalShortcut }) => [globalShortcut.isRegistered('CommandOrControl+Alt+F7'), globalShortcut.isRegistered('CommandOrControl+Alt+F8'), globalShortcut.isRegistered('CommandOrControl+Shift+Enter'), globalShortcut.isRegistered('Control+2')])).toEqual([true, true, false, true]);
+    expect(await app.evaluate(({ globalShortcut }) => [globalShortcut.isRegistered('CommandOrControl+Alt+F7'), globalShortcut.isRegistered('CommandOrControl+Alt+F8'), globalShortcut.isRegistered('CommandOrControl+Shift+Enter'), globalShortcut.isRegistered('CommandOrControl+3')])).toEqual([true, true, false, true]);
     await expect(page.getByRole('button', { name: 'AI 对话', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'AI 笔记', exact: true })).toHaveCount(0);
     await page.getByRole('navigation', { name: '设置分类' }).getByRole('button', { name: '存储', exact: true }).click();

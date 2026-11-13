@@ -10,6 +10,8 @@ export class ShelfWindow {
   private resolveReady: (() => void) | null = null;
   private expanded = false;
   private hidden = false;
+  // Keep pending visibility intent until Renderer acknowledges the native show.
+  private visibilityRequested = false;
   private suspended = false;
   private area: Rectangle | null = null;
   private epoch = 0;
@@ -56,7 +58,7 @@ export class ShelfWindow {
     if (process.platform === 'darwin') window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true, skipTransformProcessType: true });
     window.on('close', event => { event.preventDefault(); this.hide(); });
     window.webContents.on('render-process-gone', () => { this.hide(); window.destroy(); this.window = null; this.ready = null; this.resolveReady?.(); this.resolveReady = null; });
-    void this.load(window, 'shelf').catch(() => { this.resolveReady?.(); this.resolveReady = null; this.ready = null; window.destroy(); this.window = null; });
+    void this.load(window, 'shelf').catch(() => { this.resolveReady?.(); this.resolveReady = null; this.ready = null; this.visibilityRequested = false; window.destroy(); this.window = null; });
     return this.ready;
   }
   markReady() { this.resolveReady?.(); this.resolveReady = null; this.publish(); }
@@ -124,6 +126,7 @@ export class ShelfWindow {
     const focus = this.pendingFocus; this.pendingFocus = null;
     window.setOpacity(1);
     if (focus) { window.show(); window.focus(); } else if (!window.isVisible()) window.showInactive();
+    this.visibilityRequested = false;
     if (this.feedback) {
       if (this.timer) clearTimeout(this.timer);
       this.timer = setTimeout(() => this.finishFeedback(), this.feedback.duration + (this.feedback.kind === 'fly' ? 500 : 40));
@@ -253,9 +256,18 @@ export class ShelfWindow {
     this.hidden = false; this.expanded = !this.expanded || !this.peekWindow()?.isVisible();
     await this.present(true);
   }
+  async toggleVisibility() {
+    if (!this.hidden && (this.visibilityRequested || this.pendingFocus !== null || this.peekWindow()?.isVisible())) {
+      this.hide(); return;
+    }
+    this.cancelFeedback(); this.clearPreview(); this.cancelEdgeMotion(); this.edge = 'shown';
+    this.hidden = false; this.visibilityRequested = true;
+    await this.present(false);
+  }
   collapse() { this.clearPreview(); this.expanded = false; void this.present(false); }
-  hide() { this.cancelEdgeMotion(); this.clearPreview(); this.pointerInteraction = false; this.stopHitTesting(); this.cancelFeedback(); this.pendingFocus = null; this.peekWindow()?.setIgnoreMouseEvents(false); this.hidden = true; this.expanded = false; this.epoch++; this.hideWindow(); this.publish(); }
+  hide() { this.cancelEdgeMotion(); this.clearPreview(); this.pointerInteraction = false; this.stopHitTesting(); this.cancelFeedback(); this.pendingFocus = null; this.peekWindow()?.setIgnoreMouseEvents(false); this.hidden = true; this.visibilityRequested = false; this.epoch++; this.hideWindow(); this.publish(); }
   private async present(focus: boolean) {
+    if (!this.hidden) this.visibilityRequested = true;
     const epoch = ++this.epoch;
     await this.prepare();
     const window = this.peekWindow();
@@ -271,5 +283,5 @@ export class ShelfWindow {
     this.area = screen.getDisplayMatching(this.area).workArea;
     if (!this.hidden && !this.suspended) { this.cancelFeedback(); void this.present(false); }
   }
-  destroy() { this.cancelEdgeMotion(); this.clearPreview(); this.pointerInteraction = false; this.stopHitTesting(); this.cancelFeedback(); this.epoch++; this.peekWindow()?.destroy(); this.window = null; this.ready = null; }
+  destroy() { this.visibilityRequested = false; this.cancelEdgeMotion(); this.clearPreview(); this.pointerInteraction = false; this.stopHitTesting(); this.cancelFeedback(); this.epoch++; this.peekWindow()?.destroy(); this.window = null; this.ready = null; }
 }

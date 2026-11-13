@@ -14,7 +14,7 @@ import { editorFinishSchema, validateEditorPng } from '../shared/screenshot-edit
 import { cropRectangle } from '../shared/geometry';
 import { loadSettings, legacyCaptureShortcuts } from './storage/settings';
 import { CapturePreferencesStore } from './storage/CapturePreferencesStore';
-import { capturePreferencesSchema, captureShortcutKeys, acceleratorIdentity, type CapturePreferences } from '../shared/capture-preferences';
+import { defaultCapturePreferences, capturePreferencesSchema, captureShortcutKeys, acceleratorIdentity, type CapturePreferences } from '../shared/capture-preferences';
 import { ScreenshotCollection } from './storage/ScreenshotCollection';
 import { ShelfPreferencesStore } from './storage/ShelfPreferencesStore';
 import { ScreenshotDragFiles } from './storage/ScreenshotDragFiles';
@@ -688,7 +688,7 @@ function registerShortcuts(settings: CapturePreferences) {
     shortcut: () => captureHotkey('quick'),
     editorShortcut: () => captureHotkey('edit'),
     collectShortcut: () => captureHotkey('collect'),
-    collectionShortcut: () => { void shelfWindow?.toggle().catch(error => mainWindow.webContents.send('capture:error', String(error))); },
+    collectionShortcut: () => { void shelfWindow?.toggleVisibility().catch(error => mainWindow.webContents.send('capture:error', String(error))); },
     clearCollectionShortcut: () => { void confirmClearCollection().catch(error => mainWindow.webContents.send('capture:error', String(error))); }
   };
   for (const key of keys) if (previous?.[key]) globalShortcut.unregister(previous[key]);
@@ -893,6 +893,7 @@ function setupIPC() {
   handle('collection:reduced-motion', 'shelf', value => shelfWindow!.setReducedMotion(z.boolean().parse(value)));
   handle('collection:current', ['main', 'shelf'], value => { z.undefined().parse(value); return shelfWindow!.current(); });
   handle('collection:toggle', ['main', 'shelf'], value => { z.undefined().parse(value); return shelfWindow!.toggle(); });
+  handle('collection:toggle-visibility', 'main', value => { z.undefined().parse(value); return shelfWindow!.toggleVisibility(); });
   handle('collection:collapse', 'shelf', value => { z.undefined().parse(value); return shelfWindow!.collapse(); });
   handle('collection:hide', 'shelf', value => { z.undefined().parse(value); return shelfWindow!.hide(); });
   handle('collection:remove', 'shelf', value => { collection.remove(z.string().uuid().parse(value)); shelfWindow?.publish(); return shelfWindow!.current(); });
@@ -1215,7 +1216,7 @@ else {
     restoreDock();
     let startupError = '';
     try { loadSettings(); } catch { startupError = '设置文件读取失败，已使用默认值；原文件未修改。'; }
-    capturePreferences = new CapturePreferencesStore(join(app.getPath('userData'), 'capture-preferences.json'), legacyCaptureShortcuts() ?? { shortcut: 'Control+1', editorShortcut: 'Control+3' });
+    capturePreferences = new CapturePreferencesStore(join(app.getPath('userData'), 'capture-preferences.json'), legacyCaptureShortcuts() ?? defaultCapturePreferences);
     try { capturePreferences.load(); } catch { startupError += 'V2 快捷键配置读取失败，使用旧快捷键；原文件未修改。'; }
     shelfPreferences = new ShelfPreferencesStore(join(app.getPath('userData'), 'shelf-preferences.json'));
     dragFiles = new ScreenshotDragFiles(app.getPath('temp'));
@@ -1326,7 +1327,7 @@ else {
       { label: '选择截图目标', click: () => { if (quickTargetService?.current().visible) quickTargetWindow?.focus(); } },
       { label: '快速截图', click: () => { void startCapture('menu', 'quick').catch(announceError); } },
       { label: '收集截图', click: () => { void startCapture('menu', 'collect').catch(announceError); } },
-      { label: '截图收纳区', click: () => { void shelfWindow?.toggle(); } },
+      { label: '隐藏 / 显示收纳区', click: () => { void shelfWindow?.toggleVisibility().catch(announceError); } },
       { label: '截图与标注', click: () => { void startCapture('menu', 'edit').catch(announceError); } }
     ];
     Menu.setApplicationMenu(Menu.buildFromTemplate([

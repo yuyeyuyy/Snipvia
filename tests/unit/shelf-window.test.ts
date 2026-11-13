@@ -139,3 +139,60 @@ it('reveals on edge hover without focus, a click or a rendered hit region', asyn
   vi.advanceTimersByTime(32); await settle();
   expect(shelf.current().edge).toBe('revealing'); expect(native.getBounds().width).toBe(420);
 });
+
+
+it('hides and restores the expanded panel without changing images, order or size', async () => {
+  const { shelf, native } = await fixture();
+  const before = shelf.current(), bounds = native.getBounds();
+  await shelf.toggleVisibility();
+  expect(shelf.current()).toMatchObject({ hidden: true, expanded: true, collection: before.collection, size: before.size });
+  expect(native.isVisible()).toBe(false);
+  expect(shelf.rendered(before.presentation)).toBe(false);
+  await shelf.toggleVisibility(); shelf.rendered(shelf.current().presentation);
+  expect(shelf.current()).toMatchObject({ hidden: false, expanded: true, collection: before.collection });
+  expect(native.isVisible()).toBe(true); expect(native.getBounds()).toEqual(bounds);
+});
+it('restores a collapsed panel and the close-button hidden state without expanding it', async () => {
+  const { shelf } = await fixture(); shelf.collapse(); await settle(); shelf.rendered(shelf.current().presentation);
+  shelf.hide(); expect(shelf.current().expanded).toBe(false);
+  await shelf.toggleVisibility(); shelf.rendered(shelf.current().presentation);
+  expect(shelf.current()).toMatchObject({ hidden: false, expanded: false, edge: 'shown' });
+  shelf.hide(); await shelf.toggleVisibility();
+  expect(shelf.current().expanded).toBe(false);
+});
+it('cancels an in-flight first show when the visibility key is pressed twice', async () => {
+  const shelf = new ShelfWindow({}, async () => {}, () => ({ id: 'empty', createdAt: 1, updatedAt: 1, revision: 0, items: [], count: 0 }), () => '');
+  windows.push(shelf);
+  const showing = shelf.toggleVisibility();
+  await shelf.toggleVisibility(); shelf.markReady(); await showing;
+  expect(shelf.current()).toMatchObject({ hidden: true, expanded: false });
+  expect(shelf.peekWindow()!.isVisible()).toBe(false);
+  await shelf.toggleVisibility(); shelf.rendered(shelf.current().presentation);
+  expect(shelf.peekWindow()!.isVisible()).toBe(true);
+  expect(shelf.current()).toMatchObject({ hidden: false, expanded: false });
+});
+it('restores a docked panel into view and rejects late docking acknowledgements', async () => {
+  const { shelf, native, items } = await fixture();
+  vi.advanceTimersByTime(1840); const motion = shelf.current().presentation;
+  shelf.edgeFinished(motion); await settle(); shelf.rendered(shelf.current().presentation);
+  expect(shelf.current().edge).toBe('docked');
+  await shelf.toggleVisibility(); await shelf.toggleVisibility(); shelf.rendered(shelf.current().presentation);
+  expect(shelf.current()).toMatchObject({ hidden: false, expanded: true, edge: 'shown' });
+  expect(shelf.edgeFinished(motion)).toBe(false);
+  expect(native.getBounds().width).toBeGreaterThan(22); expect(shelf.current().collection.items).toEqual(items);
+});
+it('keeps visibility changes during capture suspended until capture resumes', async () => {
+  const { shelf, native } = await fixture(); shelf.suspend();
+  await shelf.toggleVisibility(); await shelf.toggleVisibility();
+  expect(shelf.current()).toMatchObject({ suspended: true, hidden: false, expanded: true });
+  expect(native.isVisible()).toBe(false);
+  shelf.resume(); await settle(); shelf.rendered(shelf.current().presentation);
+  expect(native.isVisible()).toBe(true); expect(shelf.current().expanded).toBe(true);
+});
+
+it('shows a panel hidden by the OS again without first treating it as visible', async () => {
+  const { shelf, native } = await fixture(); native.hide();
+  expect(shelf.current().hidden).toBe(false);
+  await shelf.toggleVisibility(); shelf.rendered(shelf.current().presentation);
+  expect(native.isVisible()).toBe(true); expect(shelf.current().expanded).toBe(true);
+});

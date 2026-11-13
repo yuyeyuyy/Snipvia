@@ -32,7 +32,7 @@ test('hidden editor resizes crops and annotations, re-edits text and keeps indep
     expect((await main.evaluate(() => window.snipvia.permissions.screen())).ok).toBe(true);
     expect((await main.evaluate(async () => {
       const current = await window.snipvia.settings.get(); if (!current.ok) throw Error(current.error);
-      return window.snipvia.settings.saveShortcuts({ ...current.value, editorShortcut: 'CommandOrControl+2' });
+      return window.snipvia.settings.saveShortcuts({ ...current.value, editorShortcut: 'CommandOrControl+Alt+2' });
     })).ok).toBe(true);
     const button = (page: Page, name: string) => page.getByRole('button', { name, exact: true });
     const drag = async (from: [number, number], to: [number, number]) => {
@@ -40,7 +40,7 @@ test('hidden editor resizes crops and annotations, re-edits text and keeps indep
     };
     const start = async () => {
       await app.evaluate(() => {
-        const callback = (globalThis as typeof globalThis & { editorProbe: { shortcuts: Map<string, () => void> } }).editorProbe.shortcuts.get('CommandOrControl+2');
+        const callback = (globalThis as typeof globalThis & { editorProbe: { shortcuts: Map<string, () => void> } }).editorProbe.shortcuts.get('CommandOrControl+Alt+2');
         if (!callback) throw Error('Editor shortcut missing'); callback();
       });
       await expect(overlay.locator('.screen-frame')).toHaveCount(1);

@@ -1,13 +1,13 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { dirname } from 'node:path';
-import { capturePreferencesSchema, capturePreferencesInputSchema, extendCapturePreferences, type CapturePreferences, type CapturePreferencesInput } from '../../shared/capture-preferences';
+import { defaultCapturePreferences, capturePreferencesSchema, capturePreferencesInputSchema, extendCapturePreferences, type CapturePreferences, type CapturePreferencesInput } from '../../shared/capture-preferences';
 
 /** Copy legacy defaults in memory; writes target only the independent V2 preferences file. */
 export class CapturePreferencesStore {
   private value: CapturePreferences;
   private available = true;
-  constructor(private readonly file: string, legacy: CapturePreferencesInput) { this.value = extendCapturePreferences({ shortcut: legacy.shortcut, editorShortcut: legacy.editorShortcut }); }
+  constructor(private readonly file: string, legacy: CapturePreferencesInput = defaultCapturePreferences) { this.value = extendCapturePreferences({ shortcut: legacy.shortcut, editorShortcut: legacy.editorShortcut }); }
   load() {
     if (!existsSync(this.file)) return;
     this.available = false;

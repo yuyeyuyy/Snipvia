@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { acceleratorIdentity, captureShortcutKeys, defaultCapturePreferences, extendCapturePreferences } from '../../src/shared/capture-preferences';
 import { CapturePreferencesStore } from '../../src/main/storage/CapturePreferencesStore';
 let directory: string;
 const legacy = { shortcut: 'Control+1', editorShortcut: 'Control+3' };
@@ -10,10 +11,10 @@ afterEach(() => rmSync(directory, { recursive: true, force: true }));
 describe('V2 capture preferences', () => {
   it('keeps custom old shortcuts when new defaults collide and preserves added bindings on reload', () => {
     const file = join(directory, 'capture-preferences.json');
-    writeFileSync(file, JSON.stringify({ shortcut: 'Control+2', editorShortcut: 'Control+3' }));
+    writeFileSync(file, JSON.stringify({ shortcut: 'CommandOrControl+3', editorShortcut: 'CommandOrControl+2' }));
     const store = new CapturePreferencesStore(file, legacy); store.load();
-    expect(store.current().shortcut).toBe('Control+2');
-    expect(store.current().collectShortcut).toBe('Control+Alt+2');
+    expect(store.current().shortcut).toBe('CommandOrControl+3');
+    expect(store.current().collectShortcut).toBe('CommandOrControl+Alt+3');
     store.save(store.current());
     const reload = new CapturePreferencesStore(file, legacy); reload.load();
     expect(reload.current()).toEqual(store.current());
@@ -43,4 +44,31 @@ describe('V2 capture preferences', () => {
     expect(() => store.save({ shortcut: 'Control+8', editorShortcut: 'Control+9' })).toThrow();
     expect(store.current()).toMatchObject(legacy);
   });
+});
+
+
+it.each(['darwin', 'win32'] as const)('uses Command/Control 1–5 in action order on %s', platform => {
+  const bindings = extendCapturePreferences(defaultCapturePreferences, platform);
+  expect(captureShortcutKeys.map(key => acceleratorIdentity(bindings[key], platform)))
+    .toEqual([1, 2, 3, 4, 5].map(digit => `${digit}+${platform === 'darwin' ? 'command' : 'control'}`));
+});
+it('starts fresh profiles with the new defaults without creating a preferences file', () => {
+  const file = join(directory, 'capture-preferences.json');
+  const store = new CapturePreferencesStore(file); store.load();
+  expect(store.current()).toEqual(defaultCapturePreferences);
+  expect(() => readFileSync(file)).toThrow();
+});
+it('preserves complete old V2 bindings byte-for-byte until the user saves', () => {
+  const file = join(directory, 'capture-preferences.json');
+  const old = { shortcut: 'Control+1', editorShortcut: 'Control+3', collectShortcut: 'Control+2', collectionShortcut: 'Control+Shift+2', clearCollectionShortcut: 'Alt+2' };
+  const bytes = JSON.stringify(old, null, 4); writeFileSync(file, bytes);
+  const store = new CapturePreferencesStore(file); store.load();
+  expect(store.current()).toEqual(old); expect(readFileSync(file, 'utf8')).toBe(bytes);
+});
+it.each(['darwin', 'win32'] as const)('reserves later custom aliases before filling an earlier missing binding on %s', platform => {
+  const custom = platform === 'darwin' ? 'Cmd+3' : 'Ctrl+3';
+  const value = extendCapturePreferences({ shortcut: 'CommandOrControl+1', editorShortcut: 'CommandOrControl+2', collectionShortcut: custom }, platform);
+  expect(value.collectionShortcut).toBe(custom);
+  expect(value.collectShortcut).toBe('CommandOrControl+Alt+3');
+  expect(new Set(Object.values(value).map(key => acceleratorIdentity(key, platform))).size).toBe(5);
 });

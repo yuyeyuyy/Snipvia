@@ -38,7 +38,7 @@ jobs:
         id: build
         run: pnpm dist:windows
       - name: Validate current synthetic desktop flows
-        run: pnpm exec playwright test tests/integration/v2-settings.spec.ts tests/integration/appearance.spec.ts tests/integration/feedback.spec.ts tests/integration/screenshot-editor.spec.ts tests/integration/capture-window-visibility.spec.ts tests/integration/windows-capture-ui.spec.ts tests/integration/v2-continuous.spec.ts tests/integration/shortcuts-visibility-headless.spec.ts
+        run: pnpm exec playwright test tests/integration/v2-settings.spec.ts tests/integration/appearance.spec.ts tests/integration/feedback.spec.ts tests/integration/screenshot-editor.spec.ts tests/integration/capture-window-visibility.spec.ts tests/integration/windows-capture-ui.spec.ts tests/integration/v2-continuous.spec.ts tests/integration/shortcuts-visibility-headless.spec.ts tests/integration/updates.spec.ts
       - name: Install in a temporary per-user directory
         id: install
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}

@@ -8,13 +8,14 @@ test('后台检查与关于页共享状态，手动刷新、失败恢复、亮�
   const directory = await mkdtemp(join(tmpdir(), 'snipvia-updates-'));
   const root = resolve('.'), mainPath = join(root, 'out/main/index.js'), bootstrap = join(directory, 'bootstrap.cjs');
   await writeFile(bootstrap, `
-    const { app, shell } = require('electron');
+    const { app, shell, net } = require('electron');
     app.setAppPath(${JSON.stringify(root)});
-    globalThis.updateProbe = { calls: 0, status: 200, tag: 'v9.0.0', opened: [], blocked: false,
+    globalThis.updateProbe = { calls: 0, nodeCalls: 0, status: 200, tag: 'v9.0.0', opened: [], blocked: false,
       body: ${JSON.stringify('## 改进\n\n- 启动后在后台检查新版本。\n- 在设置页直接查看版本与更新说明。\n\n## 修复\n\n- 优化截图窗口布局。\n- 改善笔记保存状态提示。')} };
-    const realFetch = globalThis.fetch;
-    globalThis.fetch = async (url, init) => {
-      if (String(url) !== 'https://api.github.com/repos/yuyeyuyy/Snipvia/releases/latest') return realFetch(url, init);
+    globalThis.fetch = async () => { globalThis.updateProbe.nodeCalls++; throw new Error('Update checks must not use Node fetch'); };
+    net.fetch = async (url, init) => {
+      if (String(url) !== 'https://api.github.com/repos/yuyeyuyy/Snipvia/releases/latest') throw new Error('Unexpected fixture network request');
+      if (init?.credentials !== 'omit' || init?.redirect !== 'error') throw new Error('Unsafe update request options');
       const probe = globalThis.updateProbe; probe.calls++;
       if (probe.blocked) await new Promise(resolve => { probe.release = resolve; });
       if (probe.status !== 200) return new Response('PRIVATE_UPSTREAM_BODY', { status: probe.status });
@@ -54,7 +55,7 @@ globalThis.enableUpdateDownloadFixture = () => {
   const instance = await electron.launch({ timeout: 10_000, args: [bootstrap, `--user-data-dir=${join(directory, 'data')}`], env: {
     ...process.env, SNIPVIA_CONSOLE_ORIGIN: 'http://127.0.0.1:9', SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0'
   } });
-  type Probe = { calls: number; status: number; tag: string; body: string | null; blocked: boolean; release?: () => void; opened: string[] };
+  type Probe = { calls: number; nodeCalls: number; status: number; tag: string; body: string | null; blocked: boolean; release?: () => void; opened: string[] };
   try {
     const page = await instance.firstWindow();
     await page.getByRole('navigation', { name: '设置分类' }).getByRole('button', { name: '关于', exact: true }).click();
@@ -70,6 +71,7 @@ globalThis.enableUpdateDownloadFixture = () => {
     await expect(notes.getByRole('listitem')).toHaveCount(4);
     await expect(notes).toContainText('优化截图窗口布局');
     expect(await instance.evaluate(() => (globalThis as typeof globalThis & { updateProbe: Probe }).updateProbe.calls)).toBe(1);
+    expect(await instance.evaluate(() => (globalThis as typeof globalThis & { updateProbe: Probe }).updateProbe.nodeCalls)).toBe(0);
     await row.getByRole('button', { name: '查看新版本' }).click();
     expect(await instance.evaluate(() => (globalThis as typeof globalThis & { updateProbe: Probe }).updateProbe.opened))
       .toEqual(['https://github.com/yuyeyuyy/Snipvia/releases/tag/v9.0.0']);

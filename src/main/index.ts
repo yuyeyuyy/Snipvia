@@ -1,4 +1,4 @@
-import { app, BrowserWindow, clipboard, ClipboardItem, desktopCapturer, dialog, globalShortcut, ipcMain, Menu, nativeImage, powerMonitor, screen, shell, Tray, type IpcMainInvokeEvent, type NativeImage } from 'electron';
+import { app, BrowserWindow, clipboard, ClipboardItem, desktopCapturer, dialog, globalShortcut, ipcMain, Menu, nativeImage, net, powerMonitor, screen, shell, Tray, type IpcMainInvokeEvent, type NativeImage } from 'electron';
 import { monitorEventLoopDelay } from 'node:perf_hooks';
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
@@ -1294,6 +1294,8 @@ else {
     writePackagedTestResult({ stage: 'window-managers-ready' });
     updates = new UpdateCheckService({
       currentVersion: app.isPackaged ? app.getVersion() : sourceVersion,
+      // Chromium follows the system proxy/PAC, unlike Node fetch. Keep transport in Main.
+      fetcher: (url, init) => net.fetch(url, init),
       openExternal: url => shell.openExternal(url),
       installer: new ElectronUpdateInstaller({
         beforeInstall: () => {

@@ -72,7 +72,7 @@ export class UpdateCheckService {
     currentVersion: string;
     onChanged(state: UpdateState): void;
     openExternal(url: string): Promise<void>;
-    fetcher?: typeof fetch;
+    fetcher: (url: string, init: RequestInit) => Promise<Response>;
     now?: () => number;
     timeoutMs?: number;
     installer?: UpdateInstaller;
@@ -173,7 +173,7 @@ export class UpdateCheckService {
     const timer = setTimeout(() => controller.abort(), this.options.timeoutMs ?? 8_000);
     timer.unref();
     try {
-      const response = await (this.options.fetcher ?? fetch)(latestReleaseEndpoint, {
+      const response = await this.options.fetcher(latestReleaseEndpoint, {
         headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2026-03-10', 'User-Agent': 'Snipvia-Update-Check' },
         signal: controller.signal, redirect: 'error', credentials: 'omit'
       });

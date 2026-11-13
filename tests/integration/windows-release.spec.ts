@@ -33,9 +33,10 @@ test('installed Windows client uses the patched runtime and preserves local capt
     const config = await page.evaluate(() => window.snipvia.collection.current());
     if (!config.ok) throw new Error(config.error);
     expect((await page.evaluate(value => window.snipvia.collection.configure({ ...value, autoHide: false }), config.value.preferences)).ok).toBe(true);
-    await app.evaluate(({ desktopCapturer, nativeImage, screen }) => {
+    await app.evaluate(({ desktopCapturer, nativeImage, screen, net }) => {
       // All frames are synthetic. No user screen or production service is read.
       globalThis.fetch = async () => { throw new Error('Installed package validation blocks network'); };
+      net.fetch = async () => { throw new Error('Installed package validation blocks network'); };
       desktopCapturer.getSources = async options => {
         const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()), size = options.thumbnailSize!;
         return [{ id: 'screen:synthetic', name: 'Synthetic', display_id: String(display.id), appIcon: nativeImage.createEmpty(),

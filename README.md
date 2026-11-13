@@ -31,17 +31,19 @@ macOS 可激活本机应用，并可选匹配 Chrome 已打开的标签。Window
 
 ## 下载 Snipvia
 
-当前稳定版：[v1.0.1](https://github.com/yuyeyuyy/Snipvia/releases/tag/v1.0.1)。以下按钮直达 GitHub Release；[官网](https://umbraticus.cn/)提供功能介绍与视频演示：
+当前稳定版：[v1.0.2](https://github.com/yuyeyuyy/Snipvia/releases/tag/v1.0.2)。以下按钮直达 GitHub Release；[官网](https://umbraticus.cn/)提供功能介绍与视频演示：
 
 <p align="center">
-  <a href="https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.1/Snipvia-1.0.1-arm64.dmg"><img src="docs/readme/download-mac-arm64.svg" alt="下载 macOS Apple silicon 安装包" width="252" /></a>
-  <a href="https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.1/Snipvia-1.0.1-x64.dmg"><img src="docs/readme/download-mac-x64.svg" alt="下载 macOS Intel 安装包" width="252" /></a>
-  <a href="https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.1/Snipvia-Setup-1.0.1-x64.exe"><img src="docs/readme/download-windows-x64.svg" alt="下载 Windows x64 安装包" width="252" /></a>
+  <a href="https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.2/Snipvia-1.0.2-arm64.dmg"><img src="docs/readme/download-mac-arm64.svg" alt="下载 macOS Apple silicon 安装包" width="252" /></a>
+  <a href="https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.2/Snipvia-1.0.2-x64.dmg"><img src="docs/readme/download-mac-x64.svg" alt="下载 macOS Intel 安装包" width="252" /></a>
+  <a href="https://github.com/yuyeyuyy/Snipvia/releases/download/v1.0.2/Snipvia-Setup-1.0.2-x64.exe"><img src="docs/readme/download-windows-x64.svg" alt="下载 Windows x64 安装包" width="252" /></a>
 </p>
 
 - **Mac**：macOS 14 及以上，提供 Apple silicon 与 Intel 安装包，已完成 Developer ID 签名和 Apple 公证。
 - **Windows**：Windows 11 x64 安装与运行回归通过；安装包尚未签名，检查更新后需手动安装。
-- 完整说明与 SHA-256 校验文件见 [Release](https://github.com/yuyeyuyy/Snipvia/releases/tag/v1.0.1) 和[发行验收记录](docs/review/V1_0_1_RELEASE.md)。
+- 完整说明与 SHA-256 校验文件见 [Release](https://github.com/yuyeyuyy/Snipvia/releases/tag/v1.0.2) 和[发行验收记录](docs/review/V1_0_2_RELEASE.md)。
+
+> v1.0.0／v1.0.1 如遇检查更新超时，请先从上述按钮手动安装 v1.0.2 一次；安装前导出重要收纳截图。
 
 ## 边截边收，稍后一起处理
 

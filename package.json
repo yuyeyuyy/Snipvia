@@ -52,7 +52,9 @@
     "release:publish": "node scripts/macos-release/publish.cjs",
     "dist:windows": "node scripts/package-windows.mjs",
     "windows:verify": "node scripts/verify-windows-build.mjs",
-    "release:prepare": "node scripts/prepare-release-build.mjs"
+    "release:prepare": "node scripts/prepare-release-build.mjs",
+    "website:sync:prepare": "node scripts/release/prepare-website-sync.mjs",
+    "website:publish": "node scripts/publish-website-release.mjs"
   },
   "dependencies": {
     "electron-updater": "6.8.10",

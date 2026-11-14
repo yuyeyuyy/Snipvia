@@ -1,0 +1,94 @@
+name: Sync published Release to website
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Latest stable Release tag (for example v1.0.3)
+        required: true
+        type: string
+      windows_run:
+        description: Optional successful Windows CI Run ID (auto-detect when empty)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: snipvia-website-production
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: >-
+      github.repository == 'yuyeyuyy/Snipvia' &&
+      ((github.event_name == 'release' && !github.event.release.prerelease) ||
+       (github.event_name == 'workflow_dispatch' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)))
+    runs-on: macos-15
+    timeout-minutes: 45
+    environment:
+      name: website-production
+      url: https://umbraticus.cn/#download
+    steps:
+      # Use trusted default-branch tooling, never execute code from a downloaded installer.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24.15.0'
+      - name: Verify official files, notarization and same-commit Windows acceptance
+        id: prepare
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+          WINDOWS_RUN: ${{ inputs.windows_run }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/release/prepare-website-sync.mjs \
+            --tag "$RELEASE_TAG" \
+            --windows-run "$WINDOWS_RUN" \
+            --directory "$RUNNER_TEMP/snipvia-website-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - name: Upload verified installers and atomically publish website version
+        env:
+          WEBSITE_RELEASE_TOKEN: ${{ secrets.WEBSITE_RELEASE_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          credential_file="$RUNNER_TEMP/snipvia-website-publisher.json"
+          trap 'rm -f "$credential_file"' EXIT
+          node --input-type=module <<'JS'
+          import { writeFileSync } from 'node:fs';
+          import { join } from 'node:path';
+          const token = process.env.WEBSITE_RELEASE_TOKEN;
+          if (!/^[a-f0-9]{64}$/.test(token ?? '')) throw new Error('Configure website-production secret WEBSITE_RELEASE_TOKEN before retrying.');
+          writeFileSync(join(process.env.RUNNER_TEMP, 'snipvia-website-publisher.json'), JSON.stringify({ origin: 'https://umbraticus.cn', token }), { flag: 'wx', mode: 0o600 });
+          JS
+          unset WEBSITE_RELEASE_TOKEN
+          node scripts/publish-website-release.mjs \
+            --credentials "$credential_file" \
+            --receipt "$RUNNER_TEMP/snipvia-website-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/PUBLICATION.json" \
+            --directory "$RUNNER_TEMP/snipvia-website-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - name: Retain verification receipt only
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: website-publication-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/snipvia-website-${{ github.run_id }}-${{ github.run_attempt }}/PUBLICATION.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Summarize successful website publication
+        shell: bash
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          import { join } from 'node:path';
+          const receipt = JSON.parse(readFileSync(join(process.env.RUNNER_TEMP, `snipvia-website-${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}`, 'PUBLICATION.json'), 'utf8'));
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, `Website updated to **${receipt.tag}**.\n\n- [Downloads](https://umbraticus.cn/#download)\n- Source: ${receipt.sourceCommit}\n- Windows acceptance: https://github.com/yuyeyuyy/Snipvia/actions/runs/${receipt.windowsRun}\n- macOS: signed, stapled tickets and Gatekeeper verified. No signing credentials used.\n`);
+          JS

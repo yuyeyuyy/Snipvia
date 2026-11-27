@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { QuickTarget, QuickTargetActivation, QuickTargetPermissions } from '../../shared/quick-target';
 
-export type ChromeTab = { windowId: string; tabId: string; url: string; title: string; index: number };
+export type ChromeTab = { browserPid: number; windowId: string; tabId: string; url: string; title: string; index: number };
 type Website = Extract<QuickTarget, { kind: 'website' }>;
 export type ChromeResolution = { kind: 'unavailable'; permissions: QuickTargetPermissions }
   | { kind: 'choices'; permissions: QuickTargetPermissions; tabs: ChromeTab[] }
@@ -46,10 +46,11 @@ export class ChromeTargetService {
     if (tabs.length > 32) throw new Error('匹配标签过多，请关闭部分标签或使用完整网址匹配');
     const windows = new Map<string, number>();
     const choices = tabs.map(item => {
-      if (!windows.has(item.windowId)) windows.set(item.windowId, windows.size + 1);
+      const windowKey = [item.browserPid, item.windowId].join(':');
+      if (!windows.has(windowKey)) windows.set(windowKey, windows.size + 1);
       const id = randomUUID();
       this.choices.set(id, { tab: item, target: target.id, presentation, expires: Date.now() + 60000, fingerprint });
-      return { id, title: [...item.title].filter(character => character.charCodeAt(0) >= 32 && character.charCodeAt(0) !== 127 && !'\u200e\u200f\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069'.includes(character)).join('').slice(0, 160) || target.label, detail: `Chrome · 窗口 ${windows.get(item.windowId)} · 标签 ${item.index}` };
+      return { id, title: [...item.title].filter(character => character.charCodeAt(0) >= 32 && character.charCodeAt(0) !== 127 && !'\u200e\u200f\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069'.includes(character)).join('').slice(0, 160) || target.label, detail: `Chrome · 窗口 ${windows.get(windowKey)} · 标签 ${item.index}` };
     });
     return { kind: 'choose', choices };
   }

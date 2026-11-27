@@ -8,7 +8,7 @@ import { setTimeout, clearTimeout } from 'node:timers';
 import process from 'node:process';
 import console from 'node:console';
 
-if (process.platform !== 'darwin') throw new Error('Native browser pipe acceptance requires macOS and installed Chrome terminology.');
+if (process.platform !== 'darwin') throw new Error('Native browser pipe acceptance requires macOS.');
 const child = spawn(resolve('build/native/snipvia-quick-target-helper'), ['browser-server'], { stdio: ['pipe', 'pipe', 'ignore'] });
 const lines = createInterface({ input: child.stdout });
 function response() {

@@ -41,7 +41,7 @@ do {
     NSApplication.shared.setActivationPolicy(.prohibited)
     try runBrowserServer(); exit(0)
   }
-  if args.count == 2, ["browser-script-check", "permissions", "request-automation", "request-accessibility", "browser-list", "browser-select", "browser-resolve"].contains(args[1]) {
+  if args.count == 2, ["permissions", "request-automation", "request-accessibility", "browser-list", "browser-select", "browser-resolve"].contains(args[1]) {
     _ = NSApplication.shared
     NSApplication.shared.setActivationPolicy(.prohibited)
     emit(try browserCommand(args[1])); exit(0)

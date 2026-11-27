@@ -9,7 +9,7 @@
 ## 行为
 
 - 旧网页目标仍使用系统默认浏览器打开保存的网址，不在加载时重写配置文件。
-- 每个网页可单独选择「Chrome 已有标签」，按同一网站或完整网址匹配。只处理普通窗口，不处理隐身窗口，不以标题猜测站点。
+- 每个网页可单独选择「Chrome 已有标签」，按同一网站或完整网址匹配。枚举已运行的 Chrome 实例，只匹配普通窗口中的标签。
 - 唯一匹配直接切换；多个匹配显示标题与窗口/标签序号供用户选择。没有匹配、Chrome 未运行或自动化权限不足时明确提示，不悄悄打开新页面。
 - 候选的原生窗口 ID、标签 ID 和完整 URL 留在 Main；浮条只收到临时 UUID、匹配标题与序号。选择与当前截图展示、目标配置和有效期绑定，防止旧候选跨会话执行。
 - 切换前原生层再次检查标签 ID、窗口归属与完整 URL，按实际索引处理移动后的标签。关闭、跳转及定位失败不会伪装为成功。
@@ -26,7 +26,7 @@ Quick 输出成功 → 原有剪贴板标记与展示会话
     → 普通网页：原有 shell.openExternal
     → Chrome 已有标签：ChromeTargetService
       → QuickTargetPlatform → 独立原生 helper
-        → 静态 AppleScript / Apple Events 列表与切换
+        → 按 Chrome 进程 ID 发送固定 Apple Events 查找和切换
         → 可选、受限的 Accessibility 输入框聚焦
 ```
 
@@ -59,7 +59,7 @@ Main/Preload 保留按窗口角色和主 frame 验证的 IPC。设置修改及�
 | `scripts/dev-stable-app.sh` | 新开发包含用途声明；旧包迁移需显式 opt-in，完整备份并验证后才本地临时签名 |
 | `tests/unit/quick-target-{chrome,preferences,service,window,worker}.test.ts` | 匹配、候选伪造/过期、取消、权限缺失、旧数据及小屏边界 |
 | `tests/integration/quick-target-headless.spec.ts` | 保留原有全部场景并增加 Chrome 多标签、未授权反馈、降级和跨窗口拒绝 |
-| `scripts/test-quick-target-helper.mjs`、`scripts/test-quick-target-worker.mjs` | 静态 AppleScript 语法、自定义小消息管道回归；保留合成原生应用激活验证 |
+| `scripts/test-quick-target-helper.mjs`、`scripts/test-quick-target-worker.mjs` | 权限状态、失效进程选择、管道协议与合成原生激活验收 |
 
 截图原生引擎、框选/标注、收纳数据结构、更新模块、现有模型/历史数据及锁文件没有为此阶段改动。没有引入依赖。
 
@@ -120,7 +120,7 @@ macOS 的「退出并重新打开」可能启动不带项目参数的 Electron �
 
 这是两次真实样本的原生调用累计，不是完整截图耗时或 p95。原始数值保存在本机 `quick-target-phase2/before-timing.json`，不包含用户内容。
 
-已移除热路径上的重复进程启动：唯一匹配在一个原生请求内完成权限核实、查找和切换；按窗口批量读取 URL/ID，不再对每个标签逐个跨进程查询。编译后的固定 AppleScript 由单个按需预热 helper 复用。只有功能开启且配置 Chrome 已有标签时预热，关闭功能、移除相关配置或退出时释放。主进程崩溃后管道 EOF 使 helper 退出。新截图不等待这个浏览器进程；浏览器选择取消/超时会杀死对应旧进程，旧回复不能完成新请求。
+已移除热路径上的重复进程启动：唯一匹配在一个原生请求内完成权限核实、查找和切换；按窗口批量读取 URL/ID，不再对每个标签逐个跨进程查询。单个按需预热的 helper 按进程 ID 定向发送固定 Apple Events，切换时重新校验窗口、标签和完整网址。只有功能开启且配置 Chrome 已有标签时预热，关闭功能、移除相关配置或退出时释放。主进程崩溃后管道 EOF 使 helper 退出。新截图不等待这个浏览器进程；浏览器选择取消/超时会杀死对应旧进程，旧回复不能完成新请求。
 
 真实原生管道回归验证预热约 955–1002ms，之后三次缺参请求往返 0–1ms；这些缺参请求没有读取/激活浏览器，不能当成网页跳转性能。测试还发现 Foundation 的读缓冲会等待填满，已改用每次最多 1024 字节的 POSIX 读取，保证小消息即时处理；每帧上限 8192 字节、返回缓存上限 256KiB、请求上限 4 秒，按当前请求 UUID 关联。只允许 resolve/select 两个操作，不接受脚本或任意文件路径。每次原生请求使用 autoreleasepool 释放临时对象。
 

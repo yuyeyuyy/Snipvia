@@ -8,7 +8,7 @@ test('Quick output drives the configured target bar without stale UI, implicit n
   const root = resolve('.'), directory = await mkdtemp(join(tmpdir(), 'snipvia-target-ui-'));
   const mainPath = join(root, 'out/main/index.js'), source = (await readFile(mainPath, 'utf8')).replace('show: !launchedAtLogin()', 'show: false');
   const instrument = [
-    "const probe={commits:0,visits:0,hold:false,fail:false,items:[],marker:false,chromeMode:'ambiguous',selections:0,permissionRequests:0};",
+    "const probe={commits:0,visits:0,hold:false,fail:false,items:[],marker:false,chromeMode:'ambiguous',selections:0,lastBrowserPid:0,permissionRequests:0};",
     "const fixturePng=require('electron').nativeImage.createFromBitmap(Buffer.alloc(160*100*4,255),{width:160,height:100}).toPNG();",
     "require('electron').clipboard.write=async items=>{if(probe.fail)throw Error('Synthetic clipboard failure');probe.items=items;probe.commits++;probe.marker=items[0].types.includes('web application/x.snipvia.quick-target');};",
     "require('electron').clipboard.read=async()=>probe.items;require('electron').shell.openExternal=async()=>{probe.visits++;};",
@@ -20,9 +20,9 @@ test('Quick output drives the configured target bar without stale UI, implicit n
     "async icons(){const good='/Applications/Synthetic Artwork.app',bad='/Applications/Synthetic Broken.app';const image=require('electron').nativeImage.createFromBitmap(Buffer.from(Array.from({length:32*32*4},(_,i)=>[180,120,20,255][i%4])),{width:32,height:32});quickTargetRegistry.platform.icon=async path=>path===good?image.toDataURL():'data:image/png;base64,invalid';require('electron').app.getFileIcon=async()=>image;for(const[label,path]of[['Artwork',good],['Broken',bad]])quickTargetRegistry.store.add({id:require('node:crypto').randomUUID(),kind:'application',label,path,bundleId:'com.snipvia.test.'+label});return refreshQuickTargets();},",
     "chrome(){quickTargetRegistry.platform.permissions=async()=>({supported:true,chromeRunning:true,automation:probe.chromeMode==='denied'?'denied':'granted',accessibility:true});",
     "quickTargetRegistry.platform.requestPermission=async()=>{probe.permissionRequests++;return{supported:true,chromeRunning:true,automation:'required',accessibility:true};};",
-    "quickTargetRegistry.platform.tabs=async target=>[{windowId:'11',tabId:'22',url:target.url,title:'Synthetic conversation A',index:1},{windowId:'33',tabId:'44',url:target.url,title:'Synthetic conversation B',index:2}];",
+    "quickTargetRegistry.platform.tabs=async target=>[{browserPid:110,windowId:'11',tabId:'22',url:target.url,title:'Synthetic conversation A',index:1},{browserPid:220,windowId:'11',tabId:'22',url:target.url,title:'Synthetic conversation B',index:2}];",
     "quickTargetRegistry.platform.resolve=async(target,signal)=>{const permissions=await quickTargetRegistry.platform.permissions();return permissions.automation==='granted'?{kind:'choices',permissions,tabs:await quickTargetRegistry.platform.tabs(target,signal)}:{kind:'unavailable',permissions};};",
-    "quickTargetRegistry.platform.select=async(tab,focus)=>{if(probe.chromeMode==='changed')throw Error('标签已关闭或跳转');probe.selections++;return{activated:true,focused:focus&&probe.chromeMode!=='manual',accessibility:true};};},",
+    "quickTargetRegistry.platform.select=async(tab,focus)=>{if(probe.chromeMode==='changed')throw Error('标签已关闭或跳转');probe.selections++;probe.lastBrowserPid=tab.browserPid;return{activated:true,focused:focus&&probe.chromeMode!=='manual',accessibility:true};};},",
     "async submit(mode='quick'){const id=screenshotPerformance.startSession({});quickTargetService.beginCapture(id);activeCapturePerformanceSessionId=id;modeRouter.begin(id,mode);view={width:800,height:600};captureDisplay={bounds:{x:0,y:0,width:800,height:600},workArea:{x:0,y:0,width:800,height:600}};",
     "capturedFrame={width:800,height:600,scaleFactor:1,displayId:'test',capturedAt:Date.now(),format:'jpeg',original:{png:async()=>{while(probe.hold)await new Promise(r=>setTimeout(r,5));return fixturePng;},release:()=>{}}};",
     "const w=captureOverlayWindow.peekWindow();return require('electron').ipcMain._targetFinish({sender:w.webContents,senderFrame:w.webContents.mainFrame},{sessionId:id,selection:{x:20,y:30,width:160,height:100}});}};"
@@ -39,7 +39,7 @@ test('Quick output drives the configured target bar without stale UI, implicit n
     'require(' + JSON.stringify(mainPath) + ');'
   ].join('\n'));
   const app = await electron.launch({ args: [bootstrap, '--user-data-dir=' + join(directory, 'data')], env: { ...process.env, ELECTRON_RENDERER_URL: '', SNIPVIA_CAPTURE_BACKEND: 'electron', SNIPVIA_CAPTURE_WARMUP: '0' } });
-  type Harness = { probe: { commits: number; visits: number; hold: boolean; fail: boolean; items: { types: string[] }[]; marker: boolean; chromeMode: string; selections: number; permissionRequests: number }; noNetwork(): void; websiteArtwork(): Promise<void>; icons(): Promise<unknown>; chrome(): void; ready(): boolean; state(): { visible: boolean; presentationId: number }; queue(): { pending: number; failed: number }; submit(mode?: string): Promise<{ ok: boolean }>; invalidate(): void; retry(): void; collect(): Promise<{ ids: string[]; revision: number }> };
+  type Harness = { probe: { commits: number; visits: number; hold: boolean; fail: boolean; items: { types: string[] }[]; marker: boolean; chromeMode: string; selections: number; lastBrowserPid: number; permissionRequests: number }; noNetwork(): void; websiteArtwork(): Promise<void>; icons(): Promise<unknown>; chrome(): void; ready(): boolean; state(): { visible: boolean; presentationId: number }; queue(): { pending: number; failed: number }; submit(mode?: string): Promise<{ ok: boolean }>; invalidate(): void; retry(): void; collect(): Promise<{ ids: string[]; revision: number }> };
   const evaluate = <T>(fn: (h: Harness) => T) => app.evaluate((_electron, code) => {
     const h = (globalThis as typeof globalThis & { quickTargetHarness: Harness }).quickTargetHarness;
     return (0, eval)('(' + code + ')')(h);
@@ -112,7 +112,7 @@ test('Quick output drives the configured target bar without stale UI, implicit n
     await expect(bar.getByRole('group', { name: '选择 Chrome 标签' }).getByRole('button')).toHaveCount(2);
     const chromeState = await bar.evaluate(() => window.snipvia.quickTarget.current());
     if (!chromeState.ok) throw Error(chromeState.error);
-    expect(JSON.stringify(chromeState.value.choices)).not.toMatch(/windowId|tabId|https:/);
+    expect(JSON.stringify(chromeState.value.choices)).not.toMatch(/browserPid|windowId|tabId|https:/);
     expect((await bar.evaluate(value => window.snipvia.quickTarget.activate({ presentationId: value.presentation, targetId: value.id, choiceId: '00000000-0000-4000-8000-000000000000' }), { presentation: chromeState.value.presentationId, id: settings.value.targets[0].id })).ok).toBe(false);
     expect((await bar.evaluate(id => window.snipvia.quickTarget.configureBrowser({ id, mode: 'open', match: 'origin', focusInput: false }), settings.value.targets[0].id)).ok).toBe(false);
     const phase2Images = join(root, '.dev-runtime/quick-target-phase2'); await mkdir(phase2Images, { recursive: true });
@@ -122,6 +122,7 @@ test('Quick output drives the configured target bar without stale UI, implicit n
     await bar.screenshot({ path: join(phase2Images, 'chrome-choices-dark.png'), animations: 'disabled' });
     await bar.getByRole('button', { name: /Synthetic conversation B/ }).click();
     await expect.poll(() => evaluate(h => h.probe.selections)).toBe(1);
+    expect(await evaluate(h => h.probe.lastBrowserPid)).toBe(220);
     await expect.poll(() => evaluate(h => h.state().visible)).toBe(false);
     expect(await evaluate(h => h.probe.visits)).toBe(1);
     await evaluate(h => { h.probe.chromeMode = 'manual'; });

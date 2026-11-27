@@ -4,7 +4,7 @@ import { ChromeTargetService, matchesWebsite, type ChromeTab, type ChromeTargetB
 import type { QuickTarget, QuickTargetPermissions } from '../../src/shared/quick-target';
 
 const permissions: QuickTargetPermissions = { supported: true, chromeRunning: true, automation: 'granted', accessibility: true };
-const tab: ChromeTab = { windowId: '1', tabId: '2', url: 'https://chatgpt.com/c/one', title: 'Synthetic conversation', index: 2 };
+const tab: ChromeTab = { browserPid: 110, windowId: '1', tabId: '2', url: 'https://chatgpt.com/c/one', title: 'Synthetic conversation', index: 2 };
 function fixture() {
   const target: Extract<QuickTarget, { kind: 'website' }> = { id: randomUUID(), kind: 'website', label: 'ChatGPT', url: 'https://chatgpt.com/', mode: 'existing-tab', match: 'origin', focusInput: true };
   const bridge = { permissions: vi.fn(async () => ({ ...permissions })), tabs: vi.fn(async () => [{ ...tab }]), select: vi.fn<ChromeTargetBridge['select']>(async () => ({ activated: true as const, focused: true, accessibility: true })), resolve: vi.fn<ChromeTargetBridge['resolve']>() };
@@ -31,16 +31,16 @@ it('switches a unique verified match and optionally focuses without opening a UR
   expect(bridge.select).toHaveBeenCalledWith(tab, true, controller.signal);
   expect(bridge.resolve).toHaveBeenCalledTimes(1);
 });
-it('requires an explicit opaque choice for multiple tabs across windows, keeping URLs and native references out of public choices', async () => {
+it('requires an explicit opaque choice for matching tabs with identical IDs in separate Chrome processes, keeping URLs and native references out of public choices', async () => {
   const { service, bridge, target, controller } = fixture();
-  bridge.tabs.mockResolvedValue([tab, { ...tab, windowId: '99', tabId: '4', title: 'Another synthetic conversation' }]);
+  bridge.tabs.mockResolvedValue([tab, { ...tab, browserPid: 220, title: 'Another synthetic conversation' }]);
   const result = await service.activate(target, 4, undefined, controller.signal);
   if (result.kind !== 'choose') throw Error('expected choices');
   expect(result.choices).toHaveLength(2); expect(bridge.select).not.toHaveBeenCalled();
-  expect(JSON.stringify(result)).not.toMatch(/chatgpt\.com|windowId|tabId/);
+  expect(JSON.stringify(result)).not.toMatch(/chatgpt\.com|browserPid|windowId|tabId/);
   expect(result.choices[1].detail).toContain('窗口 2');
   await service.activate(target, 4, result.choices[1].id, controller.signal);
-  expect(bridge.select.mock.calls[0][0]).toMatchObject({ tabId: '4' });
+  expect(bridge.select.mock.calls[0][0]).toMatchObject({ browserPid: 220, windowId: '1', tabId: '2' });
 });
 it('rejects forged, cross-presentation, cross-target, expired, changed-config and dismissed choices', async () => {
   const { service, bridge, target, controller } = fixture();

@@ -15,7 +15,24 @@ const directory = await mkdtemp(join(tmpdir(), 'snipvia-target-native-'));
 const helper = resolve('build/native/snipvia-quick-target-helper');
 let peer;
 try {
-  assert.equal(JSON.parse((await execute(helper, ['browser-script-check'])).stdout).compiled, true);
+  const permissions = JSON.parse((await execute(helper, ['permissions'])).stdout);
+  assert.equal(permissions.supported, true);
+  assert.equal(typeof permissions.chromeRunning, 'boolean');
+  const request = { browserPid: 2147483647, windowId: '1', tabId: '2', url: 'https://example.invalid/', focus: false };
+  async function checkBrowserSelection(input, error) {
+    const child = spawn(helper, ['browser-select'], { stdio: ['pipe', 'ignore', 'pipe'] });
+    let stderr = '';
+    child.stderr.setEncoding('utf8').on('data', chunk => { stderr += chunk; });
+    child.stdin.end(JSON.stringify(input));
+    const code = await new Promise((resolve, reject) => {
+      child.once('close', resolve);
+      child.once('error', reject);
+    });
+    assert.equal(code, 1);
+    assert.equal(stderr, error);
+  }
+  await checkBrowserSelection(request, 'tabChanged');
+  await checkBrowserSelection({ ...request, browserPid: undefined }, 'invalid');
   const bundle = join(directory, 'Target Peer.app'), binary = join(bundle, 'Contents/MacOS/peer'), identifier = 'com.snipvia.test.target-peer';
   await mkdir(join(bundle, 'Contents/MacOS'), { recursive: true });
   await writeFile(join(bundle, 'Contents/Info.plist'), '<?xml version="1.0"?><plist version="1.0"><dict><key>CFBundleIdentifier</key><string>' + identifier + '</string><key>CFBundleName</key><string>Target Peer</string><key>CFBundleExecutable</key><string>peer</string><key>CFBundlePackageType</key><string>APPL</string></dict></plist>');

@@ -5,7 +5,7 @@ import { ChromeWorker } from './ChromeWorker';
 import type { QuickTarget, QuickTargetPermissions } from '../../shared/quick-target';
 import type { ChromeTab, ChromeResolution } from './ChromeTargetService';
 const permissionsSchema = z.strictObject({ supported: z.boolean(), chromeRunning: z.boolean(), automation: z.enum(['granted', 'required', 'denied']), accessibility: z.boolean() });
-const tabSchema = z.strictObject({ windowId: z.string().min(1).max(128), tabId: z.string().min(1).max(128), url: z.string().max(4096), title: z.string().max(160), index: z.number().int().positive() });
+const tabSchema = z.strictObject({ browserPid: z.number().int().positive().max(2147483647), windowId: z.string().min(1).max(128), tabId: z.string().min(1).max(128), url: z.string().max(4096), title: z.string().max(160), index: z.number().int().positive() });
 
 const description = z.strictObject({ path: z.string().max(4096), bundleId: z.string().min(1).max(255), label: z.string().min(1).max(200), version: z.string().max(100) });
 export class QuickTargetPlatform {
@@ -66,7 +66,7 @@ export class QuickTargetPlatform {
     return z.strictObject({ tabs: z.array(tabSchema).max(32) }).parse(await this.run(['browser-list'], signal, { url: target.url, exact: target.match === 'exact' })).tabs;
   }
   async select(tab: ChromeTab, focus: boolean, signal: AbortSignal) {
-    return z.strictObject({ activated: z.literal(true), focused: z.boolean(), accessibility: z.boolean() }).parse(await this.browser('browser-select', { windowId: tab.windowId, tabId: tab.tabId, url: tab.url, focus }, signal));
+    return z.strictObject({ activated: z.literal(true), focused: z.boolean(), accessibility: z.boolean() }).parse(await this.browser('browser-select', { browserPid: tab.browserPid, windowId: tab.windowId, tabId: tab.tabId, url: tab.url, focus }, signal));
   }
   async describe(path: string) { return description.parse(await this.run(['describe', path])); }
   async icon(path: string) {
